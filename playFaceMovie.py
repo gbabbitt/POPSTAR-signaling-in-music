@@ -3,7 +3,7 @@
 #############################################################################
 ######   POPSTAR software for detecting fitness signaling in music
 ######   produced by Dr. Gregory A. Babbitt
-######   and students at the Rochester Instituteof Technology in 2022.
+######   and students at the Rochester Instituteof Technology in 2025.
 ######   Offered freely without guarantee.  License under GPL v3.0
 #############################################################################
 
