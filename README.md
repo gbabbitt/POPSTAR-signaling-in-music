@@ -8,4 +8,6 @@ TESTING: Linux Mint 20
 
 TO RUN: python3 popstar.py 
 
+INPUT: myFile.wav or myFile.mp3
+
 NOTE: This code does not actually do any significant analysis as of yet...stay tuned
