@@ -61,8 +61,10 @@ tm = input("\nEnter the time interval length to analyze (in seconds) (e.g. 30)\n
 '''
 inp0 = "full"
 inp00 = "y"
-inp = "test"
-tm = 20 # interval length in seconds
+#inp = "test"
+#tm = 20 # interval length in seconds
+
+# find number of cores
 num_cores = multiprocessing.cpu_count()
 
 # read popstar ctl file

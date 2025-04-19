@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import time
 import os
 import sys
-
+import platform
 
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
@@ -41,14 +41,38 @@ print("number of movie frames is %s" % frame_num)
 # calculate number of faces for folder
 
 def playFace(myfile):
-    print("playing movie file")
-    cmd = "celluloid %s" % myfile
-    os.system(cmd)
-
+    if(current_os == "Linux"):
+        print("playing movie file (Linux)")
+        cmd = "celluloid %s" % myfile
+        os.system(cmd)
+    if(current_os == "Windows"):
+        print("playing movie file (Windows)")
+        ## try this
+        cmd = "C:\Program Files\Windows Media Player\wmplayer.exe %s" % myfile
+        os.system(cmd)
+        ## or this
+        #from os import startfile
+        #startfile(myfile)
+    if(current_os == "macOS"):
+        print("playing movie file (macOS)")
+        cmd = "open ~/%s" % myfile
+        os.system(cmd)    
+        
+def detect_os():
+    os_name = platform.system()
+    if os_name == "Windows":
+        return "Windows"
+    elif os_name == "Darwin":
+        return "macOS"
+    elif os_name == "Linux":
+        return "Linux"
+    else:
+        return "Unknown"
+    
 ###############################################################
 if __name__ == '__main__':
-    import os
-    import sys
+    current_os = detect_os()
+    print(f"Operating System: {current_os}")
     myfile = os.path.join(os.path.dirname(__file__), "myMovie_faces.mp4")
     if os.path.exists(myfile):
         playFace(myfile)
