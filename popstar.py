@@ -80,7 +80,7 @@ class Ui_Dialog(object):
         self.lineEdit_2.setGeometry(QtCore.QRect(290, 420, 161, 23))
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.lineEdit.setText("10")
-        self.lineEdit_2.setText("test1")
+        self.lineEdit_2.setText("test1.wav")
         self.label_3 = QtWidgets.QLabel(Dialog)
         self.label_3.setGeometry(QtCore.QRect(30, 420, 261, 31))
         self.label_3.setObjectName("label_3")
@@ -109,7 +109,7 @@ class Ui_Dialog(object):
         self.pushButton_7.setText(_translate("Dialog", "5. play trajectory"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - BabbittLab@RIT</span></p></body></html>"))
         self.pushButton_5.setText(_translate("Dialog", "4. make movies"))
-        self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file or folder (no ext)</span></p></body></html>"))
+        self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
         self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">length of window (seconds)</span></p></body></html>"))
 ######################################### subroutines ######################################################
     def closeIt(self):
@@ -135,6 +135,7 @@ class Ui_Dialog(object):
     def processSound(self):
         print("making control file")
         filename = self.lineEdit_2.text()
+        filename = filename[:-4]
         interval = self.lineEdit.text()
         f = open("./popstar.ctl", "w") 
         f.write("name,%s,#file or folder name to analyze\n" % filename)
