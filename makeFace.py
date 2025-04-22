@@ -55,7 +55,7 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     - facecolor: color of the face
     - edgecolor: color of the face outline
     """
-    print("making Chernoff faces")
+    #print("making Chernoff faces")
     # Normalize features to be between 0 and 1
     features = np.array(features)
     features = (features - np.min(features)) / (np.max(features) - np.min(features))
@@ -104,12 +104,12 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
 
 
 def ternary_plot(tdata, i, randX, randY, randZ):
-    print("making ternary plots")
+    #print("making ternary plots")
     # Create a figure and axes with ternary scale
     fig, tax = ternary.figure(scale=1.0)
         
     # Plot the data points
-    print(i)
+    #print(i)
     #print(tdata)
     if(i != 0):
         current_key, current_value = list(tdata.items())[-1]
