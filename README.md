@@ -4,7 +4,7 @@ This repo is for code-base and PyQt5 applications for investigating fitness sign
 
 As of 2025, this project is in active development by undergraduate students at the Rochester Institute of Technology working with Dr. Gregory A Babbitt (Life Sciences) and Dr. Ernest P Fokoue (mathematics). Community collaboration is welcome...please reach out to us via email at RIT with an inquiry for more details (gabsbi(at)rit.edu or epfeqa(at)rit.edu).
 
-TESTING: Linux Mint 20 (probably works on osMac too).  It is not yet tested on Windows. 
+TESTING: Linux Mint 20 (probably works on other Debian Linux distros and MacOS too).  It is not yet tested on Windows (can use a Linux Mint VM from virtualBox for now)
 
 TO RUN: python3 popstar.py 
 
