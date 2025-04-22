@@ -181,14 +181,10 @@ def main():
     randY = rnd.randint(0,10)/10
     randZ = rnd.randint(0,10)/10  
     for i in range(face_num):
-        #random walk
-        randX = randX+rnd.random()*0.5
-        randY = randY+rnd.random()*0.5
-        randZ = randZ+rnd.random()*0.5
         # random signal
-        #randX = rnd.random()
-        #randY = rnd.random()
-        #randZ = rnd.random()
+        randX = rnd.random()
+        randY = rnd.random()
+        randZ = rnd.random()
         tdata_name = "N%s" % i
         tdata_add = [randX, randY, randZ]
         tdata_sum = sum(tdata_add)
