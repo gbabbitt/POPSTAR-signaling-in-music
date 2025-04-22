@@ -87,7 +87,9 @@ for x in range(len(infile_lines)):
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
-
+if os.path.exists('%s_analysis' % inp):
+    print("folder already exists...was this run already done?")
+    exit()
 if not os.path.exists('%s_analysis' % inp):
         os.mkdir('%s_analysis' % inp)
 if not os.path.exists('%s_analysis/intervals' % inp):

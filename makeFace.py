@@ -162,12 +162,9 @@ def main():
        
     # import and shape external data
 
-    # Create the plot
-    fig, axes = plt.subplots(int(face_num/5), int(face_num/2), figsize=(15, 6))
-    axes = axes.flatten()
-    #print(axes)
+        
     # Plot each Chernoff face
-    for i, ax in enumerate(axes):
+    for i in range(face_num):
         if(i>face_num-1):
             continue
         

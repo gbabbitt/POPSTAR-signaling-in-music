@@ -201,9 +201,9 @@ def combinedMovie_audio_video():
 
 def copyMovie():
     print("loading movie")
-    shutil.copy2("%s_analysis/myMovieSound_faces.mp4" % inp, "myMovie_faces.mp4")
-    shutil.copy2("%s_analysis/myMovieSound_tplots.mp4" % inp, "myMovie_tplots.mp4")
-    shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "myMovie_combined.mp4")
+    shutil.copy2("%s_analysis/myMovieSound_faces.mp4" % inp, "myMovie_faces_%s.mp4" % inp)
+    shutil.copy2("%s_analysis/myMovieSound_tplots.mp4" % inp, "myMovie_tplots_%s.mp4" % inp)
+    shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "myMovie_combo_%s.mp4" % inp)
     
 def main():
     renderFaceMovie()

@@ -73,7 +73,7 @@ def detect_os():
 if __name__ == '__main__':
     current_os = detect_os()
     print(f"Operating System: {current_os}")
-    myfile = os.path.join(os.path.dirname(__file__), "myMovie_combined.mp4")
+    myfile = os.path.join(os.path.dirname(__file__), "myMovie_combo_%s.mp4" % inp)
     if os.path.exists(myfile):
         playTplot(myfile)
     
