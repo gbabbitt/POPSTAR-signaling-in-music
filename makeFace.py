@@ -109,7 +109,12 @@ def ternary_plot(tdata, i, randX, randY, randZ):
     fig, tax = ternary.figure(scale=1.0)
         
     # Plot the data points
-    #tax.scatter(tdata.values(), marker='o', color='black', label='1s interval')
+    print(i)
+    #print(tdata)
+    if(i != 0):
+        current_key, current_value = list(tdata.items())[-1]
+        #print(current_value)
+        tax.scatter([current_value], marker='o', color='black', label='current value')
     #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
     max_fs = 18
