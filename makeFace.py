@@ -103,23 +103,31 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x + 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
 
 
-def ternary_plot(tdata, i):
+def ternary_plot(tdata, i, randX, randY, randZ):
     print("making ternary plots")
     # Create a figure and axes with ternary scale
     fig, tax = ternary.figure(scale=1.0)
         
     # Plot the data points
     #tax.scatter(tdata.values(), marker='o', color='black', label='1s interval')
-    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.5, label="trajectory")
-    tax.plot_colored_trajectory(tdata.values(), linewidth=0.5, color='red', label="trajectory")  
-    
+    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
+    tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
+    max_fs = 18
+    # corner font size
+    fsX = randX*max_fs
+    fsY = randY*max_fs
+    fsZ = randZ*max_fs
+    # axis font size
+    fsE = (randY+randZ)*0.5*max_fs
+    fsP = (randX+randY)*0.5*max_fs
+    fsI = (randX+randZ)*0.5*max_fs
     # Set labels and title
-    tax.right_corner_label("CONTROL")
-    tax.top_corner_label("ENERGY")
-    tax.left_corner_label("SURPRISE")
-    tax.left_axis_label("emotional impact") # A
-    tax.right_axis_label("physical impact") # B
-    tax.bottom_axis_label("intellectual impact") # C
+    tax.right_corner_label("CONTROL", fontsize=fsX, color='black')
+    tax.top_corner_label("ENERGY", fontsize=fsY, color='black')
+    tax.left_corner_label("SURPRISE", fontsize=fsZ, color='black')
+    tax.left_axis_label("emotional impact", fontsize=fsE, color='green') # A
+    tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
+    tax.bottom_axis_label("intellectual impact", fontsize=fsI, color='blue') # C
     #tax.set_title("Fitness Signal - Ternary Diagram")
 
     # Remove default Matplotlib axes
@@ -130,7 +138,7 @@ def ternary_plot(tdata, i):
 
     # Draw gridlines
     tax.gridlines(multiple=0.1, color="grey")
-    
+    #tax.ticks(axis='lbr', linewidth=1)
     
     # save image
     tax.savefig('%s_analysis/tplots/tplot_%s.png' % (inp, i), dpi=144)
@@ -177,14 +185,19 @@ def main():
     
     # make each ternary plot
     tdata = {}
-    randX = rnd.randint(0,10)/10
-    randY = rnd.randint(0,10)/10
-    randZ = rnd.randint(0,10)/10  
+    randX = 0.5
+    randY = 0.5
+    randZ = 0.5  
     for i in range(face_num):
-        # random signal
-        randX = rnd.random()
-        randY = rnd.random()
-        randZ = rnd.random()
+        if(i == 0):
+            randX = 0.5
+            randY = 0.5
+            randZ = 0.5
+        elif(i>0):
+            # random signal
+            randX = rnd.random()
+            randY = rnd.random()
+            randZ = rnd.random()
         tdata_name = "N%s" % i
         tdata_add = [randX, randY, randZ]
         tdata_sum = sum(tdata_add)
@@ -198,7 +211,7 @@ def main():
         if not os.path.exists('%s_analysis/tplots' % inp):
             os.mkdir('%s_analysis/tplots' % inp)
         print("generating ternary plot %s" % str(i+1))
-        ternary_plot(tdata, i)
+        ternary_plot(tdata, i, randX, randY, randZ)
         
         
 ###############################################################
