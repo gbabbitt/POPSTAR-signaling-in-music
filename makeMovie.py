@@ -40,6 +40,7 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction
 from PyQt5.QtGui import QIcon
 
+from moviepy.editor import VideoFileClip, clips_array
 
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
@@ -81,7 +82,8 @@ def renderFaceMovie():
     codec = cv2.VideoWriter_fourcc(*'mp4v')
     vid_writer = cv2.VideoWriter(video_filename, codec, 4.0, (w, h))  # convert to constant rate of 0.5 sec
 
-    for img in valid_images:
+    for i in range(len(valid_images)):
+        img = "face_%s.png" % i
         loaded_img = cv2.imread(os.path.join(folder, img))
         for _ in range(each_image_duration):
             vid_writer.write(loaded_img)
@@ -111,16 +113,106 @@ def faceMovie_audio_video():
     final_clip = video_clip.set_audio(audio_clip)
     # save the final clip
     final_clip.write_videofile("%s_analysis/myMovieSound_faces.mp4" % inp)
+
+def renderTplotMovie():
+    print("rendering movie")
+    folder = "%s_analysis/tplots" % inp
+    video_filename = "%s_analysis/myMovie_tplots.mp4" % inp
+    valid_images = [i for i in os.listdir(folder) if i.endswith((".jpg", ".jpeg", ".png"))]
+    #print(valid_images)
+    each_image_duration = 1 # 1 second
+    first_image = cv2.imread(os.path.join(folder, valid_images[0]))
+    h, w, _ = first_image.shape
+
+    codec = cv2.VideoWriter_fourcc(*'mp4v')
+    vid_writer = cv2.VideoWriter(video_filename, codec, 4.0, (w, h))  # convert to constant rate of 0.5 sec
+
+    for i in range(len(valid_images)):
+        img = "tplot_%s.png" % i
+        loaded_img = cv2.imread(os.path.join(folder, img))
+        for _ in range(each_image_duration):
+            vid_writer.write(loaded_img)
+
+    vid_writer.release()
     
-def copyFaceMovie():
+def tplotMovie_audio_video():
+    # map MMD in chimerax
+    print("combining audio and video for movie for %s" % inp)
+    audio_file = "%s_analysis/trimmed_%s.wav" % (inp,inp)
+    video_file = "%s_analysis/myMovie_tplots.mp4" % inp
+    wave_file = AudioSegment.from_file('%s_analysis/trimmed_%s.wav' % (inp,inp))
+    #wave_file_trim = wave_file[0000:8000] # 8 second fit to movie file             
+    #wave_file_trim.export('proteinInteraction_movie_%s/mySound_trim.wav' % PDB_id_reference, format="wav")
+    #audio_file = "proteinInteraction_movie_%s/mySound_trim.wav" % PDB_id_reference
+    # load the video
+    video_clip = VideoFileClip(video_file)
+    # load the audio
+    audio_clip = AudioFileClip(audio_file)
+    #start = 0
+    # if end is not set, use video clip's end
+    #end = video_clip.end
+    
+    # setting the start & end of the audio clip to `start` and `end` paramters
+    #audio_clip = audio_clip.subclip(start, end)
+    # add the final audio to the video
+    final_clip = video_clip.set_audio(audio_clip)
+    # save the final clip
+    final_clip.write_videofile("%s_analysis/myMovieSound_tplots.mp4" % inp)
+
+
+def combine_side_by_side():
+    # Load the two video clips
+    clip1 = VideoFileClip("%s_analysis/myMovie_faces.mp4" % inp)
+    clip2 = VideoFileClip("%s_analysis/myMovie_tplots.mp4" % inp)
+
+    # Ensure both clips have the same height for side-by-side alignment
+    clip2 = clip2.resize(height=clip1.h)
+
+    # Concatenate the clips side by side
+    final_clip = clips_array([[clip1, clip2]])
+
+    # Write the combined video to a new file
+    final_clip.write_videofile("%s_analysis/myMovie_combined.mp4" % inp)
+
+def combinedMovie_audio_video():
+    # map MMD in chimerax
+    print("combining audio and video for movie for %s" % inp)
+    audio_file = "%s_analysis/trimmed_%s.wav" % (inp,inp)
+    video_file = "%s_analysis/myMovie_combined.mp4" % inp
+    wave_file = AudioSegment.from_file('%s_analysis/trimmed_%s.wav' % (inp,inp))
+    #wave_file_trim = wave_file[0000:8000] # 8 second fit to movie file             
+    #wave_file_trim.export('proteinInteraction_movie_%s/mySound_trim.wav' % PDB_id_reference, format="wav")
+    #audio_file = "proteinInteraction_movie_%s/mySound_trim.wav" % PDB_id_reference
+    # load the video
+    video_clip = VideoFileClip(video_file)
+    # load the audio
+    audio_clip = AudioFileClip(audio_file)
+    #start = 0
+    # if end is not set, use video clip's end
+    #end = video_clip.end
+    
+    # setting the start & end of the audio clip to `start` and `end` paramters
+    #audio_clip = audio_clip.subclip(start, end)
+    # add the final audio to the video
+    final_clip = video_clip.set_audio(audio_clip)
+    # save the final clip
+    final_clip.write_videofile("%s_analysis/myMovieSound_combined.mp4" % inp)
+
+
+def copyMovie():
     print("loading movie")
     shutil.copy2("%s_analysis/myMovieSound_faces.mp4" % inp, "myMovie_faces.mp4")
-    
+    shutil.copy2("%s_analysis/myMovieSound_tplots.mp4" % inp, "myMovie_tplots.mp4")
+    shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "myMovie_combined.mp4")
     
 def main():
     renderFaceMovie()
     faceMovie_audio_video()
-    copyFaceMovie()
+    renderTplotMovie()
+    tplotMovie_audio_video()
+    combine_side_by_side()
+    combinedMovie_audio_video()
+    copyMovie()
     
 
 ###############################################################

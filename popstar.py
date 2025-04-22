@@ -185,7 +185,7 @@ class Ui_Dialog(object):
         
     def playTraj(self):
         print("playing movie file")
-        cmd = "python3 playTrajMovie.py"
+        cmd = "python3 playTplotMovie.py"
         os.system(cmd)   
     
 ###########################################################################################################

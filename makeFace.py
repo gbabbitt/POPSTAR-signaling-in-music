@@ -15,6 +15,7 @@ import random as rnd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse, Arc
+import ternary
 
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
@@ -54,7 +55,7 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     - facecolor: color of the face
     - edgecolor: color of the face outline
     """
-
+    print("making Chernoff faces")
     # Normalize features to be between 0 and 1
     features = np.array(features)
     features = (features - np.min(features)) / (np.max(features) - np.min(features))
@@ -101,11 +102,51 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x - 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
     ax.add_patch(Ellipse((x + 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
 
+
+def ternary_plot(tdata, i):
+    print("making ternary plots")
+    # Create a figure and axes with ternary scale
+    fig, tax = ternary.figure(scale=1.0)
+        
+    # Plot the data points
+    #tax.scatter(tdata.values(), marker='o', color='black', label='1s interval')
+    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.5, label="trajectory")
+    tax.plot_colored_trajectory(tdata.values(), linewidth=0.5, color='red', label="trajectory")  
+    
+    # Set labels and title
+    tax.right_corner_label("CONTROL")
+    tax.top_corner_label("ENERGY")
+    tax.left_corner_label("SURPRISE")
+    tax.left_axis_label("emotional impact") # A
+    tax.right_axis_label("physical impact") # B
+    tax.bottom_axis_label("intellectual impact") # C
+    #tax.set_title("Fitness Signal - Ternary Diagram")
+
+    # Remove default Matplotlib axes
+    tax.get_axes().axis('off')
+
+    # Add legend
+    tax.legend()
+
+    # Draw gridlines
+    tax.gridlines(multiple=0.1, color="grey")
+    
+    
+    # save image
+    tax.savefig('%s_analysis/tplots/tplot_%s.png' % (inp, i), dpi=144)
+    tax.close()
+    
+    
+################################################################################################
+################################################################################################
+
+
 def main():
-    # Generate random data for 10 faces
+    # Generate random data for faces and tplots
     np.random.seed()
     data = np.random.rand(face_num, 12)
     print(data)
+       
     # import and shape external data
 
     # Create the plot
@@ -116,15 +157,7 @@ def main():
     for i, ax in enumerate(axes):
         if(i>face_num-1):
             continue
-        '''
-        # create multipanel face plot
-        chernoff_face(ax, 0, 0, data[i])
-        ax.set_xlim(-1, 1)
-        ax.set_ylim(-1, 1)
-        ax.set_aspect('equal', adjustable='box')
-        ax.axis('off')
-        ax.set_title('fitness signal - Chernoff face')
-        '''
+        
         # Create a new figure for each subplot
         if not os.path.exists('%s_analysis/faces' % inp):
             os.mkdir('%s_analysis/faces' % inp)
@@ -142,14 +175,36 @@ def main():
         # Close the new figure to release memory
         plt.close(fig_single)
     
-    '''   
-    # finish multipanel face plot
-    plt.tight_layout()
-    plt.savefig('chernoff.png')
-    plt.show()
-    '''
-    
-
+    # make each ternary plot
+    tdata = {}
+    randX = rnd.randint(0,10)/10
+    randY = rnd.randint(0,10)/10
+    randZ = rnd.randint(0,10)/10  
+    for i in range(face_num):
+        #random walk
+        randX = randX+rnd.random()*0.5
+        randY = randY+rnd.random()*0.5
+        randZ = randZ+rnd.random()*0.5
+        # random signal
+        #randX = rnd.random()
+        #randY = rnd.random()
+        #randZ = rnd.random()
+        tdata_name = "N%s" % i
+        tdata_add = [randX, randY, randZ]
+        tdata_sum = sum(tdata_add)
+        # Normalize the numbers so that they sum to 1
+        tdata_norm = [number / tdata_sum for number in tdata_add]
+        tdata.update({tdata_name: tdata_norm})
+        #tdata.append(tdata_add)
+        #print(tdata)
+        if(i>face_num-1):
+            continue
+        if not os.path.exists('%s_analysis/tplots' % inp):
+            os.mkdir('%s_analysis/tplots' % inp)
+        print("generating ternary plot %s" % str(i+1))
+        ternary_plot(tdata, i)
+        
+        
 ###############################################################
 if __name__ == '__main__':
     main()
