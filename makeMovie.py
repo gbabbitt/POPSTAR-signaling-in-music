@@ -30,7 +30,7 @@ import shutil
 from moviepy.editor import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 import time
-
+'''
 # video window
 from PyQt5.QtCore import QDir, Qt, QUrl
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
@@ -39,7 +39,7 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction
 from PyQt5.QtGui import QIcon
-
+'''
 from moviepy.editor import VideoFileClip, clips_array
 
 # read popstar ctl file
