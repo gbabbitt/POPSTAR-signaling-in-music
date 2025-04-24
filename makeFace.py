@@ -34,9 +34,21 @@ for x in range(len(infile_lines)):
     if(header == "int"):
         tm = value
         print("my time interval is",tm)
+    if(header == "input"):
+        fof = value
+        print("file or folder is",fof)
+    if(header == "normal"):
+        nrm = value
+        print("normalization is",nrm)
+    if(header == "lyrics"):
+        lyr = value
+        print("lyrics present is",lyr) 
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
+fof = ""+fof+""
+nrm = ""+nrm+""
+lyr = ""+lyr+""
 
 # calculate number of faces for single file
 lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
@@ -103,7 +115,7 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x + 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
 
 
-def ternary_plot(tdata, i, randX, randY, randZ):
+def ternary_plot1(tdata, i, randX, randY, randZ):
     #print("making ternary plots")
     # Create a figure and axes with ternary scale
     fig, tax = ternary.figure(scale=1.0)
@@ -133,7 +145,7 @@ def ternary_plot(tdata, i, randX, randY, randZ):
     tax.left_axis_label("emotional impact", fontsize=fsE, color='green') # A
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("intellectual impact", fontsize=fsI, color='blue') # C
-    #tax.set_title("Fitness Signal - Ternary Diagram")
+    tax.set_title("Audio Fitness Signal", fontsize=18, y=-0.15)
 
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
@@ -146,7 +158,54 @@ def ternary_plot(tdata, i, randX, randY, randZ):
     #tax.ticks(axis='lbr', linewidth=1)
     
     # save image
-    tax.savefig('%s_analysis/tplots/tplot_%s.png' % (inp, i), dpi=144)
+    tax.savefig('%s_analysis/tplots1/tplot_%s.png' % (inp, i), dpi=144)
+    tax.close()
+
+
+def ternary_plot2(tdata, i, randX, randY, randZ):
+    #print("making ternary plots")
+    # Create a figure and axes with ternary scale
+    fig, tax = ternary.figure(scale=1.0)
+        
+    # Plot the data points
+    #print(i)
+    #print(tdata)
+    if(i != 0):
+        current_key, current_value = list(tdata.items())[-1]
+        #print(current_value)
+        tax.scatter([current_value], marker='o', color='black', label='current value')
+    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
+    tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
+    max_fs = 18
+    # corner font size
+    fsX = randX*max_fs
+    fsY = randY*max_fs
+    fsZ = randZ*max_fs
+    # axis font size
+    fsE = (randY+randZ)*0.5*max_fs
+    fsP = (randX+randY)*0.5*max_fs
+    fsI = (randX+randZ)*0.5*max_fs
+    # Set labels and title
+    tax.right_corner_label("CONTROL", fontsize=fsX, color='black')
+    tax.top_corner_label("ENERGY", fontsize=fsY, color='black')
+    tax.left_corner_label("SURPRISE", fontsize=fsZ, color='black')
+    tax.left_axis_label("emotional impact", fontsize=fsE, color='green') # A
+    tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
+    tax.bottom_axis_label("intellectual impact", fontsize=fsI, color='blue') # C
+    tax.set_title("Lyrical Fitness Signal", fontsize=18, y=-0.15)
+
+    # Remove default Matplotlib axes
+    tax.get_axes().axis('off')
+
+    # Add legend
+    tax.legend()
+
+    # Draw gridlines
+    tax.gridlines(multiple=0.1, color="grey")
+    #tax.ticks(axis='lbr', linewidth=1)
+    
+    # save image
+    tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
     tax.close()
     
     
@@ -162,8 +221,9 @@ def main():
        
     # import and shape external data
 
-        
+    ##########################    
     # Plot each Chernoff face
+    ##########################
     for i in range(face_num):
         if(i>face_num-1):
             continue
@@ -179,13 +239,14 @@ def main():
         ax_single.set_ylim(-1, 1)
         ax_single.set_aspect('equal', adjustable='box')
         ax_single.axis('off')
-        ax_single.set_title('fitness signal - Chernoff face')
+        ax_single.set_title('Chernoff face - fitness signal', fontsize=18,)
         # Save the new figure
         fig_single.savefig(f'%s_analysis/faces/face_{i+1}.png' % inp)
         # Close the new figure to release memory
         plt.close(fig_single)
-    
-    # make each ternary plot
+    ###########################
+    # make each ternary plot 1
+    ###########################
     tdata = {}
     randX = 0.5
     randY = 0.5
@@ -210,10 +271,44 @@ def main():
         #print(tdata)
         if(i>face_num-1):
             continue
-        if not os.path.exists('%s_analysis/tplots' % inp):
-            os.mkdir('%s_analysis/tplots' % inp)
-        print("generating ternary plot %s" % str(i+1))
-        ternary_plot(tdata, i, randX, randY, randZ)
+        if not os.path.exists('%s_analysis/tplots1' % inp):
+            os.mkdir('%s_analysis/tplots1' % inp)
+        print("generating ternary plot 1 %s" % str(i+1))
+        ternary_plot1(tdata, i, randX, randY, randZ)
+    
+    
+    ###########################    
+    # make each ternary plot 2
+    ###########################
+    if(lyr == "yes"):   
+        tdata = {}
+        randX = 0.5
+        randY = 0.5
+        randZ = 0.5  
+        for i in range(face_num):
+            if(i == 0):
+                randX = 0.5
+                randY = 0.5
+                randZ = 0.5
+            elif(i>0):
+                # random signal
+                randX = rnd.random()
+                randY = rnd.random()
+                randZ = rnd.random()
+            tdata_name = "N%s" % i
+            tdata_add = [randX, randY, randZ]
+            tdata_sum = sum(tdata_add)
+            # Normalize the numbers so that they sum to 1
+            tdata_norm = [number / tdata_sum for number in tdata_add]
+            tdata.update({tdata_name: tdata_norm})
+            #tdata.append(tdata_add)
+            #print(tdata)
+            if(i>face_num-1):
+                continue
+            if not os.path.exists('%s_analysis/tplots2' % inp):
+                os.mkdir('%s_analysis/tplots2' % inp)
+            print("generating ternary plot 2 %s" % str(i+1))
+            ternary_plot2(tdata, i, randX, randY, randZ)
         
         
 ###############################################################

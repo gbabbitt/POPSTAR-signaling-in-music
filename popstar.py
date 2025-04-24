@@ -91,10 +91,18 @@ class Ui_Dialog(object):
         self.checkBox = QtWidgets.QCheckBox(Dialog)
         self.checkBox.setGeometry(QtCore.QRect(375, 490, 80, 31))
         self.checkBox.setObjectName("checkBox")
-        self.checkBox.setChecked(True)
+        self.checkBox.setChecked(False)
         self.label_7 = QtWidgets.QLabel(Dialog)
         self.label_7.setGeometry(QtCore.QRect(395, 490, 80, 31))
         self.label_7.setText("normalize")       
+        # lyrics box
+        self.checkBox_2 = QtWidgets.QCheckBox(Dialog)
+        self.checkBox_2.setGeometry(QtCore.QRect(375, 470, 80, 31))
+        self.checkBox_2.setObjectName("checkBox")
+        self.checkBox_2.setChecked(False)
+        self.label_8 = QtWidgets.QLabel(Dialog)
+        self.label_8.setGeometry(QtCore.QRect(395, 470, 80, 31))
+        self.label_8.setText("lyrics?")
         ### picture window
         self.label_5 = QtWidgets.QLabel(Dialog)
         self.label_5.setGeometry(QtCore.QRect(30, 190, 421, 221))
@@ -152,13 +160,18 @@ class Ui_Dialog(object):
         if self.checkBox.isChecked() == True:
             normOption = "yes" 
         elif self.checkBox.isChecked() == False:
-            normOption = "no" 
+            normOption = "no"
+        if self.checkBox_2.isChecked() == True:
+            lyricOption = "yes" 
+        elif self.checkBox_2.isChecked() == False:
+            lyricOption = "no"    
         interval = self.lineEdit.text()
         f = open("./popstar.ctl", "w") 
         f.write("name,%s,#file or folder name to analyze\n" % filename)
         f.write("int,%s,#length of time interval window\n" % interval)
         f.write("input,%s,#input type\n" % fileORfolder)
         f.write("normal,%s,#normalize feature data\n" % normOption)
+        f.write("lyrics,%s,#lyrics present in feature data\n" % lyricOption)
         f.close()
         print("pre-processing sound file(s)")
         # setting for loop to set value of progress bar 
