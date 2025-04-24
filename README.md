@@ -12,6 +12,6 @@ INPUT: myFile.wav or myFile.mp3
 
 DEPENDENCIES: PyQt5, PIL, python-ternary, soundfile, pydub, moviepy (use pip install moviepy==1.0.3 to avoid recent bug), and the usual suspects (numpy,scipy,pandas, matplotlib, statsmodels)
 
-NOTE: This code does not actually do any significant analysis as of yet. The signals plotted dynamically are just random for now...stay tuned
+NOTE: This code does not actually do any significant analysis as of yet. The signals plotted dynamically are just random for now...stay tuned. Batch processing is not coded yet either.  All testing can be done with a single sound file (.wav or .mp3)
 
 
