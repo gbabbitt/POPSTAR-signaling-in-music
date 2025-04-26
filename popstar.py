@@ -91,10 +91,10 @@ class Ui_Dialog(object):
         self.checkBox = QtWidgets.QCheckBox(Dialog)
         self.checkBox.setGeometry(QtCore.QRect(375, 490, 80, 31))
         self.checkBox.setObjectName("checkBox")
-        self.checkBox.setChecked(False)
+        self.checkBox.setChecked(True)
         self.label_7 = QtWidgets.QLabel(Dialog)
         self.label_7.setGeometry(QtCore.QRect(395, 490, 80, 31))
-        self.label_7.setText("normalize")       
+        self.label_7.setText("beats?")       
         # lyrics box
         self.checkBox_2 = QtWidgets.QCheckBox(Dialog)
         self.checkBox_2.setGeometry(QtCore.QRect(375, 470, 80, 31))
@@ -158,9 +158,9 @@ class Ui_Dialog(object):
             print("user input is a folder")
             fileORfolder = "folder"
         if self.checkBox.isChecked() == True:
-            normOption = "yes" 
+            metroOption = "yes" 
         elif self.checkBox.isChecked() == False:
-            normOption = "no"
+            metroOption = "no"
         if self.checkBox_2.isChecked() == True:
             lyricOption = "yes" 
         elif self.checkBox_2.isChecked() == False:
@@ -168,9 +168,9 @@ class Ui_Dialog(object):
         interval = self.lineEdit.text()
         f = open("./popstar.ctl", "w") 
         f.write("name,%s,#file or folder name to analyze\n" % filename)
-        f.write("int,%s,#length of time interval window\n" % interval)
+        f.write("int,%s,#size of sliding window (seconds)\n" % interval)
         f.write("input,%s,#input type\n" % fileORfolder)
-        f.write("normal,%s,#normalize feature data\n" % normOption)
+        f.write("metro,%s,#use metronome\n" % metroOption)
         f.write("lyrics,%s,#lyrics present in feature data\n" % lyricOption)
         f.close()
         print("pre-processing sound file(s)")

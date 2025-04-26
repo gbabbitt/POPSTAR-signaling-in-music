@@ -47,7 +47,7 @@ import re
 from plotnine import *
 from pydub import AudioSegment
 import soundfile
-
+import librosa 
 import multiprocessing
 
 # IMPORTANT NOTE - run in base conda env, not in atomdance conda env   
@@ -84,9 +84,15 @@ for x in range(len(infile_lines)):
     if(header == "int"):
         tm = value
         print("my time interval is",tm)
+    if(header == "metro"):
+        met = value
+        print("my metronome option is",met)    
+infile.close()
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
+met = ""+met+""
+
 if os.path.exists('%s_analysis' % inp):
     print("folder already exists...was this run already done?")
     exit()
@@ -134,6 +140,7 @@ else:
 #################################################################################
 ####################  preprocessing     #########################################
 #################################################################################
+
 def trim_wav(): 
     print("trimming %s" % input1)
     # Open an mp3 file 
@@ -185,14 +192,39 @@ def time_sample():
     print("segmenting %s" % input1)
     print("length of file (seconds)")
     #tm = 20 # interval length in seconds
+    file_path = "%s_analysis/trimmed_%s" % (inp,input1)
     song = AudioSegment.from_file("%s_analysis/trimmed_%s" % (inp,input1), format="wav") 
     print(song.duration_seconds)
     dur = song.duration_seconds
-    ints = int(dur*4)-tm  # analyze in 1/4 second sliding window
+    # Estimate the tempo (BPM)
+    y, sr = librosa.load(file_path)
+    tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+    tempo = tempo[0]
+    total_beats = (dur/60*tempo)
+    beat_int = dur/total_beats
+    print("tempo = %s bpm" % tempo)
+    print("beat interval = %s sec" % beat_int)
+    print("total beats = %s" % total_beats)
+    f = open("./popstar.ctl", "a")
+    f.write("duration,%s,#song duration (seconds)\n" % dur)
+    f.write("tempo,%s,#tempo (bpm)\n" % tempo)
+    f.write("beatInt,%s,#beat interval (seconds)\n" % beat_int)
+    f.write("ttlBeats,%s,#total number beats in song\n" % total_beats)
+    f.close()
+    #print(myStop)
+    if(met == "no"):
+        ints = int(dur*8)-tm  # analyze in 1/8 second fixed sliding window
+    #ints = int(dur*4*beat_int)-tm  # analyze fixed sliding window attempting matching beat intervals
+    if(met == "yes"):   
+        ints = int(total_beats)
     # start and end time 
     for i in range(ints): 
-        start = i*250  # note 500 = 0.5 second
-        end = i*250+tm*250
+        if(met == "no"):
+            start = i*125  # note 250 = 0.125 second fixed window
+            end = i*125+tm*1000
+        if(met == "yes"):
+            start = i*beat_int*1000  # attempt to match beat intervals
+            end = i*beat_int*1000+tm*1000
         print("start: %s end: %s" % (start,end))
         # song interval 
         finterval = song[start: end] 

@@ -52,24 +52,40 @@ for x in range(len(infile_lines)):
     if(header == "input"):
         fof = value
         print("file or folder is",fof)
-    if(header == "normal"):
-        nrm = value
-        print("normalization is",nrm)
+    if(header == "metro"):
+        met = value
+        print("my metronome option is",met)
     if(header == "lyrics"):
         lyr = value
-        print("lyrics present is",lyr) 
+        print("lyrics present is",lyr)
+    if(header == "duration"):
+        dur = value
+        print("duration is",dur)    
+    if(header == "tempo"):
+        tmp = value
+        print("tempo is",tmp)
+    if(header == "beatInt"):
+        btInt = value
+        print("beat interval is",btInt)
+    if(header == "ttlBeats"):
+        ttlBts = value
+        print("total beats is",ttlBts)    
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
-nrm = ""+nrm+""
+met = ""+met+""
 lyr = ""+lyr+""
-
+tmp = float(tmp)
+btInt = float(btInt)
+ttlBts = float(ttlBts)
+dur = float(dur)
 # calculate number of faces for single file
 lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
 frame_num = int(len(lst)/4)  # note folder has 4 types of files
 print("number of movie frames is %s" % frame_num)
-# calculate number of faces for folder
+frameSec = (frame_num/dur)
+print("frames per second is %s" % frameSec)
 
 def renderFaceMovie():
     print("rendering movie")
@@ -82,7 +98,10 @@ def renderFaceMovie():
     h, w, _ = first_image.shape
 
     codec = cv2.VideoWriter_fourcc(*'mp4v')
-    vid_writer = cv2.VideoWriter(video_filename, codec, 4.0, (w, h))  # convert to constant rate of 0.5 sec
+    if(met == "no"):
+        vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
+    if(met == "yes"):
+        vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
 
     for i in range(len(valid_images)):
         img = "face_%s.png" % i
@@ -127,7 +146,10 @@ def renderTplotMovie():
     h, w, _ = first_image.shape
 
     codec = cv2.VideoWriter_fourcc(*'mp4v')
-    vid_writer = cv2.VideoWriter(video_filename, codec, 4.0, (w, h))  # convert to constant rate of 0.5 sec
+    if(met == "no"):
+        vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
+    if(met == "yes"):
+        vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
 
     for i in range(len(valid_images)):
         img = "tplot_%s.png" % i
@@ -148,7 +170,10 @@ def renderTplotMovie():
         h, w, _ = first_image.shape
 
         codec = cv2.VideoWriter_fourcc(*'mp4v')
-        vid_writer = cv2.VideoWriter(video_filename, codec, 4.0, (w, h))  # convert to constant rate of 0.5 sec
+        if(met == "no"):
+            vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
+        if(met == "yes"):
+            vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
 
         for i in range(len(valid_images)):
             img = "tplot_%s.png" % i

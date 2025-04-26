@@ -37,9 +37,6 @@ for x in range(len(infile_lines)):
     if(header == "input"):
         fof = value
         print("file or folder is",fof)
-    if(header == "normal"):
-        nrm = value
-        print("normalization is",nrm)
     if(header == "lyrics"):
         lyr = value
         print("lyrics present is",lyr) 
@@ -47,7 +44,6 @@ for x in range(len(infile_lines)):
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
-nrm = ""+nrm+""
 lyr = ""+lyr+""
 
 # calculate number of faces for single file
@@ -126,7 +122,7 @@ def ternary_plot1(tdata, i, randX, randY, randZ):
     if(i != 0):
         current_key, current_value = list(tdata.items())[-1]
         #print(current_value)
-        tax.scatter([current_value], marker='o', color='black', label='current value')
+        tax.scatter([current_value], marker='o', color='orange', label='current value')
     #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
     max_fs = 18
