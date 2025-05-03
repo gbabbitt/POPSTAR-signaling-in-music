@@ -80,7 +80,7 @@ class Ui_Dialog(object):
         self.lineEdit_2.setGeometry(QtCore.QRect(290, 420, 161, 23))
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.lineEdit.setText("10")
-        self.lineEdit_2.setText("test1.wav")
+        self.lineEdit_2.setText("test.mp3")
         self.label_3 = QtWidgets.QLabel(Dialog)
         self.label_3.setGeometry(QtCore.QRect(30, 420, 261, 31))
         self.label_3.setObjectName("label_3")
