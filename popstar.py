@@ -103,6 +103,14 @@ class Ui_Dialog(object):
         self.label_8 = QtWidgets.QLabel(Dialog)
         self.label_8.setGeometry(QtCore.QRect(395, 470, 80, 31))
         self.label_8.setText("lyrics?")
+        # mean or max box
+        self.checkBox_3 = QtWidgets.QCheckBox(Dialog)
+        self.checkBox_3.setGeometry(QtCore.QRect(375, 450, 80, 31))
+        self.checkBox_3.setObjectName("checkBox")
+        self.checkBox_3.setChecked(False)
+        self.label_9 = QtWidgets.QLabel(Dialog)
+        self.label_9.setGeometry(QtCore.QRect(395, 450, 80, 31))
+        self.label_9.setText("max value")
         ### picture window
         self.label_5 = QtWidgets.QLabel(Dialog)
         self.label_5.setGeometry(QtCore.QRect(30, 190, 421, 221))
@@ -164,7 +172,11 @@ class Ui_Dialog(object):
         if self.checkBox_2.isChecked() == True:
             lyricOption = "yes" 
         elif self.checkBox_2.isChecked() == False:
-            lyricOption = "no"    
+            lyricOption = "no"
+        if self.checkBox_3.isChecked() == True:
+            maxOption = "yes" 
+        elif self.checkBox_3.isChecked() == False:
+            maxOption = "no"   
         interval = self.lineEdit.text()
         f = open("./popstar.ctl", "w") 
         f.write("name,%s,#file or folder name to analyze\n" % filename)
@@ -172,6 +184,7 @@ class Ui_Dialog(object):
         f.write("input,%s,#input type\n" % fileORfolder)
         f.write("metro,%s,#use metronome\n" % metroOption)
         f.write("lyrics,%s,#lyrics present in feature data\n" % lyricOption)
+        f.write("max,%s,#use maximum values in feature data rather than averages\n" % maxOption)
         f.close()
         print("pre-processing sound file(s)")
         # setting for loop to set value of progress bar 
