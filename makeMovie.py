@@ -76,16 +76,17 @@ tm = int(tm)
 fof = ""+fof+""
 met = ""+met+""
 lyr = ""+lyr+""
-tmp = float(tmp)
-btInt = float(btInt)
-ttlBts = float(ttlBts)
-dur = float(dur)
-# calculate number of faces for single file
-lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
-frame_num = int(len(lst)/4)  # note folder has 4 types of files
-print("number of movie frames is %s" % frame_num)
-frameSec = (frame_num/dur)
-print("frames per second is %s" % frameSec)
+if(fof=="file"):
+    tmp = float(tmp)
+    btInt = float(btInt)
+    ttlBts = float(ttlBts)
+    dur = float(dur)
+    # calculate number of faces for single file
+    lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
+    frame_num = int(len(lst)/4)  # note folder has 4 types of files
+    print("number of movie frames is %s" % frame_num)
+    frameSec = (frame_num/dur)
+    print("frames per second is %s" % frameSec)
 
 def renderFaceMovie():
     print("rendering movie")
@@ -111,6 +112,59 @@ def renderFaceMovie():
 
     vid_writer.release()
     
+def renderFaceMovie_batch():
+    print("rendering movie")
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    trk = 0
+    for fname in dir_list:
+        print(fname)
+        dirname = fname[:-4]
+        folder = "%s_analysis/faces/%s" % (inp,dirname)
+        video_filename = "%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname)
+        valid_images = [i for i in os.listdir(folder) if i.endswith((".jpg", ".jpeg", ".png"))]
+        #print(valid_images)
+        each_image_duration = 1 # 1 second
+        first_image = cv2.imread(os.path.join(folder, valid_images[0]))
+        h, w, _ = first_image.shape
+        # calculate frameSec
+        infile = open("popstar.ctl", "r")
+        infile_lines = infile.readlines()
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            if(header == "duration_%s" % trk):
+                dur = float(value)
+                print("my duration is",dur)
+        lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,fname)) # your directory path
+        frame_num = int(len(lstINT)/4)  # note folder has 4 types of files
+        print("number of movie frames is %s" % frame_num)
+        frameSec = (frame_num/dur)
+        print("frames per second is %s" % frameSec)       
+        # make video        
+        codec = cv2.VideoWriter_fourcc(*'mp4v')
+        if(met == "no"):
+            vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
+        if(met == "yes"):
+            vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
+
+        for i in range(len(valid_images)):
+            itr = i+1
+            img = "face_%s.png" % itr
+            loaded_img = cv2.imread(os.path.join(folder, img))
+            for _ in range(each_image_duration):
+                vid_writer.write(loaded_img)
+
+        vid_writer.release()
+        trk = trk + 1
+        
 def faceMovie_audio_video():
     # map MMD in chimerax
     print("combining audio and video for movie for %s" % inp)
@@ -134,6 +188,42 @@ def faceMovie_audio_video():
     final_clip = video_clip.set_audio(audio_clip)
     # save the final clip
     final_clip.write_videofile("%s_analysis/myMovieSound_faces.mp4" % inp)
+        
+    
+def faceMovie_audio_video_batch():
+    print("rendering movie")
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    for fname in dir_list:
+        print(fname)
+        dirname = fname[:-4]
+        # map MMD in chimerax
+        print("combining audio and video for movie for %s file %s" % (inp,fname))
+        audio_file = "%s_analysis/%s" % (inp,fname)
+        video_file = "%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname)
+        wave_file = AudioSegment.from_file('%s_analysis/%s' % (inp,fname))
+        #wave_file_trim = wave_file[0000:8000] # 8 second fit to movie file             
+        #wave_file_trim.export('proteinInteraction_movie_%s/mySound_trim.wav' % PDB_id_reference, format="wav")
+        #audio_file = "proteinInteraction_movie_%s/mySound_trim.wav" % PDB_id_reference
+        # load the video
+        video_clip = VideoFileClip(video_file)
+        # load the audio
+        audio_clip = AudioFileClip(audio_file)
+        #start = 0
+        # if end is not set, use video clip's end
+        #end = video_clip.end
+    
+        # setting the start & end of the audio clip to `start` and `end` paramters
+        #audio_clip = audio_clip.subclip(start, end)
+        # add the final audio to the video
+        final_clip = video_clip.set_audio(audio_clip)
+        # save the final clip
+        final_clip.write_videofile("%s_analysis/myMovieSound_faces_%s.mp4" % (inp,dirname))
+
 
 def renderTplotMovie():
     print("rendering movie 1")
@@ -182,7 +272,113 @@ def renderTplotMovie():
                 vid_writer.write(loaded_img)
 
         vid_writer.release()
-    
+
+def renderTplotMovie_batch():
+    print("rendering movie 1")
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    trk1 = 0
+    for fname in dir_list:
+        print(fname)
+        dirname = fname[:-4]
+        folder = "%s_analysis/tplots1/%s" % (inp,dirname)
+        video_filename = "%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname)
+        valid_images = [i for i in os.listdir(folder) if i.endswith((".jpg", ".jpeg", ".png"))]
+        #print(valid_images)
+        each_image_duration = 1 # 1 second
+        first_image = cv2.imread(os.path.join(folder, valid_images[0]))
+        h, w, _ = first_image.shape
+        # calculate frameSec
+        infile = open("popstar.ctl", "r")
+        infile_lines = infile.readlines()
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            if(header == "duration_%s" % trk1):
+                dur = float(value)
+                print("my duration is",dur)
+        lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,fname)) # your directory path
+        frame_num = int(len(lstINT)/4)  # note folder has 4 types of files
+        print("number of movie frames is %s" % frame_num)
+        frameSec = (frame_num/dur)
+        print("frames per second is %s" % frameSec)       
+        # make video        
+        codec = cv2.VideoWriter_fourcc(*'mp4v')
+        if(met == "no"):
+            vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
+        if(met == "yes"):
+            vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
+
+        for i in range(len(valid_images)):
+            itr = i+1
+            img = "tplot_%s.png" % itr
+            loaded_img = cv2.imread(os.path.join(folder, img))
+            for _ in range(each_image_duration):
+                vid_writer.write(loaded_img)
+
+        vid_writer.release()
+        trk1 = trk1 + 1
+    ############################
+    if(lyr == "yes"):  
+        print("rendering movie 2")
+        lst = os.listdir(inp) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir(inp)
+        print(dir_list)
+        trk2 = 0
+        for fname in dir_list:
+            print(fname)
+            dirname = fname[:-4]
+            folder = "%s_analysis/tplots2/%s" % (inp,dirname)
+            video_filename = "%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname)
+            valid_images = [i for i in os.listdir(folder) if i.endswith((".jpg", ".jpeg", ".png"))]
+            #print(valid_images)
+            each_image_duration = 1 # 1 second
+            first_image = cv2.imread(os.path.join(folder, valid_images[0]))
+            h, w, _ = first_image.shape
+            # calculate frameSec
+            infile = open("popstar.ctl", "r")
+            infile_lines = infile.readlines()
+            for x in range(len(infile_lines)):
+                infile_line = infile_lines[x]
+                #print(infile_line)
+                infile_line_array = str.split(infile_line, ",")
+                header = infile_line_array[0]
+                value = infile_line_array[1]
+                if(header == "duration_%s" % trk2):
+                    dur = float(value)
+                    print("my duration is",dur)
+            lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,fname)) # your directory path
+            frame_num = int(len(lstINT)/4)  # note folder has 4 types of files
+            print("number of movie frames is %s" % frame_num)
+            frameSec = (frame_num/dur)
+            print("frames per second is %s" % frameSec)       
+            # make video        
+            codec = cv2.VideoWriter_fourcc(*'mp4v')
+            if(met == "no"):
+                vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
+            if(met == "yes"):
+                vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
+
+            for i in range(len(valid_images)):
+                itr = i+1
+                img = "tplot_%s.png" % itr
+                loaded_img = cv2.imread(os.path.join(folder, img))
+                for _ in range(each_image_duration):
+                    vid_writer.write(loaded_img)
+
+            vid_writer.release()
+            trk2 = trk2 + 1
+            
 def tplotMovie_audio_video():
     # map MMD in chimerax
     print("combining audio and video for movie 1 for %s" % inp)
@@ -230,6 +426,77 @@ def tplotMovie_audio_video():
         # save the final clip
         final_clip.write_videofile("%s_analysis/myMovieSound_tplots2.mp4" % inp)
 
+
+    
+def tplotMovie_audio_video_batch():
+    print("rendering movie")
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    for fname in dir_list:
+        print(fname)
+        dirname = fname[:-4]
+        # map MMD in chimerax
+        print("combining audio and video for movie for %s file %s" % (inp,fname))
+        audio_file = "%s_analysis/%s" % (inp,fname)
+        video_file = "%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname)
+        wave_file = AudioSegment.from_file('%s_analysis/%s' % (inp,fname))
+        #wave_file_trim = wave_file[0000:8000] # 8 second fit to movie file             
+        #wave_file_trim.export('proteinInteraction_movie_%s/mySound_trim.wav' % PDB_id_reference, format="wav")
+        #audio_file = "proteinInteraction_movie_%s/mySound_trim.wav" % PDB_id_reference
+        # load the video
+        video_clip = VideoFileClip(video_file)
+        # load the audio
+        audio_clip = AudioFileClip(audio_file)
+        #start = 0
+        # if end is not set, use video clip's end
+        #end = video_clip.end
+    
+        # setting the start & end of the audio clip to `start` and `end` paramters
+        #audio_clip = audio_clip.subclip(start, end)
+        # add the final audio to the video
+        final_clip = video_clip.set_audio(audio_clip)
+        # save the final clip
+        final_clip.write_videofile("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname))
+    #####################
+    if(lyr == "yes"):  
+        print("rendering movie")
+        lst = os.listdir(inp) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir(inp)
+        print(dir_list)
+        for fname in dir_list:
+            print(fname)
+            dirname = fname[:-4]
+            # map MMD in chimerax
+            print("combining audio and video for movie for %s file %s" % (inp,fname))
+            audio_file = "%s_analysis/%s" % (inp,fname)
+            video_file = "%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname)
+            wave_file = AudioSegment.from_file('%s_analysis/%s' % (inp,fname))
+            #wave_file_trim = wave_file[0000:8000] # 8 second fit to movie file             
+            #wave_file_trim.export('proteinInteraction_movie_%s/mySound_trim.wav' % PDB_id_reference, format="wav")
+            #audio_file = "proteinInteraction_movie_%s/mySound_trim.wav" % PDB_id_reference
+            # load the video
+            video_clip = VideoFileClip(video_file)
+            # load the audio
+            audio_clip = AudioFileClip(audio_file)
+            #start = 0
+            # if end is not set, use video clip's end
+            #end = video_clip.end
+    
+            # setting the start & end of the audio clip to `start` and `end` paramters
+            #audio_clip = audio_clip.subclip(start, end)
+            # add the final audio to the video
+            final_clip = video_clip.set_audio(audio_clip)
+            # save the final clip
+            final_clip.write_videofile("%s_analysis/myMovieSound_tplots2_%s.mp4" % (inp,dirname))
+
+
 def combine_side_by_side():
     # Load the two video clips
     clip0 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
@@ -249,6 +516,36 @@ def combine_side_by_side():
         final_clip = clips_array([[clip0, clip1]])
     # Write the combined video to a new file
     final_clip.write_videofile("%s_analysis/myMovie_combined.mp4" % inp)
+
+def combine_side_by_side_batch():
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    for fname in dir_list:
+        print(fname)
+        dirname = fname[:-4]
+        # Load the two video clips
+        clip0 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
+        clip1 = VideoFileClip("%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname))
+        if(lyr == "yes"):  
+            clip2 = VideoFileClip("%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname))
+        else:
+            clip2 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
+        # Ensure both clips have the same height for side-by-side alignment
+        clip1 = clip1.resize(height=clip0.h)
+        clip2 = clip2.resize(height=clip0.h)
+
+        # Concatenate the clips side by side
+        if(lyr == "yes"): 
+            final_clip = clips_array([[clip0, clip1, clip2]])
+        else:
+            final_clip = clips_array([[clip0, clip1]])
+        # Write the combined video to a new file
+        final_clip.write_videofile("%s_analysis/myMovie_combined_%s.mp4" % (inp,dirname))
+
 
 def combinedMovie_audio_video():
     # map MMD in chimerax
@@ -274,6 +571,38 @@ def combinedMovie_audio_video():
     # save the final clip
     final_clip.write_videofile("%s_analysis/myMovieSound_combined.mp4" % inp)
 
+def combinedMovie_audio_video_batch():
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    for fname in dir_list:
+        print(fname)
+        dirname = fname[:-4]
+        # map MMD in chimerax
+        print("combining audio and video for movie for %s file %s" % (inp,fname))
+        audio_file = "%s_analysis/%s" % (inp,fname)
+        video_file = "%s_analysis/myMovie_combined_%s.mp4" % (inp,dirname)
+        wave_file = AudioSegment.from_file('%s_analysis/%s' % (inp,fname))
+        #wave_file_trim = wave_file[0000:8000] # 8 second fit to movie file             
+        #wave_file_trim.export('proteinInteraction_movie_%s/mySound_trim.wav' % PDB_id_reference, format="wav")
+        #audio_file = "proteinInteraction_movie_%s/mySound_trim.wav" % PDB_id_reference
+        # load the video
+        video_clip = VideoFileClip(video_file)
+        # load the audio
+        audio_clip = AudioFileClip(audio_file)
+        #start = 0
+        # if end is not set, use video clip's end
+        #end = video_clip.end
+    
+        # setting the start & end of the audio clip to `start` and `end` paramters
+        #audio_clip = audio_clip.subclip(start, end)
+        # add the final audio to the video
+        final_clip = video_clip.set_audio(audio_clip)
+        # save the final clip
+        final_clip.write_videofile("%s_analysis/myMovieSound_combined_%s.mp4" % (inp,dirname))
 
 def copyMovie():
     print("loading movie")
@@ -282,17 +611,42 @@ def copyMovie():
     if(lyr == "yes"): 
         shutil.copy2("%s_analysis/myMovieSound_tplots2.mp4" % inp, "myMovie_tplots2_%s.mp4" % inp)
     shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "myMovie_combo_%s.mp4" % inp)
-    
-def main():
-    renderFaceMovie()
-    faceMovie_audio_video()
-    renderTplotMovie()
-    tplotMovie_audio_video()
-    combine_side_by_side()
-    combinedMovie_audio_video()
-    copyMovie()
-    
 
+def copyMovie_batch():
+    print("loading movie")
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    for fname in dir_list:
+        print(fname)
+        dirname = fname[:-4]
+        shutil.copy2("%s_analysis/myMovieSound_faces_%s.mp4" % (inp,dirname), "myMovie_faces_%s.mp4" % (dirname))
+        shutil.copy2("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname), "myMovie_tplots1_%s.mp4" % (dirname))
+        if(lyr == "yes"): 
+            shutil.copy2("%s_analysis/myMovieSound_tplots2_%s.mp4" % (inp,dirname), "myMovie_tplots2_%s.mp4" % (dirname))
+        shutil.copy2("%s_analysis/myMovieSound_combined_%s.mp4" % (inp,dirname), "myMovie_combo_%s.mp4" % (dirname))
+
+##############################################################    
+def main():
+    if(fof == "file"):
+        renderFaceMovie()
+        faceMovie_audio_video()
+        renderTplotMovie()
+        tplotMovie_audio_video()
+        combine_side_by_side()
+        combinedMovie_audio_video()
+        copyMovie()
+    if(fof == "folder"):
+        renderFaceMovie_batch()
+        faceMovie_audio_video_batch()
+        renderTplotMovie_batch()
+        tplotMovie_audio_video_batch()
+        combine_side_by_side_batch()
+        combinedMovie_audio_video_batch()
+        copyMovie_batch()
 ###############################################################
 if __name__ == '__main__':
     main()

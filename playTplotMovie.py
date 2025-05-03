@@ -30,10 +30,17 @@ for x in range(len(infile_lines)):
     if(header == "int"):
         tm = value
         print("my time interval is",tm)
+    if(header == "input"):
+        fof = value
+        print("file or folder is",fof)   
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
-
+fof = ""+fof+""
+if(fof=="folder"):
+    print("PLAYBACK BUTTONS ONLY WORK FOR SINGLE FILE SUBMISSIONS")
+    print("movies generated can be found in your main folder")
+    exit()
 # calculate number of faces for single file
 lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
 frame_num = int(len(lst)/4)  # note folder has 4 types of files

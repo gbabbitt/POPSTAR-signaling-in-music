@@ -245,6 +245,7 @@ def time_sample_batch():
     for i in range(number_files):    
         # Open an mp3 file 
         filename = dir_list[i]
+        file_path = "%s/%s" % (inp,filename)
         #print(filename)
         if not os.path.exists('%s_analysis/intervals/%s' % (inp,filename)):
             os.mkdir('%s_analysis/intervals/%s' % (inp,filename))
@@ -255,11 +256,34 @@ def time_sample_batch():
             song = AudioSegment.from_file("%s/%s" % (inp,filename), format="wav")
         print(song.duration_seconds)
         dur = song.duration_seconds
-        ints = int(dur*4)-tm  # analyze in 1/4 second sliding window
+        # Estimate the tempo (BPM)
+        y, sr = librosa.load(file_path)
+        tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+        tempo = tempo[0]
+        total_beats = (dur/60*tempo)
+        beat_int = dur/total_beats
+        print("tempo = %s bpm" % tempo)
+        print("beat interval = %s sec" % beat_int)
+        print("total beats = %s" % total_beats)
+        f = open("./popstar.ctl", "a")
+        f.write("duration_%s,%s,#song duration (seconds) for %s\n" % (i,dur,filename))
+        f.write("tempo_%s,%s,#tempo (bpm) for %s\n" % (i,tempo,filename))
+        f.write("beatInt_%s,%s,#beat interval (seconds) for %s\n" % (i,beat_int,filename))
+        f.write("ttlBeats_%s,%s,#total number beats in song for %s\n" % (i,total_beats,filename))
+        f.close()
+        if(met == "no"):
+            ints = int(dur*8)-tm  # analyze in 1/8 second fixed sliding window
+        #ints = int(dur*4*beat_int)-tm  # analyze fixed sliding window attempting matching beat intervals
+        if(met == "yes"):   
+            ints = int(total_beats)
         # start and end time 
         for j in range(ints): 
-            start = i*250  # note 500 = 0.5 second
-            end = i*250+tm*250
+            if(met == "no"):
+                start = i*125  # note 250 = 0.125 second fixed window
+                end = i*125+tm*1000
+            if(met == "yes"):
+                start = i*beat_int*1000  # attempt to match beat intervals
+                end = i*beat_int*1000+tm*1000
             print("start: %s end: %s" % (start,end))
             # song interval 
             finterval = song[start: end] 

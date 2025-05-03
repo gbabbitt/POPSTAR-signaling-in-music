@@ -16,7 +16,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse, Arc
 import ternary
-
+import multiprocessing
+# find number of cores
+num_cores = multiprocessing.cpu_count()
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
 infile_lines = infile.readlines()
@@ -39,18 +41,20 @@ for x in range(len(infile_lines)):
         print("file or folder is",fof)
     if(header == "lyrics"):
         lyr = value
-        print("lyrics present is",lyr) 
+        print("lyrics present is",lyr)
+       
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
 lyr = ""+lyr+""
 
-# calculate number of faces for single file
-lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
-face_num = int(len(lst)/4)  # note folder has 4 types of files
-print("number of Chernoff faces is %s" % face_num)
-# calculate number of faces for folder
+if(fof=="file"):
+    # calculate number of faces for single file
+    lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
+    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    print("number of Chernoff faces is %s" % face_num)
+    
 
 def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     """
@@ -152,10 +156,8 @@ def ternary_plot1(tdata, i, randX, randY, randZ):
     # Draw gridlines
     tax.gridlines(multiple=0.1, color="grey")
     #tax.ticks(axis='lbr', linewidth=1)
+    return tax
     
-    # save image
-    tax.savefig('%s_analysis/tplots1/tplot_%s.png' % (inp, i), dpi=144)
-    tax.close()
 
 
 def ternary_plot2(tdata, i, randX, randY, randZ):
@@ -199,10 +201,7 @@ def ternary_plot2(tdata, i, randX, randY, randZ):
     # Draw gridlines
     tax.gridlines(multiple=0.1, color="grey")
     #tax.ticks(axis='lbr', linewidth=1)
-    
-    # save image
-    tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
-    tax.close()
+    return tax
     
     
 ################################################################################################
@@ -270,8 +269,10 @@ def main():
         if not os.path.exists('%s_analysis/tplots1' % inp):
             os.mkdir('%s_analysis/tplots1' % inp)
         print("generating ternary plot 1 %s" % str(i+1))
-        ternary_plot1(tdata, i, randX, randY, randZ)
-    
+        tax = ternary_plot1(tdata, i, randX, randY, randZ)
+        # save image
+        tax.savefig('%s_analysis/tplots1/tplot_%s.png' % (inp, i), dpi=144)
+        tax.close()
     
     ###########################    
     # make each ternary plot 2
@@ -304,11 +305,208 @@ def main():
             if not os.path.exists('%s_analysis/tplots2' % inp):
                 os.mkdir('%s_analysis/tplots2' % inp)
             print("generating ternary plot 2 %s" % str(i+1))
-            ternary_plot2(tdata, i, randX, randY, randZ)
+            tax = ternary_plot2(tdata, i, randX, randY, randZ)
+            # save image
+            tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
+            tax.close()
+
+##################################################################        
+
+def create_list():   
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    global folder_paths1
+    folder_paths1 = []
+    global folder_paths2
+    folder_paths2 = []
+    global folder_paths3
+    folder_paths3 = []
+    if not os.path.exists('%s_analysis/faces' % (inp)):
+        os.mkdir('%s_analysis/faces' % (inp))
+    if not os.path.exists('%s_analysis/tplots1' % (inp)):
+        os.mkdir('%s_analysis/tplots1' % (inp))
+        if(lyr == "yes"):
+            if not os.path.exists('%s_analysis/tplots2' % (inp)):
+                os.mkdir('%s_analysis/tplots2' % (inp))
+    for i in range(number_files):    
+        # Open an mp3 file 
+        filename = dir_list[i]
+        dirname = filename[:-4]
+        if not os.path.exists('%s_analysis/faces/%s' % (inp,dirname)):
+            os.mkdir('%s_analysis/faces/%s' % (inp,dirname))
+        if not os.path.exists('%s_analysis/tplots1/%s' % (inp,dirname)):
+            os.mkdir('%s_analysis/tplots1/%s' % (inp,dirname))
+        if(lyr == "yes"):
+            if not os.path.exists('%s_analysis/tplots2/%s' % (inp,dirname)):
+                os.mkdir('%s_analysis/tplots2/%s' % (inp,dirname))
         
+        folder_path1 = "%s_analysis/faces/%s" % (inp,dirname)
+        folder_path2 = "%s_analysis/tplots1/%s" % (inp,dirname)
+        if(lyr == "yes"):
+            folder_path3 = "%s_analysis/tplots2/%s" % (inp,dirname)
+        #print(filename)
+        print("generating faces and tplots for %s" % (dirname))
+        folder_paths1.append(folder_path1)
+        folder_paths2.append(folder_path2)
+        if(lyr == "yes"):     
+             folder_paths3.append(folder_path3)
+    print(folder_paths1)
+    print(folder_paths2)
+    print(folder_paths3)
+    return folder_paths1
+    return folder_paths2
+    return folder_paths3
+    
+#################################################################
+def main_batch_faces(item):
+    
+    folder_path = item
+    print(folder_path)
+    folder_path_array = folder_path.split("/")
+    filename = "%s.wav" % (folder_path_array[2])
+    print(filename)
+    # calculate number of faces for single file
+    lst = os.listdir("%s_analysis/intervals/%s" % (inp,filename)) # your directory path
+    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    print("number of Chernoff faces is %s" % face_num)  
+    # Generate random data for faces and tplots
+    np.random.seed()
+    data = np.random.rand(face_num, 12)
+    print(data)
+    
+    
+    # import and shape external data
+
+    ##########################    
+    # Plot each Chernoff face
+    ##########################
+    for i in range(face_num):
+        if(i>face_num-1):
+            continue
         
+        # Create a new figure for each subplot
+        print("generating Chernoff face %s for %s" % (str(i+1),filename))
+        fig_single, ax_single = plt.subplots()
+        # Copy the plot from the original subplot to the new figure
+        chernoff_face(ax_single, 0, 0, data[i])
+        ax_single.set_xlim(-1, 1)
+        ax_single.set_ylim(-1, 1)
+        ax_single.set_aspect('equal', adjustable='box')
+        ax_single.axis('off')
+        ax_single.set_title('Chernoff face - fitness signal', fontsize=18,)
+        # Save the new figure
+        fig_single.savefig(f'%s/face_{i+1}.png' % (folder_path))
+        # Close the new figure to release memory
+        plt.close(fig_single)
+    
+
+def main_batch_tplots1(item):
+    
+    folder_path = item
+    print(folder_path)
+    folder_path_array = folder_path.split("/")
+    filename = "%s.wav" % (folder_path_array[2])
+    print(filename)
+    # calculate number of faces for single file
+    lst = os.listdir("%s_analysis/intervals/%s" % (inp,filename)) # your directory path
+    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    print("number of tplots is %s" % face_num)  
+    ###########################
+    # make each ternary plot 1
+    ###########################
+    tdata = {}
+    randX = 0.5
+    randY = 0.5
+    randZ = 0.5  
+    for i in range(face_num):
+        if(i == 0):
+            randX = 0.5
+            randY = 0.5
+            randZ = 0.5
+        elif(i>0):
+            # random signal
+            randX = rnd.random()
+            randY = rnd.random()
+            randZ = rnd.random()
+        tdata_name = "N%s" % i
+        tdata_add = [randX, randY, randZ]
+        tdata_sum = sum(tdata_add)
+        # Normalize the numbers so that they sum to 1
+        tdata_norm = [number / tdata_sum for number in tdata_add]
+        tdata.update({tdata_name: tdata_norm})
+        #tdata.append(tdata_add)
+        #print(tdata)
+        if(i>face_num-1):
+            continue
+        if not os.path.exists('%s_analysis/tplots1' % inp):
+            os.mkdir('%s_analysis/tplots1' % inp)
+        print("generating ternary plot 1 %s for %s" % (str(i+1),filename))
+        tax = ternary_plot1(tdata, i, randX, randY, randZ)
+        # save image
+        tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
+        tax.close()
+    
+def main_batch_tplots2(item):
+    
+    folder_path = item
+    print(folder_path)
+    folder_path_array = folder_path.split("/")
+    filename = "%s.wav" % (folder_path_array[2])
+    print(filename)
+    # calculate number of faces for single file
+    lst = os.listdir("%s_analysis/intervals/%s" % (inp,filename)) # your directory path
+    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    print("number of tplots is %s" % face_num)  
+    ###########################
+    # make each ternary plot 2
+    ###########################
+    tdata = {}
+    randX = 0.5
+    randY = 0.5
+    randZ = 0.5  
+    for i in range(face_num):
+        if(i == 0):
+            randX = 0.5
+            randY = 0.5
+            randZ = 0.5
+        elif(i>0):
+            # random signal
+            randX = rnd.random()
+            randY = rnd.random()
+            randZ = rnd.random()
+        tdata_name = "N%s" % i
+        tdata_add = [randX, randY, randZ]
+        tdata_sum = sum(tdata_add)
+        # Normalize the numbers so that they sum to 1
+        tdata_norm = [number / tdata_sum for number in tdata_add]
+        tdata.update({tdata_name: tdata_norm})
+        #tdata.append(tdata_add)
+        #print(tdata)
+        if(i>face_num-1):
+            continue
+        if not os.path.exists('%s_analysis/tplots2' % inp):
+            os.mkdir('%s_analysis/tplots2' % inp)
+        print("generating ternary plot 2 %s for %s" % (str(i+1),filename))
+        ternary_plot1(tdata, i, randX, randY, randZ)
+        # save image
+        tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
+        tax.close()   
+
+
 ###############################################################
 if __name__ == '__main__':
-    main()
-    
-    
+    if(fof == "file"):
+        main()
+    if(fof == "folder"):
+        create_list()
+        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+            pool.map(main_batch_faces, folder_paths1)
+        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+            pool.map(main_batch_tplots1, folder_paths2)
+        if(lyr == "yes"):
+            with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+                pool.map(main_batch_tplots2, folder_paths3)
