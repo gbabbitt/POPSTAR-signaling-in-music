@@ -8,10 +8,10 @@ TESTING: Linux Mint 20 (probably works on other Debian Linux distros and MacOS t
 
 TO RUN: python3 popstar.py 
 
-INPUT: myFile.wav or myFile.mp3
+INPUT: myFile.wav or myFile.mp3 or myDir (...where myDir is a directory with multiple sound files for batch processing)
 
-DEPENDENCIES: PyQt5, PIL, python-ternary, librosa, soundfile, pydub, moviepy (use pip install moviepy==1.0.3 to avoid recent bug), and the usual suspects (numpy,scipy,pandas, matplotlib, statsmodels)
+DEPENDENCIES: PyQt5, PIL, python-ternary, librosa, soundfile, pydub, moviepy (use pip install moviepy==1.0.3 to avoid recent bug), and the usual suspects (numpy,scipy,pandas, matplotlib, statsmodels, multiprocessing)
 
-NOTE: This code does not actually do any significant analysis as of yet. The signals plotted dynamically are just random for now...stay tuned. Batch processing is not coded yet either.  All testing can be done with a single sound file (.wav or .mp3)
+NOTE: This code does not actually do any significant analysis as of yet. The signals plotted dynamically are just random for now...stay tuned. 
 
 
