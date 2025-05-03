@@ -329,9 +329,9 @@ def create_list():
         os.mkdir('%s_analysis/faces' % (inp))
     if not os.path.exists('%s_analysis/tplots1' % (inp)):
         os.mkdir('%s_analysis/tplots1' % (inp))
-        if(lyr == "yes"):
-            if not os.path.exists('%s_analysis/tplots2' % (inp)):
-                os.mkdir('%s_analysis/tplots2' % (inp))
+    if(lyr == "yes"):
+        if not os.path.exists('%s_analysis/tplots2' % (inp)):
+            os.mkdir('%s_analysis/tplots2' % (inp))
     for i in range(number_files):    
         # Open an mp3 file 
         filename = dir_list[i]
@@ -491,7 +491,7 @@ def main_batch_tplots2(item):
         if not os.path.exists('%s_analysis/tplots2' % inp):
             os.mkdir('%s_analysis/tplots2' % inp)
         print("generating ternary plot 2 %s for %s" % (str(i+1),filename))
-        ternary_plot1(tdata, i, randX, randY, randZ)
+        tax = ternary_plot2(tdata, i, randX, randY, randZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
         tax.close()   
