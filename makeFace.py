@@ -74,43 +74,48 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
 
     # Face outline
     face = Ellipse((x, y), 
-                   width=0.8 + features[0] * 0.01,  # Face width
-                   height=1.0 + features[1] * 0.01, # Face height
+                   #width=0.8 + features[0] * 0.01,  # Face width
+                   #height=1.0 + features[1] * 0.01, # Face height
+                   width=0.8,  # Face width
+                   height=1.0, # Face height
                    angle=0, 
                    facecolor=facecolor, 
                    edgecolor=edgecolor)
     ax.add_patch(face)
 
     # Eyes
-    eye_width = 0.1 + features[2] * 0.1
-    eye_height = 0.1 + features[3] * 0.1
+    eye_width = 0.1 + features[0] * 0.1
+    eye_height = 0.1 + features[1] * 0.1
     ax.add_patch(Ellipse((x - 0.2, y + 0.2), width=eye_width, height=eye_height, facecolor='white', edgecolor='black'))
     ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=eye_width, height=eye_height, facecolor='white', edgecolor='black'))
 
     # Pupils
-    pupil_size = 0.02 + features[4] * 0.05
-    ax.add_patch(Ellipse((x - 0.2, y + 0.2), width=pupil_size, height=pupil_size, facecolor='black'))
-    ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=pupil_size, height=pupil_size, facecolor='black'))
+    pupil_height = 0.02 + features[2] * 0.05
+    pupil_width = 0.02 + features[3] * 0.05
+    ax.add_patch(Ellipse((x - 0.2, y + 0.2), width=pupil_width, height=pupil_height, facecolor='black'))
+    ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=pupil_width, height=pupil_height, facecolor='black'))
 
     # Eyebrows
-    eyebrow_angle = -30 + features[5] * 60  # Angle between -30 and 30 degrees
+    eyebrow_angle = -30 + features[4] * 60  # Angle between -30 and 30 degrees
     ax.plot([x - 0.3, x - 0.1], [y + 0.3 + 0.05 * np.sin(np.radians(eyebrow_angle)), y + 0.3 - 0.05 * np.sin(np.radians(eyebrow_angle))], color='black', linewidth=2)
     ax.plot([x + 0.1, x + 0.3], [y + 0.3 - 0.05 * np.sin(np.radians(eyebrow_angle)), y + 0.3 + 0.05 * np.sin(np.radians(eyebrow_angle))], color='black', linewidth=2)
 
     # Nose
-    nose_width = 0.1 + features[6] * 0.01
-    nose_height = 0.15 + features[7] * 0.01
-    ax.add_patch(Ellipse((x, y), width=nose_width, height=nose_height, angle=features[8] * 45, facecolor='lightgray', edgecolor='black'))
+    #nose_width = 0.1 + features[5] * 0.01
+    #nose_height = 0.15 + features[6] * 0.01
+    nose_width = 0.1
+    nose_height = 0.15
+    ax.add_patch(Ellipse((x, y), width=nose_width, height=nose_height, angle=features[5] * 45, facecolor='lightgray', edgecolor='black'))
 
     # Mouth
-    mouth_width = 0.2 + features[9] * 0.1
-    mouth_height = 0.05 + features[10] * 0.1
+    mouth_width = 0.2 + features[6] * 0.1
+    mouth_height = 0.05 + features[7] * 0.1
     mouth = Ellipse((x, y - 0.2), width=mouth_width, height=mouth_height, angle=0,facecolor='black', edgecolor='black')
     ax.add_patch(mouth)
     
     #Ears
-    ear_width = 0.05 + features[10] * 0.1
-    ear_height = 0.05 + features[10] * 0.2
+    ear_width = 0.05 + features[8] * 0.1
+    ear_height = 0.05 + features[9] * 0.2
     ax.add_patch(Ellipse((x - 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
     ax.add_patch(Ellipse((x + 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
 
@@ -211,7 +216,7 @@ def ternary_plot2(tdata, i, randX, randY, randZ):
 def main():
     # Generate random data for faces and tplots
     np.random.seed()
-    data = np.random.rand(face_num, 12)
+    data = np.random.rand(face_num, 10)
     print(data)
        
     # import and shape external data
@@ -375,7 +380,7 @@ def main_batch_faces(item):
     print("number of Chernoff faces is %s" % face_num)  
     # Generate random data for faces and tplots
     np.random.seed()
-    data = np.random.rand(face_num, 12)
+    data = np.random.rand(face_num, 10)
     print(data)
     
     
