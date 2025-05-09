@@ -365,8 +365,8 @@ def create_sonogram(item):
                 n_cols = shp[1]   
             #print("number of notes (i.e. columns)")
             #print(n_cols)
-            if(inp0 == 'fast' and shp[1] >= 2000):
-                print("...NVI will be limited to first 2000 cols")
+            #if(inp0 == 'fast' and shp[1] >= 2000):
+            #    print("...NVI will be limited to first 2000 cols")
             with open("%s_analysis/intervals/%s.dat" % (inp,fname), 'w') as ffile:
                 for spectros in ls[0]:
                     for spectro in spectros:
@@ -471,8 +471,8 @@ def create_sonogram_batch(item):
                 #print("generating sonogram for %s" % filename)
                 #print("number of notes (i.e. columns)")
                 #print(n_cols)
-                if(inp0 == 'fast' and shp[1] >= 2000):
-                    print("...NVI will be limited to first 2000 cols")
+                #if(inp0 == 'fast' and shp[1] >= 2000):
+                #    print("...NVI will be limited to first 2000 cols")
                 n_cols_array.append(n_cols)
                 #input3 = "%s.dat" % filename
                 with open("%s_analysis/intervals/%s/%s.dat" % (inp,folder,fname), 'w') as ffile:

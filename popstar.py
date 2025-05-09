@@ -150,6 +150,8 @@ class Ui_Dialog(object):
             
     def analyzeSignal(self):
         print("analyzing fitness signal")
+        cmd = "python3 analyzeSignal.py"
+        os.system(cmd)
         for i in range(51): 
             time.sleep(0.01) 
             # setting value to progress bar 
