@@ -237,12 +237,137 @@ def mli_stat(item):
     txt_out.close
     
 # control metrics
-def f0_var_stat():
-    print("calculating f0 variance")
-def f0_even_stat():
-    print("calculating f0 evenness")    
-def fn_levels_stat():
-    print("calculating fn levels")
+def f0_var_stat(item):
+    path_objs = item.split("/")
+    filename = path_objs[2]
+    writePath = "%s_analysis/FFVvalues.txt" % (inp)
+    txt_out = open(writePath, 'a')
+    infile = item
+    y, sr = librosa.load(infile)
+    f0, voiced_flag, voiced_probs = librosa.pyin(y,sr=sr,fmin=librosa.note_to_hz('C2'),fmax=librosa.note_to_hz('C7'))
+    times = librosa.times_like(f0, sr=sr)
+    #pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
+    #print(f0)
+    #print(times)
+    notes = []
+    sum_diff = 0
+    ##################
+    for freq in f0:
+        #print(freq)
+        if(freq == "nan"):
+            continue
+        # equal tempered scale - middle octave range (octave 4)
+        if(freq < 269.405 and freq >= 253.855): 
+            note = "C"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 261.63)
+        if(freq < 285.42 and freq >= 269.405):
+            note = "C#"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 277.18)
+        if(freq < 302.395 and freq >= 285.42):
+            note = "D"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 293.66)
+        if(freq < 320.38 and freq >= 302.395):
+            note = "D#"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 311.13)    
+        if(freq < 339.43 and freq >= 320.38):
+            note = "E"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 329.63)    
+        if(freq < 359.61 and freq >= 339.43):
+            note = "F"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 349.23)    
+        if(freq < 380.995 and freq >= 359.61):
+            note = "F#"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 369.99)
+        if(freq < 403.65 and freq >= 380.995):
+            note = "G"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 392)
+        if(freq < 427.65 and freq >= 403.65):
+            note = "G#"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 415.3)
+        if(freq < 453.08 and freq >= 427.65):
+            note = "A"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 440)
+        if(freq < 480.02 and freq >= 453.08):
+            note = "A#"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 466.16) 
+        if(freq < 507.74 and freq >= 480.02):
+            note = "B"
+            notes.append(note)
+            sum_diff = sum_diff + abs(freq - 493.88) 
+    ##############
+    #print("notes detected")
+    #print(notes)
+    n_notes = len(notes)
+    if(sum_diff == 0):
+        FFV = 0
+    if(sum_diff != 0):
+        FFV = sum_diff/(len(notes))
+    print("FFV (f0 frequency variance) = %s over %s notes for %s" % (FFV,n_notes,filename))
+    txt_out.write("%s,%s,%s\n" % (filename,FFV,n_notes))
+    txt_out.close
+    
+    
+def fn_levels_stat(item):
+    path_objs = item.split("/")
+    filename = path_objs[2]
+    writePath = "%s_analysis/HENvalues.txt" % (inp)
+    txt_out = open(writePath, 'a')
+    infile = item
+    y, sr = librosa.load(infile)
+    f0, voiced_flag, voiced_probs = librosa.pyin(y,sr=sr,fmin=librosa.note_to_hz('C2'),fmax=librosa.note_to_hz('C7'))
+    S = np.abs(librosa.stft(y))
+    times = librosa.times_like(S, sr=sr)
+    # use the first 30 harmonics: 1, 2, 3, ..., 30
+    harmonics = np.arange(1, 31)
+    # And standard Fourier transform frequencies
+    frequencies = librosa.fft_frequencies(sr=sr)
+    harmonic_energy = librosa.f0_harmonics(S, f0=f0, harmonics=harmonics, freqs=frequencies) # 2D matrix
+    #print(harmonic_energy)
+    HEN = np.sum(harmonic_energy)
+    print("HEN (harmonic energy) = %s over for %s" % (HEN,filename))
+    txt_out.write("%s,%s\n" % (filename,HEN))
+    txt_out.close
+
+def beat_var(item):
+    path_objs = item.split("/")
+    filename = path_objs[2]
+    writePath = "%s_analysis/BIVvalues.txt" % (inp)
+    txt_out = open(writePath, 'a')
+    writePath2 = "%s_analysis/EVIvalues.txt" % (inp)
+    txt_out2 = open(writePath2, 'a')
+    # Load an audio file
+    infile = item
+    y, sr = librosa.load(infile)
+    # Estimate tempo and beat frames
+    tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+    # Convert beat frames to timestamps
+    beat_times = librosa.frames_to_time(beat_frames, sr=sr, hop_length=1024)
+    # Analyze beat spacing
+    beat_intervals = np.diff(beat_times)
+    mean_beat_interval = np.mean(beat_intervals)
+    EVI = (beat_intervals - mean_beat_interval)**2
+    EVI = np.sum(EVI)
+    BIV = np.var(beat_intervals)
+    # Print the estimated tempo and beat intervals
+    #print(f"Estimated tempo: {tempo} BPM")
+    #print(f"Beat intervals: {beat_intervals}")
+    print("BIV (beat interval variance) = %s for %s" % (BIV,filename))
+    print("EVI (beat interval evenness) = %s for %s" % (EVI,filename))
+    txt_out.write("%s,%s\n" % (filename,BIV))
+    txt_out.close
+    txt_out2.write("%s,%s\n" % (filename,EVI))
+    txt_out2.close
 
 # energy metrics
 def ampvar_stat(item):
@@ -356,10 +481,28 @@ def main():
         ####################
         # control metrics
         ####################
-        f0_var_stat()
-        f0_even_stat()
-        fn_levels_stat()
-        
+        print("calculating f0 variance")
+        writePath = "%s_analysis/FFVvalues.txt" % (inp)
+        txt_out = open(writePath, 'w')
+        txt_out.close
+        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+            pool.map(f0_var_stat, sound_file_paths)
+        print("calculating fn harmonic energy")
+        writePath = "%s_analysis/HENvalues.txt" % (inp)
+        txt_out = open(writePath, 'w')
+        txt_out.close
+        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+            pool.map(fn_levels_stat, sound_file_paths)
+        print("calculating beat interval variance")
+        writePath = "%s_analysis/BIVvalues.txt" % (inp)
+        txt_out = open(writePath, 'w')
+        txt_out.close
+        writePath2 = "%s_analysis/EVIvalues.txt" % (inp)
+        txt_out2 = open(writePath2, 'w')
+        txt_out2.close
+        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+            pool.map(beat_var, sound_file_paths)
+                
         ####################
         # surprise metrics
         ####################
@@ -382,14 +525,14 @@ def main():
         txt_out.close
         with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
             pool.map(nvi_stat, data_file_paths)
-        '''
-        print("calculating ADF statistic")
-        writePath = "%s_analysis/ADFvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
-            pool.map(adf_stat, sound_file_paths)
-        '''
+        
+        #print("calculating ADF statistic")
+        #writePath = "%s_analysis/ADFvalues.txt" % (inp)
+        #txt_out = open(writePath, 'w')
+        #txt_out.close
+        #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
+        #    pool.map(adf_stat, sound_file_paths)
+                
         ###################    
         print("\nsignal analysis is complete\n")   
     if(fileORfolder == "folder"):
