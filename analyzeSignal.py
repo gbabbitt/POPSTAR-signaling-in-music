@@ -95,7 +95,7 @@ if(fof=="file"):
     lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
     face_num = int(len(lst)/4)  # note folder has 4 types of files
     print("number of Chernoff faces is %s" % face_num)
-
+#####################################################################
 def create_file_lists():   
     folder_path = "%s_analysis/intervals/" % inp
     print(folder_path)
@@ -120,6 +120,34 @@ def create_file_lists():
     return sound_file_paths
     return data_file_paths
 
+def create_file_lists_batch(): 
+    folder_path1 = "%s_analysis/intervals/" % inp
+    #print(folder_path1)
+    global sound_file_paths
+    sound_file_paths = []  # for .wav files
+    global data_file_paths
+    data_file_paths = [] # for .dat files
+    for foldername in os.listdir(folder_path1):
+        folder_path2 = os.path.join(folder_path1, "%s" % (foldername))
+        print(folder_path2)
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, "%s" % (filename))
+            #print(file_path)
+            if os.path.isfile(file_path) and file_path[-4:] == ".wav":
+                print("generating sound file list for %s" % (filename))
+                sound_file_paths.append(file_path)
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, "%s" % (filename))
+            #print(file_path)
+            if os.path.isfile(file_path) and file_path[-4:] == ".dat":
+                print("generating data file list for %s" % (filename))
+                data_file_paths.append(file_path)
+        #print(sound_file_paths)
+        #print(data_file_paths)
+        return sound_file_paths
+        return data_file_paths
+        
+########################################################################
 
 # surprise metrics
 def nvi_stat(item):
@@ -447,6 +475,145 @@ def tempo_stat(item):
     print("TEMPO (tempo - bpm) = %s for %s" % (tempo,filename))
     txt_out.write("%s,%s\n" % (filename,tempo))
     txt_out.close
+    
+def coll_data():
+    print("collecting data")
+    writePath = "%s_analysis/features_raw.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.write("file,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues\n")
+    readPath1 = "%s_analysis/AC1values.txt" % (inp)
+    txt_in1 = open(readPath1, 'r')
+    readPath2 = "%s_analysis/AMPvalues.txt" % (inp)
+    txt_in2 = open(readPath2, 'r')
+    readPath3 = "%s_analysis/BIVvalues.txt" % (inp)
+    txt_in3 = open(readPath3, 'r')
+    readPath4 = "%s_analysis/EVIvalues.txt" % (inp)
+    txt_in4 = open(readPath4, 'r')
+    readPath5 = "%s_analysis/FFVvalues.txt" % (inp)
+    txt_in5 = open(readPath5, 'r')
+    readPath6 = "%s_analysis/HENvalues.txt" % (inp)
+    txt_in6 = open(readPath6, 'r')
+    readPath7 = "%s_analysis/LZCvalues.txt" % (inp)
+    txt_in7 = open(readPath7, 'r')
+    readPath8 = "%s_analysis/MLIvalues.txt" % (inp)
+    txt_in8 = open(readPath8, 'r')
+    readPath9 = "%s_analysis/NVIvalues.txt" % (inp)
+    txt_in9 = open(readPath9, 'r')
+    readPath10 = "%s_analysis/TEMPOvalues.txt" % (inp)
+    txt_in10 = open(readPath10, 'r')
+    AC1_lines = txt_in1.readlines()
+    AMP_lines = txt_in2.readlines()
+    BIV_lines = txt_in3.readlines()
+    EVI_lines = txt_in4.readlines()
+    FFV_lines = txt_in5.readlines()
+    HEN_lines = txt_in6.readlines()
+    LZC_lines = txt_in7.readlines()
+    MLI_lines = txt_in8.readlines()
+    NVI_lines = txt_in9.readlines()
+    TEMPO_lines = txt_in10.readlines()
+    length = len(AC1_lines)
+    for i in range(len(AC1_lines)):
+        for line in AC1_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("AC1 matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                AC1 = float(line_split2[1])
+        for line in AMP_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("AMP matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                AMP= float(line_split2[1]) 
+        for line in BIV_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("BIV matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                BIV= float(line_split2[1]) 
+        for line in EVI_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("EVI matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                EVI= float(line_split2[1])
+        for line in FFV_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("FFV matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                FFV= float(line_split2[1])
+        for line in HEN_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("HEN matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                HEN= float(line_split2[1])
+        for line in LZC_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("LZC matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                LZC= float(line_split2[1])
+        for line in MLI_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("MLI matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                MLI= float(line_split2[1])
+        for line in NVI_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("NVI matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                NVI= float(line_split2[1])
+        for line in TEMPO_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("TEMPO matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                TEMPO= float(line_split2[1])
+        
+        txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MLI,NVI,TEMPO))
+    txt_out.close
+
+
+def norm_data():
+    print("normalizing data")
+    readPath = "%s_analysis/features_raw.txt" % (inp)
+    writePath = "%s_analysis/features_norm.txt" % (inp)
+    df = pd.read_csv(readPath, delimiter=',',header=1)
+    print(df)
+    df = df.iloc[:, 1:]
+    df_norm = df.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+    print(df_norm)
+    with open(writePath, 'w') as txt_out:
+        txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues\n")
+        for index, row in df_norm.iterrows():
+            line = ','.join(str(x) for x in row.values)  # Convert row to comma-separated string
+            txt_out.write(line + '\n')  # Write line to file with newline character
+        txt_out.close
+    
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
@@ -455,91 +622,96 @@ def main():
         create_file_lists()
         print(data_file_paths)
         print(sound_file_paths)
-        
-        ####################
-        # energy metrics
-        ####################
-        print("calculating amplitude variance")
-        writePath = "%s_analysis/AMPvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(ampvar_stat, sound_file_paths)
-        print("calculating size/dimension")
-        writePath = "%s_analysis/AC1values.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(dimension_stat, sound_file_paths)
-        print("calculating local tempo")
-        writePath = "%s_analysis/TEMPOvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(tempo_stat, sound_file_paths)
-        
-        ####################
-        # control metrics
-        ####################
-        print("calculating f0 variance")
-        writePath = "%s_analysis/FFVvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(f0_var_stat, sound_file_paths)
-        print("calculating fn harmonic energy")
-        writePath = "%s_analysis/HENvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(fn_levels_stat, sound_file_paths)
-        print("calculating beat interval variance")
-        writePath = "%s_analysis/BIVvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        writePath2 = "%s_analysis/EVIvalues.txt" % (inp)
-        txt_out2 = open(writePath2, 'w')
-        txt_out2.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(beat_var, sound_file_paths)
-                
-        ####################
-        # surprise metrics
-        ####################
-        print("calculating Lempel-Ziv complexity")
-        writePath = "%s_analysis/LZCvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(lzc_stat, sound_file_paths)
-        print("calculating MLI statistic")
-        writePath = "%s_analysis/MLIvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(mli_stat, sound_file_paths)
-        print("calculating NVI statistic (zero order)")
-        print("(Sawant et al. 2021 in MEE-BES)")
-        writePath = "%s_analysis/NVIvalues.txt" % (inp)
-        txt_out = open(writePath, 'w')
-        txt_out.close
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(nvi_stat, data_file_paths)
-        
-        #print("calculating ADF statistic")
-        #writePath = "%s_analysis/ADFvalues.txt" % (inp)
-        #txt_out = open(writePath, 'w')
-        #txt_out.close
-        #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
-        #    pool.map(adf_stat, sound_file_paths)
-                
-        ###################    
-        print("\nsignal analysis is complete\n")   
     if(fileORfolder == "folder"):
-        analyze_signal_batch_list()
-        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-            pool.map(analyze_signal_batch, file_paths)
-        print("\nsignal analysis is complete\n")
+        create_file_lists_batch()
+        print(data_file_paths)
+        print(sound_file_paths)
+    
+    ####################
+    # energy metrics
+    ####################
+    print("calculating amplitude variance")
+    writePath = "%s_analysis/AMPvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(ampvar_stat, sound_file_paths)
+    print("calculating size/dimension")
+    writePath = "%s_analysis/AC1values.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(dimension_stat, sound_file_paths)
+    print("calculating local tempo")
+    writePath = "%s_analysis/TEMPOvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(tempo_stat, sound_file_paths)
+    
+    ####################
+    # control metrics
+    ####################
+    print("calculating f0 variance")
+    writePath = "%s_analysis/FFVvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(f0_var_stat, sound_file_paths)
+    print("calculating fn harmonic energy")
+    writePath = "%s_analysis/HENvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(fn_levels_stat, sound_file_paths)
+    print("calculating beat interval variance")
+    writePath = "%s_analysis/BIVvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    writePath2 = "%s_analysis/EVIvalues.txt" % (inp)
+    txt_out2 = open(writePath2, 'w')
+    txt_out2.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(beat_var, sound_file_paths)
+            
+    ####################
+    # surprise metrics
+    ####################
+    print("calculating Lempel-Ziv complexity")
+    writePath = "%s_analysis/LZCvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(lzc_stat, sound_file_paths)
+    print("calculating MLI statistic")
+    writePath = "%s_analysis/MLIvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(mli_stat, sound_file_paths)
+    print("calculating NVI statistic (zero order)")
+    print("(Sawant et al. 2021 in MEE-BES)")
+    writePath = "%s_analysis/NVIvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.close
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(nvi_stat, data_file_paths)
+    
+    #print("calculating ADF statistic")
+    #writePath = "%s_analysis/ADFvalues.txt" % (inp)
+    #txt_out = open(writePath, 'w')
+    #txt_out.close
+    #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
+    #    pool.map(adf_stat, sound_file_paths)
+            
+    ###################    
+    print("collecting data")
+    coll_data()
+    print("normalizing data")
+    norm_data()
+    print("\nsignal analysis is complete\n")   
+    
+        
 ###############################################################
 if __name__ == '__main__':
     main()
