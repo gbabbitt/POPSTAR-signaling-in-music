@@ -641,7 +641,7 @@ def main():
         create_file_lists_batch()
         print(data_file_paths)
         print(sound_file_paths)
-    '''
+    
     ####################
     # energy metrics
     ####################
@@ -718,7 +718,7 @@ def main():
     #txt_out.close
     #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
     #    pool.map(adf_stat, sound_file_paths)
-    '''        
+            
     ###################    
     print("collecting data")
     coll_data()
