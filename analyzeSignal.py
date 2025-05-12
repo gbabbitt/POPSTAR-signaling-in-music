@@ -480,7 +480,7 @@ def coll_data():
     print("collecting data")
     writePath = "%s_analysis/features_raw.txt" % (inp)
     txt_out = open(writePath, 'w')
-    txt_out.write("file,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues\n")
+    txt_out.write("file,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
     readPath1 = "%s_analysis/AC1values.txt" % (inp)
     txt_in1 = open(readPath1, 'r')
     readPath2 = "%s_analysis/AMPvalues.txt" % (inp)
@@ -593,7 +593,7 @@ def coll_data():
                 print("TEMPO matching %s to %s" % (i,seg_num))
                 file_name = line_split2[0]
                 TEMPO= float(line_split2[1])
-        
+                
         txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MLI,NVI,TEMPO))
     txt_out.close
 
@@ -602,15 +602,30 @@ def norm_data():
     print("normalizing data")
     readPath = "%s_analysis/features_raw.txt" % (inp)
     writePath = "%s_analysis/features_norm.txt" % (inp)
-    df = pd.read_csv(readPath, delimiter=',',header=1)
+    writePath2 = "%s_analysis/ternary_norm.txt" % (inp)
+    df = pd.read_csv(readPath, delimiter=',',header=0)
     print(df)
     df = df.iloc[:, 1:]
     df_norm = df.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
     print(df_norm)
     with open(writePath, 'w') as txt_out:
-        txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues\n")
+        txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
         for index, row in df_norm.iterrows():
-            line = ','.join(str(x) for x in row.values)  # Convert row to comma-separated string
+            line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+            txt_out.write(line + '\n')  # Write line to file with newline character
+        txt_out.close
+    df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
+    #print(df_energy)
+    df_control = df_norm[['EVIvalues', 'FFVvalues', 'HENvalues']].mean(axis=1)
+    #print(df_control)
+    df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
+    #print(df_surprise)
+    df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
+    print(df_ternary)
+    with open(writePath2, 'w') as txt_out:
+        txt_out.write("energy,control,surprise\n")
+        for index, row in df_ternary.iterrows():
+            line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
         txt_out.close
     
@@ -626,7 +641,7 @@ def main():
         create_file_lists_batch()
         print(data_file_paths)
         print(sound_file_paths)
-    
+    '''
     ####################
     # energy metrics
     ####################
@@ -703,7 +718,7 @@ def main():
     #txt_out.close
     #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
     #    pool.map(adf_stat, sound_file_paths)
-            
+    '''        
     ###################    
     print("collecting data")
     coll_data()

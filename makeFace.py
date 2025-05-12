@@ -6,13 +6,15 @@
 ######   and students at the Rochester Instituteof Technology in 2025.
 ######   Offered freely without guarantee.  License under GPL v3.0
 #############################################################################
-
+# set signal to random or real (default should be real)
+signalType = "real"
 
 import getopt, sys # Allows for command line arguments
 import os
 import random as rnd
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse, Arc
 import ternary
@@ -84,19 +86,19 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(face)
 
     # Eyes
-    eye_width = 0.1 + features[0] * 0.1
-    eye_height = 0.1 + features[1] * 0.1
+    eye_width = 0.1 + features[6] * 0.1
+    eye_height = 0.1 + features[8] * 0.1
     ax.add_patch(Ellipse((x - 0.2, y + 0.2), width=eye_width, height=eye_height, facecolor='white', edgecolor='black'))
     ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=eye_width, height=eye_height, facecolor='white', edgecolor='black'))
 
     # Pupils
-    pupil_height = 0.02 + features[2] * 0.05
-    pupil_width = 0.02 + features[3] * 0.05
+    pupil_height = 0.02 + features[7] * 0.05
+    pupil_width = 0.02 + features[7] * 0.05
     ax.add_patch(Ellipse((x - 0.2, y + 0.2), width=pupil_width, height=pupil_height, facecolor='black'))
     ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=pupil_width, height=pupil_height, facecolor='black'))
 
     # Eyebrows
-    eyebrow_angle = -30 + features[4] * 60  # Angle between -30 and 30 degrees
+    eyebrow_angle = -30 + features[1] * 60  # Angle between -30 and 30 degrees
     ax.plot([x - 0.3, x - 0.1], [y + 0.3 + 0.05 * np.sin(np.radians(eyebrow_angle)), y + 0.3 - 0.05 * np.sin(np.radians(eyebrow_angle))], color='black', linewidth=2)
     ax.plot([x + 0.1, x + 0.3], [y + 0.3 - 0.05 * np.sin(np.radians(eyebrow_angle)), y + 0.3 + 0.05 * np.sin(np.radians(eyebrow_angle))], color='black', linewidth=2)
 
@@ -108,19 +110,19 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x, y), width=nose_width, height=nose_height, angle=features[5] * 45, facecolor='lightgray', edgecolor='black'))
 
     # Mouth
-    mouth_width = 0.2 + features[6] * 0.1
-    mouth_height = 0.05 + features[7] * 0.1
+    mouth_width = 0.2 + features[0] * 0.2
+    mouth_height = 0.05 + features[9] * 0.2
     mouth = Ellipse((x, y - 0.2), width=mouth_width, height=mouth_height, angle=0,facecolor='black', edgecolor='black')
     ax.add_patch(mouth)
     
     #Ears
-    ear_width = 0.05 + features[8] * 0.1
-    ear_height = 0.05 + features[9] * 0.2
+    ear_width = 0.05 + features[4] * 0.2
+    ear_height = 0.05 + features[2] * 0.3
     ax.add_patch(Ellipse((x - 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
     ax.add_patch(Ellipse((x + 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
 
 
-def ternary_plot1(tdata, i, randX, randY, randZ):
+def ternary_plot1(tdata, i, valX, valY, valZ):
     #print("making ternary plots")
     # Create a figure and axes with ternary scale
     fig, tax = ternary.figure(scale=1.0)
@@ -136,13 +138,13 @@ def ternary_plot1(tdata, i, randX, randY, randZ):
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
     max_fs = 18
     # corner font size
-    fsX = randX*max_fs
-    fsY = randY*max_fs
-    fsZ = randZ*max_fs
+    fsX = valX*max_fs
+    fsY = valY*max_fs
+    fsZ = valZ*max_fs
     # axis font size
-    fsE = (randY+randZ)*0.5*max_fs
-    fsP = (randX+randY)*0.5*max_fs
-    fsI = (randX+randZ)*0.5*max_fs
+    fsE = (valY+valZ)*0.5*max_fs
+    fsP = (valX+valY)*0.5*max_fs
+    fsI = (valX+valZ)*0.5*max_fs
     # Set labels and title
     tax.right_corner_label("CONTROL", fontsize=fsX, color='black')
     tax.top_corner_label("ENERGY", fontsize=fsY, color='black')
@@ -165,7 +167,7 @@ def ternary_plot1(tdata, i, randX, randY, randZ):
     
 
 
-def ternary_plot2(tdata, i, randX, randY, randZ):
+def ternary_plot2(tdata, i, valX, valY, valZ):
     #print("making ternary plots")
     # Create a figure and axes with ternary scale
     fig, tax = ternary.figure(scale=1.0)
@@ -181,13 +183,13 @@ def ternary_plot2(tdata, i, randX, randY, randZ):
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
     max_fs = 18
     # corner font size
-    fsX = randX*max_fs
-    fsY = randY*max_fs
-    fsZ = randZ*max_fs
+    fsX = valX*max_fs
+    fsY = valY*max_fs
+    fsZ = valZ*max_fs
     # axis font size
-    fsE = (randY+randZ)*0.5*max_fs
-    fsP = (randX+randY)*0.5*max_fs
-    fsI = (randX+randZ)*0.5*max_fs
+    fsE = (valY+valZ)*0.5*max_fs
+    fsP = (valX+valY)*0.5*max_fs
+    fsI = (valX+valZ)*0.5*max_fs
     # Set labels and title
     tax.right_corner_label("CONTROL", fontsize=fsX, color='black')
     tax.top_corner_label("ENERGY", fontsize=fsY, color='black')
@@ -215,19 +217,27 @@ def ternary_plot2(tdata, i, randX, randY, randZ):
 
 def main():
     # Generate random data for faces and tplots
-    np.random.seed()
-    data = np.random.rand(face_num, 10)
-    print(data)
+    if(signalType == "random"):
+        print("generating random data")
+        np.random.seed()
+        data = np.random.rand(face_num, 10)
+        print(data)
        
     # import and shape external data
-
+    if(signalType == "real"):
+        print("importing computed data")
+        readPath = "%s_analysis/features_norm.txt" % (inp)
+        df = pd.read_csv(readPath, delimiter=',',header=1)
+        data = df.values  # convert dataframe to matrix
+        print(data)
+    
+    
     ##########################    
     # Plot each Chernoff face
     ##########################
-    for i in range(face_num):
+    for i in range(face_num-1):
         if(i>face_num-1):
             continue
-        
         # Create a new figure for each subplot
         if not os.path.exists('%s_analysis/faces' % inp):
             os.mkdir('%s_analysis/faces' % inp)
@@ -247,22 +257,34 @@ def main():
     ###########################
     # make each ternary plot 1
     ###########################
+    if(signalType == "real"): # real signal    
+        print("importing computed data")
+        readPath = "%s_analysis/ternary_norm.txt" % (inp)
+        df = pd.read_csv(readPath, delimiter=',',header=1)
+        data = df.values  # convert dataframe to matrix
+        print(data)
     tdata = {}
-    randX = 0.5
-    randY = 0.5
-    randZ = 0.5  
-    for i in range(face_num):
+    valX = 0.5
+    valY = 0.5
+    valZ = 0.5  
+    for i in range(face_num-1):
         if(i == 0):
-            randX = 0.5
-            randY = 0.5
-            randZ = 0.5
+            valX = 0.5
+            valY = 0.5
+            valZ = 0.5
         elif(i>0):
-            # random signal
-            randX = rnd.random()
-            randY = rnd.random()
-            randZ = rnd.random()
+            if(signalType == "random"): # random signal
+                valX = rnd.random()
+                valY = rnd.random()
+                valZ = rnd.random()
+            if(signalType == "real"): # real signal
+                XYZ = data[i]
+                #print(XYZ)
+                valX = data[i][0]
+                valY =  data[i][1]
+                valZ =  data[i][2]   
         tdata_name = "N%s" % i
-        tdata_add = [randX, randY, randZ]
+        tdata_add = [valX, valY, valZ]
         tdata_sum = sum(tdata_add)
         # Normalize the numbers so that they sum to 1
         tdata_norm = [number / tdata_sum for number in tdata_add]
@@ -274,7 +296,7 @@ def main():
         if not os.path.exists('%s_analysis/tplots1' % inp):
             os.mkdir('%s_analysis/tplots1' % inp)
         print("generating ternary plot 1 %s" % str(i+1))
-        tax = ternary_plot1(tdata, i, randX, randY, randZ)
+        tax = ternary_plot1(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s_analysis/tplots1/tplot_%s.png' % (inp, i), dpi=144)
         tax.close()
@@ -283,22 +305,35 @@ def main():
     # make each ternary plot 2
     ###########################
     if(lyr == "yes"):   
+        if(signalType == "real"): # real signal    
+            print("importing computed data")
+            readPath = "%s_analysis/ternary_norm.txt" % (inp)
+            df = pd.read_csv(readPath, delimiter=',',header=1)
+            data = df.values  # convert dataframe to matrix
+            print(data)
+        
         tdata = {}
-        randX = 0.5
-        randY = 0.5
-        randZ = 0.5  
-        for i in range(face_num):
+        valX = 0.5
+        valY = 0.5
+        valZ = 0.5  
+        for i in range(face_num-1):
             if(i == 0):
-                randX = 0.5
-                randY = 0.5
-                randZ = 0.5
+                valX = 0.5
+                valY = 0.5
+                valZ = 0.5
             elif(i>0):
-                # random signal
-                randX = rnd.random()
-                randY = rnd.random()
-                randZ = rnd.random()
+                if(signalType == "random"): # random signal
+                    valX = rnd.random()
+                    valY = rnd.random()
+                    valZ = rnd.random()
+                if(signalType == "real"): # real signal
+                    XYZ = data[i]
+                    #print(XYZ)
+                    valX = data[i][0]
+                    valY =  data[i][1]
+                    valZ =  data[i][2]
             tdata_name = "N%s" % i
-            tdata_add = [randX, randY, randZ]
+            tdata_add = [valX, valY, valZ]
             tdata_sum = sum(tdata_add)
             # Normalize the numbers so that they sum to 1
             tdata_norm = [number / tdata_sum for number in tdata_add]
@@ -310,7 +345,7 @@ def main():
             if not os.path.exists('%s_analysis/tplots2' % inp):
                 os.mkdir('%s_analysis/tplots2' % inp)
             print("generating ternary plot 2 %s" % str(i+1))
-            tax = ternary_plot2(tdata, i, randX, randY, randZ)
+            tax = ternary_plot2(tdata, i, valX, valY, valZ)
             # save image
             tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
             tax.close()
@@ -424,21 +459,21 @@ def main_batch_tplots1(item):
     # make each ternary plot 1
     ###########################
     tdata = {}
-    randX = 0.5
-    randY = 0.5
-    randZ = 0.5  
+    valX = 0.5
+    valY = 0.5
+    valZ = 0.5  
     for i in range(face_num):
         if(i == 0):
-            randX = 0.5
-            randY = 0.5
-            randZ = 0.5
+            valX = 0.5
+            valY = 0.5
+            valZ = 0.5
         elif(i>0):
             # random signal
-            randX = rnd.random()
-            randY = rnd.random()
-            randZ = rnd.random()
+            valX = rnd.random()
+            valY = rnd.random()
+            valZ = rnd.random()
         tdata_name = "N%s" % i
-        tdata_add = [randX, randY, randZ]
+        tdata_add = [valX, valY, valZ]
         tdata_sum = sum(tdata_add)
         # Normalize the numbers so that they sum to 1
         tdata_norm = [number / tdata_sum for number in tdata_add]
@@ -450,7 +485,7 @@ def main_batch_tplots1(item):
         if not os.path.exists('%s_analysis/tplots1' % inp):
             os.mkdir('%s_analysis/tplots1' % inp)
         print("generating ternary plot 1 %s for %s" % (str(i+1),filename))
-        tax = ternary_plot1(tdata, i, randX, randY, randZ)
+        tax = ternary_plot1(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
         tax.close()
@@ -470,21 +505,21 @@ def main_batch_tplots2(item):
     # make each ternary plot 2
     ###########################
     tdata = {}
-    randX = 0.5
-    randY = 0.5
-    randZ = 0.5  
+    valX = 0.5
+    valY = 0.5
+    valZ = 0.5  
     for i in range(face_num):
         if(i == 0):
-            randX = 0.5
-            randY = 0.5
-            randZ = 0.5
+            valX = 0.5
+            valY = 0.5
+            valZ = 0.5
         elif(i>0):
             # random signal
-            randX = rnd.random()
-            randY = rnd.random()
-            randZ = rnd.random()
+            valX = rnd.random()
+            valY = rnd.random()
+            valZ = rnd.random()
         tdata_name = "N%s" % i
-        tdata_add = [randX, randY, randZ]
+        tdata_add = [valX, valY, valZ]
         tdata_sum = sum(tdata_add)
         # Normalize the numbers so that they sum to 1
         tdata_norm = [number / tdata_sum for number in tdata_add]
@@ -496,7 +531,7 @@ def main_batch_tplots2(item):
         if not os.path.exists('%s_analysis/tplots2' % inp):
             os.mkdir('%s_analysis/tplots2' % inp)
         print("generating ternary plot 2 %s for %s" % (str(i+1),filename))
-        tax = ternary_plot2(tdata, i, randX, randY, randZ)
+        tax = ternary_plot2(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
         tax.close()   
