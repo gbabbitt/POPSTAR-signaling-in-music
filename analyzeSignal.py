@@ -602,7 +602,8 @@ def norm_data():
     print("normalizing data")
     readPath = "%s_analysis/features_raw.txt" % (inp)
     writePath = "%s_analysis/features_norm.txt" % (inp)
-    writePath2 = "%s_analysis/ternary_norm.txt" % (inp)
+    writePath2 = "%s_analysis/ternary.txt" % (inp)
+    writePath3 = "%s_analysis/ternary_norm.txt" % (inp)
     df = pd.read_csv(readPath, delimiter=',',header=0)
     print(df)
     df = df.iloc[:, 1:]
@@ -628,6 +629,15 @@ def norm_data():
             line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
         txt_out.close
+    df_ternary_norm = df_ternary.div(df_ternary.sum(axis=1), axis=0)
+    print(df_ternary_norm)
+    with open(writePath3, 'w') as txt_out:
+        txt_out.write("energy,control,surprise\n")
+        for index, row in df_ternary_norm.iterrows():
+            line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+            txt_out.write(line + '\n')  # Write line to file with newline character
+        txt_out.close
+    
     
 #################################################################################
 ####################  main program      #########################################
