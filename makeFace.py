@@ -191,13 +191,13 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
     fsP = (valX+valY)*0.5*max_fs
     fsI = (valX+valZ)*0.5*max_fs
     # Set labels and title
-    tax.right_corner_label("CONTROL", fontsize=fsX, color='black')
+    tax.right_corner_label("SURPRISE", fontsize=fsX, color='black')
     tax.top_corner_label("ENERGY", fontsize=fsY, color='black')
-    tax.left_corner_label("SURPRISE", fontsize=fsZ, color='black')
-    tax.left_axis_label("emotional impact", fontsize=fsE, color='green') # A
-    tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
+    tax.left_corner_label("CONTROL", fontsize=fsZ, color='black')
+    tax.left_axis_label("physical impact", fontsize=fsE, color='green') # A
+    tax.right_axis_label("emotional impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("intellectual impact", fontsize=fsI, color='blue') # C
-    tax.set_title("Lyrical Fitness Signal", fontsize=18, y=-0.15)
+    tax.set_title("Audio Fitness Signal", fontsize=18, y=-0.15)
 
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
