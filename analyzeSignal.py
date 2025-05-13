@@ -80,7 +80,10 @@ for x in range(len(infile_lines)):
         print("lyrics present is",lyr)
     if(header == "max"):
         maxOpt = value
-        print("use max values",maxOpt)   
+        print("use max values",maxOpt)
+    if(header == "metro"):
+        met = value
+        print("my metronome option is",met)    
 infile.close()
  ###### variable assignments ######
 inp = ""+name+""
@@ -89,6 +92,7 @@ fof = ""+fof+""
 lyr = ""+lyr+""
 maxOpt = ""+maxOpt+""
 fileORfolder = fof
+met = ""+met+""
 
 if(fof=="file"):
     # calculate number of faces for single file
@@ -203,7 +207,7 @@ def lzc_stat(item):
                 break
         else:
             break
-    LZC = len(sub_strings)
+    LZC = np.log(len(sub_strings))
     print("LZC (Lempel-Ziv complexity) = %s for %s" % (LZC,filename))
     txt_out.write("%s,%s\n" % (filename,LZC))
     txt_out.close
@@ -259,8 +263,8 @@ def mli_stat(item):
     # Hurst Exponent (measure memory 0 = negative memry, 0.5 = no memory, 1 = positive memory)
     H, c, data = compute_Hc(signalData, kind='change', simplified=True)
     #print("Hurst Exp = %s" % str(H))
-    mem_level = 2*abs(H-0.5) # rescale 0-1
-    print("MLI (memory level index) = %s for %s" % (mem_level,filename))
+    mem_level = 1-(2*abs(H-0.5)) # rescale 0-1  
+    print("MLI (inverse memory level index) = %s for %s" % (mem_level,filename))
     txt_out.write("%s,%s\n" % (filename,mem_level))
     txt_out.close
     
@@ -340,8 +344,8 @@ def f0_var_stat(item):
     if(sum_diff == 0):
         FFV = 0
     if(sum_diff != 0):
-        FFV = sum_diff/(len(notes))
-    print("FFV (f0 frequency variance) = %s over %s notes for %s" % (FFV,n_notes,filename))
+        FFV = 1/((sum_diff/(len(notes)))+0.000001)
+    print("FFV (f0 frequency control) = %s over %s notes for %s" % (FFV,n_notes,filename))
     txt_out.write("%s,%s,%s\n" % (filename,FFV,n_notes))
     txt_out.close
     
@@ -362,7 +366,7 @@ def fn_levels_stat(item):
     frequencies = librosa.fft_frequencies(sr=sr)
     harmonic_energy = librosa.f0_harmonics(S, f0=f0, harmonics=harmonics, freqs=frequencies) # 2D matrix
     #print(harmonic_energy)
-    HEN = np.sum(harmonic_energy)
+    HEN = np.log(np.sum(harmonic_energy))
     print("HEN (harmonic energy) = %s over for %s" % (HEN,filename))
     txt_out.write("%s,%s\n" % (filename,HEN))
     txt_out.close
@@ -384,13 +388,13 @@ def beat_var(item):
     # Analyze beat spacing
     beat_intervals = np.diff(beat_times)
     mean_beat_interval = np.mean(beat_intervals)
-    EVI = (beat_intervals - mean_beat_interval)**2
+    EVI = np.log(1/(((beat_intervals - mean_beat_interval)**2)+0.000001))
     EVI = np.sum(EVI)
-    BIV = np.var(beat_intervals)
+    BIV = np.log(1/(np.var(beat_intervals)+0.000001))
     # Print the estimated tempo and beat intervals
     #print(f"Estimated tempo: {tempo} BPM")
     #print(f"Beat intervals: {beat_intervals}")
-    print("BIV (beat interval variance) = %s for %s" % (BIV,filename))
+    print("BIV (beat interval control) = %s for %s" % (BIV,filename))
     print("EVI (beat interval evenness) = %s for %s" % (EVI,filename))
     txt_out.write("%s,%s\n" % (filename,BIV))
     txt_out.close
@@ -416,7 +420,7 @@ def ampvar_stat(item):
     #minVAL = np.min(signalData)
     #maxVAL = np.max(signalData)
     #norm_signalData = (signalData - minVAL) / (maxVAL-minVAL)
-    AMP = np.var(signalData)
+    AMP = np.log(np.var(signalData))
     print("AMP (amplitude variance) = %s for %s" % (AMP,filename))
     txt_out.write("%s,%s\n" % (filename,AMP))
     txt_out.close
@@ -615,12 +619,22 @@ def norm_data():
             line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
         txt_out.close
-    df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
-    #print(df_energy)
-    df_control = df_norm[['EVIvalues', 'FFVvalues', 'HENvalues']].mean(axis=1)
-    #print(df_control)
-    df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
-    #print(df_surprise)
+    if(maxOpt == "no" and met == "yes"):
+        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].mean(axis=1)
+        df_control = df_norm[['EVIvalues', 'FFVvalues', 'BIVvalues', 'HENvalues']].mean(axis=1)
+        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
+    if(maxOpt == "yes" and met == "yes"):
+        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].max(axis=1)
+        df_control = df_norm[['EVIvalues', 'FFVvalues', 'BIVvalues', 'HENvalues']].max(axis=1)
+        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
+    if(maxOpt == "no" and met == "no"):
+        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].mean(axis=1)
+        df_control = df_norm[['FFVvalues', 'HENvalues']].mean(axis=1)
+        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
+    if(maxOpt == "yes" and met == "no"):
+        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].max(axis=1)
+        df_control = df_norm[['FFVvalues', 'HENvalues']].max(axis=1)
+        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
     df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
     print(df_ternary)
     with open(writePath2, 'w') as txt_out:
