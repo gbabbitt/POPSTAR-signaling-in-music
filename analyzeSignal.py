@@ -138,13 +138,13 @@ def create_file_lists_batch():
             file_path = os.path.join(folder_path2, "%s" % (filename))
             #print(file_path)
             if os.path.isfile(file_path) and file_path[-4:] == ".wav":
-                print("generating sound file list for %s" % (filename))
+                print("generating sound file list for %s%s" % (folder_path2,filename))
                 sound_file_paths.append(file_path)
         for filename in os.listdir(folder_path2):
             file_path = os.path.join(folder_path2, "%s" % (filename))
             #print(file_path)
             if os.path.isfile(file_path) and file_path[-4:] == ".dat":
-                print("generating data file list for %s" % (filename))
+                print("generating data file list for %s%s" % (folder_path2,filename))
                 data_file_paths.append(file_path)
         #print(sound_file_paths)
         #print(data_file_paths)

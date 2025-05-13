@@ -288,7 +288,7 @@ def time_sample_batch():
             # song interval 
             finterval = song[start: end] 
             # save file 
-            finterval.export("%s_analysis/intervals/%s/%s_%s" % (inp, filename, j, inp), format="wav") 
+            finterval.export("%s_analysis/intervals/%s/%s_%s.wav" % (inp, filename, j, inp), format="wav") 
             print("interval %s for %s file is created and saved" % (j, filename))   
             
 def create_sonogram_list():   
