@@ -366,7 +366,10 @@ def fn_levels_stat(item):
     frequencies = librosa.fft_frequencies(sr=sr)
     harmonic_energy = librosa.f0_harmonics(S, f0=f0, harmonics=harmonics, freqs=frequencies) # 2D matrix
     #print(harmonic_energy)
-    HEN = np.log(np.sum(harmonic_energy))
+    if(np.sum(harmonic_energy) <= 1):
+        HEN = 0
+    if(np.sum(harmonic_energy) > 1):
+        HEN = np.log(np.sum(harmonic_energy))
     print("HEN (harmonic energy) = %s over for %s" % (HEN,filename))
     txt_out.write("%s,%s\n" % (filename,HEN))
     txt_out.close

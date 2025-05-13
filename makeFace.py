@@ -110,7 +110,7 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x, y), width=nose_width, height=nose_height, angle=features[5] * 45, facecolor='lightgray', edgecolor='black'))
 
     # Mouth
-    mouth_width = 0.2 + features[0] * 0.2
+    mouth_width = 0.2 + features[0] * 0.3
     mouth_height = 0.05 + features[9] * 0.2
     mouth = Ellipse((x, y - 0.2), width=mouth_width, height=mouth_height, angle=0,facecolor='black', edgecolor='black')
     ax.add_patch(mouth)
@@ -136,7 +136,7 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
         tax.scatter([current_value], marker='o', color='orange', label='current value')
     #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
-    max_fs = 18
+    max_fs = 32
     # corner font size
     fsX = valX*max_fs
     fsY = valY*max_fs
@@ -181,7 +181,7 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
         tax.scatter([current_value], marker='o', color='orange', label='current value')
     #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
-    max_fs = 18
+    max_fs = 32
     # corner font size
     fsX = valX*max_fs
     fsY = valY*max_fs
