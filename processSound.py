@@ -279,11 +279,11 @@ def time_sample_batch():
         # start and end time 
         for j in range(ints): 
             if(met == "no"):
-                start = i*125  # note 250 = 0.125 second fixed window
-                end = i*125+tm*1000
+                start = j*125  # note 250 = 0.125 second fixed window
+                end = j*125+tm*1000
             if(met == "yes"):
-                start = i*beat_int*1000  # attempt to match beat intervals
-                end = i*beat_int*1000+tm*1000
+                start = j*beat_int*1000  # attempt to match beat intervals
+                end = j*beat_int*1000+tm*1000
             print("start: %s end: %s" % (start,end))
             # song interval 
             finterval = song[start: end] 
