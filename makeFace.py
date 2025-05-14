@@ -407,29 +407,39 @@ def main_batch_faces(item):
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
-    filename = "%s.wav" % (folder_path_array[2])
-    print(filename)
+    foldername = "%s.wav" % (folder_path_array[2])
+    print(foldername)
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/%s" % (inp,filename)) # your directory path
+    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
     face_num = int(len(lst)/4)  # note folder has 4 types of files
     print("number of Chernoff faces is %s" % face_num)  
-    # Generate random data for faces and tplots
-    np.random.seed()
-    data = np.random.rand(face_num, 10)
-    print(data)
     
+    # Generate random data for faces and tplots
+    if(signalType == "random"):
+        print("generating random data")
+        np.random.seed()
+        data = np.random.rand(face_num, 10)
+        print(data)
+       
+    # import and shape external data
+    if(signalType == "real"):
+        print("importing computed data")
+        readPath = "%s_analysis/features_norm_%s.txt" % (inp,foldername)
+        df = pd.read_csv(readPath, delimiter=',',header=1)
+        data = df.values  # convert dataframe to matrix
+        print(data)
     
     # import and shape external data
 
     ##########################    
     # Plot each Chernoff face
     ##########################
-    for i in range(face_num):
+    for i in range(face_num-1):
         if(i>face_num-1):
             continue
         
         # Create a new figure for each subplot
-        print("generating Chernoff face %s for %s" % (str(i+1),filename))
+        print("generating Chernoff face %s for %s" % (str(i+1),foldername))
         fig_single, ax_single = plt.subplots()
         # Copy the plot from the original subplot to the new figure
         chernoff_face(ax_single, 0, 0, data[i])
@@ -449,29 +459,42 @@ def main_batch_tplots1(item):
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
-    filename = "%s.wav" % (folder_path_array[2])
-    print(filename)
+    foldername = "%s.wav" % (folder_path_array[2])
+    print(foldername)
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/%s" % (inp,filename)) # your directory path
+    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
     face_num = int(len(lst)/4)  # note folder has 4 types of files
     print("number of tplots is %s" % face_num)  
     ###########################
     # make each ternary plot 1
     ###########################
+    if(signalType == "real"): # real signal    
+        print("importing computed data")
+        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
+        df = pd.read_csv(readPath, delimiter=',',header=1)
+        data = df.values  # convert dataframe to matrix
+        print(data)
+    
     tdata = {}
     valX = 0.5
     valY = 0.5
     valZ = 0.5  
-    for i in range(face_num):
+    for i in range(face_num-1):
         if(i == 0):
             valX = 0.5
             valY = 0.5
             valZ = 0.5
         elif(i>0):
-            # random signal
-            valX = rnd.random()
-            valY = rnd.random()
-            valZ = rnd.random()
+            if(signalType == "random"): # random signal
+                valX = rnd.random()
+                valY = rnd.random()
+                valZ = rnd.random()
+            if(signalType == "real"): # real signal
+                XYZ = data[i]
+                #print(XYZ)
+                valX = data[i][0]
+                valY =  data[i][1]
+                valZ =  data[i][2]
         tdata_name = "N%s" % i
         tdata_add = [valX, valY, valZ]
         tdata_sum = sum(tdata_add)
@@ -484,7 +507,7 @@ def main_batch_tplots1(item):
             continue
         if not os.path.exists('%s_analysis/tplots1' % inp):
             os.mkdir('%s_analysis/tplots1' % inp)
-        print("generating ternary plot 1 %s for %s" % (str(i+1),filename))
+        print("generating ternary plot 1 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot1(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
@@ -495,29 +518,42 @@ def main_batch_tplots2(item):
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
-    filename = "%s.wav" % (folder_path_array[2])
-    print(filename)
+    foldername = "%s.wav" % (folder_path_array[2])
+    print(foldername)
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/%s" % (inp,filename)) # your directory path
+    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
     face_num = int(len(lst)/4)  # note folder has 4 types of files
     print("number of tplots is %s" % face_num)  
     ###########################
     # make each ternary plot 2
     ###########################
+    if(signalType == "real"): # real signal    
+        print("importing computed data")
+        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
+        df = pd.read_csv(readPath, delimiter=',',header=1)
+        data = df.values  # convert dataframe to matrix
+        print(data)
+        
     tdata = {}
     valX = 0.5
     valY = 0.5
     valZ = 0.5  
-    for i in range(face_num):
+    for i in range(face_num-1):
         if(i == 0):
             valX = 0.5
             valY = 0.5
             valZ = 0.5
         elif(i>0):
-            # random signal
-            valX = rnd.random()
-            valY = rnd.random()
-            valZ = rnd.random()
+            if(signalType == "random"): # random signal
+                valX = rnd.random()
+                valY = rnd.random()
+                valZ = rnd.random()
+            if(signalType == "real"): # real signal
+                XYZ = data[i]
+                #print(XYZ)
+                valX = data[i][0]
+                valY =  data[i][1]
+                valZ =  data[i][2]
         tdata_name = "N%s" % i
         tdata_add = [valX, valY, valZ]
         tdata_sum = sum(tdata_add)
@@ -530,7 +566,7 @@ def main_batch_tplots2(item):
             continue
         if not os.path.exists('%s_analysis/tplots2' % inp):
             os.mkdir('%s_analysis/tplots2' % inp)
-        print("generating ternary plot 2 %s for %s" % (str(i+1),filename))
+        print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot2(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
