@@ -59,6 +59,10 @@ class Ui_Dialog(object):
         self.pushButton_7.setGeometry(QtCore.QRect(30, 570, 171, 31))
         self.pushButton_7.setObjectName("pushButton_7")
         self.pushButton_7.clicked.connect(self.playTraj)
+        self.pushButton_8 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_8.setGeometry(QtCore.QRect(390, 550, 80, 31))
+        self.pushButton_8.setObjectName("pushButton_8")
+        self.pushButton_8.clicked.connect(self.readDoc)
         self.label_2 = QtWidgets.QLabel(Dialog)
         self.label_2.setGeometry(QtCore.QRect(30, 60, 421, 121))
         self.label_2.setText("")
@@ -130,6 +134,7 @@ class Ui_Dialog(object):
         self.pushButton_4.setText(_translate("Dialog", "1. process sounds"))
         self.pushButton_6.setText(_translate("Dialog", "6. play faces"))
         self.pushButton_7.setText(_translate("Dialog", "5. play trajectory"))
+        self.pushButton_8.setText(_translate("Dialog", "see DOC"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - BabbittLab@RIT</span></p></body></html>"))
         self.pushButton_5.setText(_translate("Dialog", "4. make movies"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
@@ -138,7 +143,12 @@ class Ui_Dialog(object):
     def closeIt(self):
         print("POPSTAR program closed")
         sys.exit(app.exec_())
-         
+    
+    def readDoc(self):
+        print("POPSTAR instructions")
+        cmd = "xdg-open POPSTAR-instructions.pdf" 
+        os.system(cmd)
+        
     def makeFace(self):
         print("making Chernoff faces")
         cmd = "python3 makeFace.py"
