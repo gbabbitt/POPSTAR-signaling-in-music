@@ -309,65 +309,35 @@ def f0_var_stat(item):
     notes = []
     sum_diff = 0
     ##################
+    # equal tempered scale - octave range (octave 0 - 8)
+    readPath = "NoteFreqHz.csv"
+    note_freqs = pd.read_csv(readPath, delimiter=',',header=1)
+    print(note_freqs)
     for freq in f0:
         #print(freq)
         if(freq == "nan"):
             continue
-        # equal tempered scale - middle octave range (octave 4)
-        if(freq < 269.405 and freq >= 253.855): 
-            note = "C"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 261.63)
-        if(freq < 285.42 and freq >= 269.405):
-            note = "C#"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 277.18)
-        if(freq < 302.395 and freq >= 285.42):
-            note = "D"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 293.66)
-        if(freq < 320.38 and freq >= 302.395):
-            note = "D#"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 311.13)    
-        if(freq < 339.43 and freq >= 320.38):
-            note = "E"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 329.63)    
-        if(freq < 359.61 and freq >= 339.43):
-            note = "F"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 349.23)    
-        if(freq < 380.995 and freq >= 359.61):
-            note = "F#"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 369.99)
-        if(freq < 403.65 and freq >= 380.995):
-            note = "G"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 392)
-        if(freq < 427.65 and freq >= 403.65):
-            note = "G#"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 415.3)
-        if(freq < 453.08 and freq >= 427.65):
-            note = "A"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 440)
-        if(freq < 480.02 and freq >= 453.08):
-            note = "A#"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 466.16) 
-        if(freq < 507.74 and freq >= 480.02):
-            note = "B"
-            notes.append(note)
-            sum_diff = sum_diff + abs(freq - 493.88) 
+        for i in range(len(note_freqs)-1):
+            note = note_freqs.iloc[i,0]
+            note_freq_lower = note_freqs.iloc[i-1,1]
+            note_freq = note_freqs.iloc[i,1]
+            note_freq_upper = note_freqs.iloc[i+1,1]
+            octave = note_freqs.iloc[i,2]
+            #print("%s %s %s" %(note, note_freq, octave))
+            note_freq_upper_bound = note_freq + 0.5*(note_freq_upper - note_freq)
+            note_freq_lower_bound = note_freq - 0.5*(note_freq - note_freq_lower)
+            #print("bounds %s to %s" %(note_freq_lower_bound,note_freq_upper_bound))
+            if(freq < note_freq_upper_bound and freq >= note_freq_lower_bound): 
+                notes.append(note)
+                sum_diff = sum_diff + abs(freq - note_freq)
+                #print("detected %s in oct%s" % (note, octave))
+        
     ##############
     #print("notes detected")
     #print(notes)
     n_notes = len(notes)
     if(sum_diff == 0):
-        FFV = 0
+        FFV = 0.000001
     if(sum_diff != 0):
         FFV = 1/((sum_diff/(len(notes)))+0.000001)
     print("FFV (f0 frequency control) = %s over %s notes for %s" % (FFV,n_notes,filename))
@@ -850,9 +820,11 @@ def norm_data_batch():
         writePath2 = "%s_analysis/ternary_%s.txt" % (inp,foldername)
         writePath3 = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
         df = pd.read_csv(readPath, delimiter=',',header=0)
+        df = df.fillna(0.000001) # replace nan and inf with near zero values
         print(df)
         df = df.iloc[:, 1:]
         df_norm = df.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+        df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
         with open(writePath, 'w') as txt_out:
             txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
@@ -910,21 +882,12 @@ def main():
     # energy metrics
     ####################
     print("calculating amplitude variance")
-    #writePath = "%s_analysis/AMPvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(ampvar_stat, sound_file_paths)
     print("calculating size/dimension")
-    #writePath = "%s_analysis/AC1values.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(dimension_stat, sound_file_paths)
     print("calculating local tempo")
-    #writePath = "%s_analysis/TEMPOvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(tempo_stat, sound_file_paths)
     
@@ -932,24 +895,12 @@ def main():
     # control metrics
     ####################
     print("calculating f0 variance")
-    #writePath = "%s_analysis/FFVvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(f0_var_stat, sound_file_paths)
     print("calculating fn harmonic energy")
-    #writePath = "%s_analysis/HENvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(fn_levels_stat, sound_file_paths)
     print("calculating beat interval variance")
-    #writePath = "%s_analysis/BIVvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
-    #writePath2 = "%s_analysis/EVIvalues.txt" % (inp)
-    #txt_out2 = open(writePath2, 'w')
-    #txt_out2.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(beat_var, sound_file_paths)
             
@@ -957,22 +908,13 @@ def main():
     # surprise metrics
     ####################
     print("calculating Lempel-Ziv complexity")
-    #writePath = "%s_analysis/LZCvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(lzc_stat, sound_file_paths)
     print("calculating MLI statistic")
-    #writePath = "%s_analysis/MLIvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(mli_stat, sound_file_paths)
     print("calculating NVI statistic (zero order)")
     print("(Sawant et al. 2021 in MEE-BES)")
-    #writePath = "%s_analysis/NVIvalues.txt" % (inp)
-    #txt_out = open(writePath, 'w')
-    #txt_out.close
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(nvi_stat, data_file_paths)
     
