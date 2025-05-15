@@ -498,8 +498,9 @@ def tempo_stat(item):
     dur = song.duration_seconds
     # Estimate the tempo (BPM)
     y, sr = librosa.load(item)
-    tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
-    tempo = tempo[0]
+    tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
+    if(isinstance(tempo, np.ndarray)==True):    
+        tempo = tempo[0]
     print("TEMPO (tempo - bpm) = %s for %s" % (tempo,filename))
     txt_out.write("%s,%s\n" % (filename,tempo))
     txt_out.close
