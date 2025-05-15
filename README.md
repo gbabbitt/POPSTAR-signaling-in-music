@@ -12,6 +12,7 @@ INPUT: myFile.wav or myFile.mp3 or myDir (...where myDir is a directory with mul
 
 DEPENDENCIES: PyQt5, PIL, python-ternary, hurst, librosa, soundfile, pydub, moviepy (use pip install moviepy==1.0.3 to avoid recent bug), and the usual suspects (numpy, scipy, pandas, matplotlib, statsmodels, multiprocessing)
 
+https://github.com/gbabbitt/POPSTAR-signaling-in-music/blob/main/POPSTARgui.png
 
 
 
