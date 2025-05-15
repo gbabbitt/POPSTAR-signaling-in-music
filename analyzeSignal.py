@@ -312,7 +312,7 @@ def f0_var_stat(item):
     # equal tempered scale - octave range (octave 0 - 8)
     readPath = "NoteFreqHz.csv"
     note_freqs = pd.read_csv(readPath, delimiter=',',header=1)
-    print(note_freqs)
+    #print(note_freqs)
     for freq in f0:
         #print(freq)
         if(freq == "nan"):
