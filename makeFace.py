@@ -117,7 +117,7 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     
     #Ears
     ear_width = 0.05 + features[4] * 0.2
-    ear_height = 0.05 + features[2] * 0.3
+    ear_height = 0.05 + features[3] * 0.3
     ax.add_patch(Ellipse((x - 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
     ax.add_patch(Ellipse((x + 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
 

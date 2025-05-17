@@ -398,14 +398,14 @@ def beat_var(item):
     # Analyze beat spacing
     beat_intervals = np.diff(beat_times)
     mean_beat_interval = np.mean(beat_intervals)
-    EVI = np.log(1/(((beat_intervals - mean_beat_interval)**2)+0.000001))
-    EVI = np.sum(EVI)
-    BIV = np.log(1/(np.var(beat_intervals)+0.000001))
+    EVI = ((beat_intervals - mean_beat_interval)**2)/mean_beat_interval
+    EVI = 1-np.sum(EVI)
+    BIV = 1/((np.var(beat_intervals))+0.000001)
     # Print the estimated tempo and beat intervals
     #print(f"Estimated tempo: {tempo} BPM")
     #print(f"Beat intervals: {beat_intervals}")
-    print("BIV (beat interval control) = %s for %s" % (BIV,filename))
-    print("EVI (beat interval evenness) = %s for %s" % (EVI,filename))
+    print("BIV (1/beat interval deviation) = %s for %s" % (BIV,filename))
+    print("EVI (beat interval sums of squares) = %s for %s" % (EVI,filename))
     txt_out.write("%s,%s\n" % (filename,BIV))
     txt_out.close
     txt_out2.write("%s,%s\n" % (filename,EVI))
@@ -672,11 +672,11 @@ def norm_data():
         txt_out.close
     if(maxOpt == "no"):
         df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
-        df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].mean(axis=1)
+        df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
         df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
     if(maxOpt == "yes"):
         df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
-        df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].max(axis=1)
+        df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
         df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
     df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
     print(df_ternary)
@@ -875,11 +875,11 @@ def norm_data_batch():
             txt_out.close
         if(maxOpt == "no"):
             df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
-            df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].mean(axis=1)
+            df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
             df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
         if(maxOpt == "yes"):
             df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
-            df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].max(axis=1)
+            df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
             df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
         df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
         print(df_ternary)
