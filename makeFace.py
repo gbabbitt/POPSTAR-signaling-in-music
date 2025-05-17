@@ -98,7 +98,7 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=pupil_width, height=pupil_height, facecolor='black'))
 
     # Eyebrows
-    eyebrow_angle = -30 + features[1] * 60  # Angle between -30 and 30 degrees
+    eyebrow_angle = -30 + features[9] * 60  # Angle between -30 and 30 degrees
     ax.plot([x - 0.3, x - 0.1], [y + 0.3 + 0.05 * np.sin(np.radians(eyebrow_angle)), y + 0.3 - 0.05 * np.sin(np.radians(eyebrow_angle))], color='black', linewidth=2)
     ax.plot([x + 0.1, x + 0.3], [y + 0.3 - 0.05 * np.sin(np.radians(eyebrow_angle)), y + 0.3 + 0.05 * np.sin(np.radians(eyebrow_angle))], color='black', linewidth=2)
 
@@ -111,7 +111,7 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
 
     # Mouth
     mouth_width = 0.2 + features[0] * 0.3
-    mouth_height = 0.05 + features[9] * 0.2
+    mouth_height = 0.05 + features[1] * 0.2
     mouth = Ellipse((x, y - 0.2), width=mouth_width, height=mouth_height, angle=0,facecolor='black', edgecolor='black')
     ax.add_patch(mouth)
     

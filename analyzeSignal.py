@@ -41,6 +41,7 @@ from scipy.stats import f_oneway
 from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.decomposition import TruncatedSVD
 from sklearn import metrics
+from sklearn.preprocessing import MinMaxScaler
 from hurst import compute_Hc, random_walk
 import re
 # for ggplot
@@ -434,8 +435,9 @@ def ampvar_stat(item):
     #minVAL = np.min(signalData)
     #maxVAL = np.max(signalData)
     #norm_signalData = (signalData - minVAL) / (maxVAL-minVAL)
-    AMP = np.log(np.var(signalData))
-    print("AMP (amplitude variance) = %s for %s" % (AMP,filename))
+    #AMP = np.log(np.var(signalData)) # amplitude variance
+    AMP = np.log(np.sum(abs(signalData))) # amplitude volume
+    print("AMP (amplitude volume) = %s for %s" % (AMP,filename))
     txt_out.write("%s,%s\n" % (filename,AMP))
     txt_out.close
     
@@ -634,9 +636,33 @@ def norm_data():
     writePath2 = "%s_analysis/ternary.txt" % (inp)
     writePath3 = "%s_analysis/ternary_norm.txt" % (inp)
     df = pd.read_csv(readPath, delimiter=',',header=0)
+    #print(df)
+    df = df.iloc[:, 1:] # drop newlines
     print(df)
-    df = df.iloc[:, 1:]
-    df_norm = df.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+    #df = df.drop(df.index[-1]) # drop last line due to lack of signal
+    #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
+    df_norm = df.copy()
+    column = 'AC1values'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'AMPvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'BIVvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'EVIvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'FFVvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'HENvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'LZCvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'MLIvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'NVIvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    column = 'TEMPOvalues'
+    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+    df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
     print(df_norm)
     with open(writePath, 'w') as txt_out:
         txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
@@ -644,21 +670,13 @@ def norm_data():
             line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
         txt_out.close
-    if(maxOpt == "no" and met == "yes"):
-        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].mean(axis=1)
-        df_control = df_norm[['EVIvalues', 'FFVvalues', 'BIVvalues', 'HENvalues']].mean(axis=1)
+    if(maxOpt == "no"):
+        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
+        df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].mean(axis=1)
         df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
-    if(maxOpt == "yes" and met == "yes"):
-        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].max(axis=1)
-        df_control = df_norm[['EVIvalues', 'FFVvalues', 'BIVvalues', 'HENvalues']].max(axis=1)
-        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
-    if(maxOpt == "no" and met == "no"):
-        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].mean(axis=1)
-        df_control = df_norm[['FFVvalues', 'HENvalues']].mean(axis=1)
-        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
-    if(maxOpt == "yes" and met == "no"):
-        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].max(axis=1)
-        df_control = df_norm[['FFVvalues', 'HENvalues']].max(axis=1)
+    if(maxOpt == "yes"):
+        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
+        df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].max(axis=1)
         df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
     df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
     print(df_ternary)
@@ -824,7 +842,29 @@ def norm_data_batch():
         df = df.fillna(0.000001) # replace nan and inf with near zero values
         print(df)
         df = df.iloc[:, 1:]
-        df_norm = df.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+        #df = df.drop(df.index[-1]) # drop last line due to lack of signal
+        #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
+        df_norm = df.copy()
+        column = 'AC1values'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'AMPvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'BIVvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'EVIvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'FFVvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'HENvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'LZCvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'MLIvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'NVIvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'TEMPOvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
         with open(writePath, 'w') as txt_out:
@@ -833,21 +873,13 @@ def norm_data_batch():
                 line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
                 txt_out.write(line + '\n')  # Write line to file with newline character
             txt_out.close
-        if(maxOpt == "no" and met == "yes"):
-            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].mean(axis=1)
-            df_control = df_norm[['EVIvalues', 'FFVvalues', 'BIVvalues', 'HENvalues']].mean(axis=1)
+        if(maxOpt == "no"):
+            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
+            df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].mean(axis=1)
             df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
-        if(maxOpt == "yes" and met == "yes"):
-            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].max(axis=1)
-            df_control = df_norm[['EVIvalues', 'FFVvalues', 'BIVvalues', 'HENvalues']].max(axis=1)
-            df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
-        if(maxOpt == "no" and met == "no"):
-            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].mean(axis=1)
-            df_control = df_norm[['FFVvalues', 'HENvalues']].mean(axis=1)
-            df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
-        if(maxOpt == "yes" and met == "no"):
-            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues', 'HENvalues']].max(axis=1)
-            df_control = df_norm[['FFVvalues', 'HENvalues']].max(axis=1)
+        if(maxOpt == "yes"):
+            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
+            df_control = df_norm[['FFVvalues', 'BIVvalues', 'HENvalues']].max(axis=1)
             df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
         df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
         print(df_ternary)
