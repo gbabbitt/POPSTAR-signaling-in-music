@@ -103,9 +103,10 @@ def renderFaceMovie():
         vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
     if(met == "yes"):
         vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
-
-    for i in range(len(valid_images)):
-        img = "face_%s.png" % i
+    adj = int(0.5*tm)
+    for i in range(len(valid_images)-adj):
+        adjCNT = str(i+adj)
+        img = "face_%s.png" % adjCNT
         loaded_img = cv2.imread(os.path.join(folder, img))
         for _ in range(each_image_duration):
             vid_writer.write(loaded_img)
@@ -154,10 +155,10 @@ def renderFaceMovie_batch():
             vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
         if(met == "yes"):
             vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
-
-        for i in range(len(valid_images)):
-            itr = i+1
-            img = "face_%s.png" % itr
+        adj = int(0.5*tm)
+        for i in range(len(valid_images)-adj):
+            adjCNT = str(i+adj+1)
+            img = "face_%s.png" % adjCNT
             loaded_img = cv2.imread(os.path.join(folder, img))
             for _ in range(each_image_duration):
                 vid_writer.write(loaded_img)
@@ -240,9 +241,10 @@ def renderTplotMovie():
         vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
     if(met == "yes"):
         vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
-
-    for i in range(len(valid_images)):
-        img = "tplot_%s.png" % i
+    adj = int(0.5*tm) 
+    for i in range(len(valid_images)-adj):
+        adjCNT = str(i+adj)
+        img = "tplot_%s.png" % adjCNT
         loaded_img = cv2.imread(os.path.join(folder, img))
         for _ in range(each_image_duration):
             vid_writer.write(loaded_img)
@@ -264,9 +266,10 @@ def renderTplotMovie():
             vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
         if(met == "yes"):
             vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
-
-        for i in range(len(valid_images)):
-            img = "tplot_%s.png" % i
+        adj = int(0.5*tm)
+        for i in range(len(valid_images)-adj):
+            adjCNT = str(i+adj)
+            img = "tplot_%s.png" % adjCNT
             loaded_img = cv2.imread(os.path.join(folder, img))
             for _ in range(each_image_duration):
                 vid_writer.write(loaded_img)
@@ -315,10 +318,10 @@ def renderTplotMovie_batch():
             vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
         if(met == "yes"):
             vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
-
-        for i in range(len(valid_images)):
-            itr = i+1
-            img = "tplot_%s.png" % itr
+        adj = int(0.5*tm)
+        for i in range(len(valid_images)- adj):
+            adjCNT = str(i+adj+1)
+            img = "tplot_%s.png" % adjCNT
             loaded_img = cv2.imread(os.path.join(folder, img))
             for _ in range(each_image_duration):
                 vid_writer.write(loaded_img)
@@ -368,10 +371,10 @@ def renderTplotMovie_batch():
                 vid_writer = cv2.VideoWriter(video_filename, codec, 8.0, (w, h))  # convert to constant rate of 0.125 sec
             if(met == "yes"):
                 vid_writer = cv2.VideoWriter(video_filename, codec, frameSec, (w, h))  # convert to rate of  beat interval
-
-            for i in range(len(valid_images)):
-                itr = i+1
-                img = "tplot_%s.png" % itr
+            adj = int(0.5*tm)
+            for i in range(len(valid_images)-adj):
+                adjCNT = str(i+adj+1)
+                img = "tplot_%s.png" % adjCNT
                 loaded_img = cv2.imread(os.path.join(folder, img))
                 for _ in range(each_image_duration):
                     vid_writer.write(loaded_img)
