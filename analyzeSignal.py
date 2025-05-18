@@ -55,6 +55,7 @@ import multiprocessing
 ################################################################################
 # find number of cores
 num_cores = multiprocessing.cpu_count()
+#num_cores = 1 # activate this line for identifying/removing files that stop script with errors
 
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
@@ -187,7 +188,10 @@ def nvi_stat(item):
             #print(NVIsum)
     # normalize NVI to number of notes (i.e. columns)
     NVI = NVIsum/(n_cols*(n_cols-1))
-    print("NVI (note variability index) = %s for %s" % (NVI,filename))
+    if(fileORfolder == "file"):
+        print("NVI (note variability index) = %s for %s" % (NVI,filename))
+    if(fileORfolder == "folder"):
+        print("NVI (note variability index) = %s for %s in %s" % (NVI,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,NVI))
     txt_out.close
 
@@ -219,7 +223,10 @@ def lzc_stat(item):
         else:
             break
     LZC = np.log(len(sub_strings))
-    print("LZC (Lempel-Ziv complexity) = %s for %s" % (LZC,filename))
+    if(fileORfolder == "file"):
+        print("LZC (Lempel-Ziv complexity) = %s for %s" % (LZC,filename))
+    if(fileORfolder == "folder"):
+        print("LZC (Lempel-Ziv complexity) = %s for %s in %s" % (LZC,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,LZC))
     txt_out.close
         
@@ -257,7 +264,10 @@ def adf_stat(item):
     #print(ADFtest)
     ADFtestStat = ADFtest[0]
     ADFpValue = ADFtest[1]
-    print("ADF (augmented Dickey Fuller test) = %s for %s" % (ADFtestStat,filename))
+    if(fileORfolder == "file"):
+        print("ADF (augmented Dickey Fuller test) = %s for %s" % (ADFtestStat,filename))
+    if(fileORfolder == "folder"):
+        print("ADF (augmented Dickey Fuller test) = %s for %s in %s" % (ADFtestStat,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,ADFtestStat))
     txt_out.close
     
@@ -285,7 +295,10 @@ def mli_stat(item):
     H, c, data = compute_Hc(signalData, kind='change', simplified=True)
     #print("Hurst Exp = %s" % str(H))
     mem_level = 1-(2*abs(H-0.5)) # rescale 0-1  
-    print("MLI (inverse memory level index) = %s for %s" % (mem_level,filename))
+    if(fileORfolder == "file"):
+        print("MLI (inverse memory level index) = %s for %s" % (mem_level,filename))
+    if(fileORfolder == "folder"):
+        print("MLI (inverse memory level index) = %s for %s in %s" % (mem_level,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,mem_level))
     txt_out.close
     
@@ -341,7 +354,10 @@ def f0_var_stat(item):
         FFV = 0.000001
     if(sum_diff != 0):
         FFV = 1/((sum_diff/(len(notes)))+0.000001)
-    print("FFV (f0 frequency control) = %s over %s notes for %s" % (FFV,n_notes,filename))
+    if(fileORfolder == "file"):
+        print("FFV (f0 frequency control) = %s over %s notes for %s" % (FFV,n_notes,filename))
+    if(fileORfolder == "folder"):
+        print("FFV (f0 frequency control) = %s over %s notes for %s in %s" % (FFV,n_notes,filename,foldername))
     txt_out.write("%s,%s,%s\n" % (filename,FFV,n_notes))
     txt_out.close
     
@@ -371,7 +387,10 @@ def fn_levels_stat(item):
         HEN = 0
     if(np.sum(harmonic_energy) > 1):
         HEN = np.log(np.sum(harmonic_energy))
-    print("HEN (harmonic energy) = %s over for %s" % (HEN,filename))
+    if(fileORfolder == "file"):
+        print("HEN (harmonic energy) = %s over for %s" % (HEN,filename))
+    if(fileORfolder == "folder"):
+        print("HEN (harmonic energy) = %s over for %s in %s" % (HEN,filename, foldername))
     txt_out.write("%s,%s\n" % (filename,HEN))
     txt_out.close
 
@@ -404,8 +423,12 @@ def beat_var(item):
     # Print the estimated tempo and beat intervals
     #print(f"Estimated tempo: {tempo} BPM")
     #print(f"Beat intervals: {beat_intervals}")
-    print("BIV (1/beat interval deviation) = %s for %s" % (BIV,filename))
-    print("EVI (beat interval sums of squares) = %s for %s" % (EVI,filename))
+    if(fileORfolder == "file"):
+        print("BIV (1/beat interval deviation) = %s for %s" % (BIV,filename))
+        print("EVI (beat interval sums of squares) = %s for %s" % (EVI,filename))
+    if(fileORfolder == "folder"):
+        print("BIV (1/beat interval deviation) = %s for %s in %s" % (BIV,filename,foldername))
+        print("EVI (beat interval sums of squares) = %s for %s in %s" % (EVI,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,BIV))
     txt_out.close
     txt_out2.write("%s,%s\n" % (filename,EVI))
@@ -437,7 +460,10 @@ def ampvar_stat(item):
     #norm_signalData = (signalData - minVAL) / (maxVAL-minVAL)
     #AMP = np.log(np.var(signalData)) # amplitude variance
     AMP = np.log(np.sum(abs(signalData))) # amplitude volume
-    print("AMP (amplitude volume) = %s for %s" % (AMP,filename))
+    if(fileORfolder == "file"):
+        print("AMP (amplitude volume) = %s for %s" % (AMP,filename))
+    if(fileORfolder == "folder"):
+        print("AMP (amplitude volume) = %s for %s in %s" % (AMP,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,AMP))
     txt_out.close
     
@@ -480,7 +506,10 @@ def dimension_stat(item):
     #print(corr)
     #print(lags)
     MAC = np.max(corr)
-    print("AC1 (1st order autocorrelation) = %s for %s" % (MAC,filename))
+    if(fileORfolder == "file"):
+        print("AC1 (1st order autocorrelation) = %s for %s" % (MAC,filename))
+    if(fileORfolder == "folder"):
+        print("AC1 (1st order autocorrelation) = %s for %s in %s" % (MAC,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,MAC))
     txt_out.close
     
@@ -503,7 +532,10 @@ def tempo_stat(item):
     tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
     if(isinstance(tempo, np.ndarray)==True):    
         tempo = tempo[0]
-    print("TEMPO (tempo - bpm) = %s for %s" % (tempo,filename))
+    if(fileORfolder == "file"):
+        print("TEMPO (tempo - bpm) = %s for %s" % (tempo,filename))
+    if(fileORfolder == "folder"):
+        print("TEMPO (tempo - bpm) = %s for %s in %s" % (tempo,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,tempo))
     txt_out.close
     
