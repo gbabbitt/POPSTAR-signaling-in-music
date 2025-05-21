@@ -15,6 +15,7 @@ import scipy as sp
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.mixture import GaussianMixture
 import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
@@ -58,6 +59,38 @@ def mm_inf(df_order0, df_order1,dirname):
         if(fof=="file"):
             writePath = "%s_analysis/mm_inference_order1.txt" % (inp)
         txt_out = open(writePath, "w")
+        ### GMM function - bimodal
+        gmm = GaussianMixture(n_components=2, random_state=0)
+        fit = gmm.fit(df_order1)
+        #print(fit)
+        means = gmm.means_
+        covs = gmm.covariances_
+        aic_gmm2 = gmm.aic(df_order1)
+        bic_gmm2 = gmm.bic(df_order1)
+        logLik_gmm2 = gmm.score(df_order1)
+        print("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
+        txt_out.write("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
+        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        if(bic_gmm2 < test):
+            best = bic_gmm2
+            test = bic_gmm2
+            bestLABEL = "gmm2"
+        ### GMM function - trimodal
+        gmm = GaussianMixture(n_components=3, random_state=0)
+        fit = gmm.fit(df_order1)
+        #print(fit)
+        means = gmm.means_
+        covs = gmm.covariances_
+        aic_gmm3 = gmm.aic(df_order1)
+        bic_gmm3 = gmm.bic(df_order1)
+        logLik_gmm3 = gmm.score(df_order1)
+        print("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
+        txt_out.write("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
+        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        if(bic_gmm3 < test):
+            best = bic_gmm3
+            test = bic_gmm3
+            bestLABEL = "gmm3"
         ### gamma function
         fit = sp.stats.gamma.fit(df_order1)
         #print(fit)
@@ -67,6 +100,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_gamma = np.log(len(df_order1))*k - 2*(logLik_gamma)
         print("gamma | logLik %s AIC %s BIC %s" % (logLik_gamma, aic_gamma, bic_gamma))
         txt_out.write("gamma | logLik %s AIC %s BIC %s\n" % (logLik_gamma, aic_gamma, bic_gamma))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_gamma < test):
             best = bic_gamma
             test = bic_gamma
@@ -80,6 +114,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_powerlognorm = np.log(len(df_order1))*k - 2*(logLik_powerlognorm)
         print("powerlognorm | logLik %s AIC %s BIC %s" % (logLik_powerlognorm, aic_powerlognorm, bic_powerlognorm))
         txt_out.write("powerlognorm | logLik %s AIC %s BIC %s\n" % (logLik_powerlognorm, aic_powerlognorm, bic_powerlognorm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_powerlognorm < test):
             best = bic_powerlognorm
             test = bic_powerlognorm
@@ -93,6 +128,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_lognorm = np.log(len(df_order1))*k - 2*(logLik_lognorm)
         print("lognorm | logLik %s AIC %s BIC %s" % (logLik_lognorm, aic_lognorm, bic_lognorm))
         txt_out.write("lognorm | logLik %s AIC %s BIC %s\n" % (logLik_lognorm, aic_lognorm, bic_lognorm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_lognorm < test):
             best = bic_lognorm
             test = bic_lognorm
@@ -106,6 +142,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_pareto = np.log(len(df_order1))*k - 2*(logLik_pareto)
         print("pareto | logLik %s AIC %s BIC %s" % (logLik_pareto, aic_pareto, bic_pareto))
         txt_out.write("pareto | logLik %s AIC %s BIC %s\n" % (logLik_pareto, aic_pareto, bic_pareto))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_pareto < test):
             best = bic_pareto
             test = bic_pareto
@@ -119,6 +156,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_expon = np.log(len(df_order1))*k - 2*(logLik_expon)
         print("expon | logLik %s AIC %s BIC %s" % (logLik_expon, aic_expon, bic_expon))
         txt_out.write("expon | logLik %s AIC %s BIC %s\n" % (logLik_expon, aic_expon, bic_expon))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_expon < test):
             best = bic_expon
             test = bic_expon
@@ -132,6 +170,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_norm = np.log(len(df_order1))*k - 2*(logLik_norm)
         print("norm | logLik %s AIC %s BIC %s" % (logLik_norm, aic_norm, bic_norm))
         txt_out.write("norm | logLik %s AIC %s BIC %s\n" % (logLik_norm, aic_norm, bic_norm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_norm < test):
             best = bic_norm
             test = bic_norm
@@ -145,6 +184,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_truncnorm = np.log(len(df_order1))*k - 2*(logLik_truncnorm)
         print("truncnorm | logLik %s AIC %s BIC %s" % (logLik_truncnorm, aic_truncnorm, bic_truncnorm))
         txt_out.write("truncnorm | logLik %s AIC %s BIC %s\n" % (logLik_truncnorm, aic_truncnorm, bic_truncnorm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_truncnorm < test):
             best = bic_truncnorm
             test = bic_truncnorm
@@ -161,6 +201,38 @@ def mm_inf(df_order0, df_order1,dirname):
         if(fof=="file"):
             writePath = "%s_analysis/mm_inference_order0.txt" % (inp)
         txt_out = open(writePath, "w")
+        ### GMM function - bimodal
+        gmm = GaussianMixture(n_components=2, random_state=0)
+        fit = gmm.fit(df_order0)
+        #print(fit)
+        means = gmm.means_
+        covs = gmm.covariances_
+        aic_gmm2 = gmm.aic(df_order0)
+        bic_gmm2 = gmm.bic(df_order0)
+        logLik_gmm2 = gmm.score(df_order0)
+        print("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
+        txt_out.write("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
+        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        if(bic_gmm2 < test):
+            best = bic_gmm2
+            test = bic_gmm2
+            bestLABEL = "gmm2"
+        ### GMM function - trimodal
+        gmm = GaussianMixture(n_components=3, random_state=0)
+        fit = gmm.fit(df_order0)
+        #print(fit)
+        means = gmm.means_
+        covs = gmm.covariances_
+        aic_gmm3 = gmm.aic(df_order0)
+        bic_gmm3 = gmm.bic(df_order0)
+        logLik_gmm3 = gmm.score(df_order0)
+        print("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
+        txt_out.write("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
+        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        if(bic_gmm3 < test):
+            best = bic_gmm3
+            test = bic_gmm3
+            bestLABEL = "gmm3"
         ### gamma function
         fit = sp.stats.gamma.fit(df_order0)
         #print(fit)
@@ -170,6 +242,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_gamma = np.log(len(df_order0))*k - 2*(logLik_gamma)
         print("gamma | logLik %s AIC %s BIC %s" % (logLik_gamma, aic_gamma, bic_gamma))
         txt_out.write("gamma | logLik %s AIC %s BIC %s\n" % (logLik_gamma, aic_gamma, bic_gamma))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_gamma < test):
             best = bic_gamma
             test = bic_gamma
@@ -183,6 +256,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_powerlognorm = np.log(len(df_order0))*k - 2*(logLik_powerlognorm)
         print("powerlognorm | logLik %s AIC %s BIC %s" % (logLik_powerlognorm, aic_powerlognorm, bic_powerlognorm))
         txt_out.write("powerlognorm | logLik %s AIC %s BIC %s\n" % (logLik_powerlognorm, aic_powerlognorm, bic_powerlognorm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_powerlognorm < test):
             best = bic_powerlognorm
             test = bic_powerlognorm
@@ -196,6 +270,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_lognorm = np.log(len(df_order0))*k - 2*(logLik_lognorm)
         print("lognorm | logLik %s AIC %s BIC %s" % (logLik_lognorm, aic_lognorm, bic_lognorm))
         txt_out.write("lognorm | logLik %s AIC %s BIC %s\n" % (logLik_lognorm, aic_lognorm, bic_lognorm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_lognorm < test):
             best = bic_lognorm
             test = bic_lognorm
@@ -209,6 +284,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_pareto = np.log(len(df_order0))*k - 2*(logLik_pareto)
         print("pareto | logLik %s AIC %s BIC %s" % (logLik_pareto, aic_pareto, bic_pareto))
         txt_out.write("pareto | logLik %s AIC %s BIC %s\n" % (logLik_pareto, aic_pareto, bic_pareto))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_pareto < test):
             best = bic_pareto
             test = bic_pareto
@@ -222,6 +298,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_expon = np.log(len(df_order0))*k - 2*(logLik_expon)
         print("expon | logLik %s AIC %s BIC %s" % (logLik_expon, aic_expon, bic_expon))
         txt_out.write("expon | logLik %s AIC %s BIC %s\n" % (logLik_expon, aic_expon, bic_expon))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_expon < test):
             best = bic_expon
             test = bic_expon
@@ -235,6 +312,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_norm = np.log(len(df_order0))*k - 2*(logLik_norm)
         print("norm | logLik %s AIC %s BIC %s" % (logLik_norm, aic_norm, bic_norm))
         txt_out.write("norm | logLik %s AIC %s BIC %s\n" % (logLik_norm, aic_norm, bic_norm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_norm < test):
             best = bic_norm
             test = bic_norm
@@ -248,6 +326,7 @@ def mm_inf(df_order0, df_order1,dirname):
         bic_truncnorm = np.log(len(df_order0))*k - 2*(logLik_truncnorm)
         print("truncnorm | logLik %s AIC %s BIC %s" % (logLik_truncnorm, aic_truncnorm, bic_truncnorm))
         txt_out.write("truncnorm | logLik %s AIC %s BIC %s\n" % (logLik_truncnorm, aic_truncnorm, bic_truncnorm))
+        txt_out.write("parameters | %s\n" % str(fit))
         if(bic_truncnorm < test):
             best = bic_truncnorm
             test = bic_truncnorm
@@ -299,6 +378,7 @@ def main():
         plt.title("best model %s|1st order =%s|0th order =%s" % (inp,bestLABEL_order1,bestLABEL_order0))
         plt.savefig("%s_analysis/histogram.png" % (inp))
         plt.show()
+        
     if(fof=="folder"):
         print("make histograms")    
         lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
