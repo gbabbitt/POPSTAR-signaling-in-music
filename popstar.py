@@ -60,9 +60,13 @@ class Ui_Dialog(object):
         self.pushButton_7.setObjectName("pushButton_7")
         self.pushButton_7.clicked.connect(self.playTraj)
         self.pushButton_8 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_8.setGeometry(QtCore.QRect(390, 550, 80, 31))
+        self.pushButton_8.setGeometry(QtCore.QRect(390, 570, 80, 31))
         self.pushButton_8.setObjectName("pushButton_8")
         self.pushButton_8.clicked.connect(self.readDoc)
+        self.pushButton_9 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_9.setGeometry(QtCore.QRect(390, 530, 80, 31))
+        self.pushButton_9.setObjectName("pushButton_9")
+        self.pushButton_9.clicked.connect(self.makeHist)
         self.label_2 = QtWidgets.QLabel(Dialog)
         self.label_2.setGeometry(QtCore.QRect(30, 60, 421, 121))
         self.label_2.setText("")
@@ -135,6 +139,7 @@ class Ui_Dialog(object):
         self.pushButton_6.setText(_translate("Dialog", "6. play faces"))
         self.pushButton_7.setText(_translate("Dialog", "5. play trajectory"))
         self.pushButton_8.setText(_translate("Dialog", "see DOC"))
+        self.pushButton_9.setText(_translate("Dialog", "step dist"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - BabbittLab@RIT</span></p></body></html>"))
         self.pushButton_5.setText(_translate("Dialog", "4. make movies"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
@@ -157,6 +162,12 @@ class Ui_Dialog(object):
             time.sleep(0.01) 
             # setting value to progress bar 
             self.progressBar.setValue(i)
+    
+    def makeHist(self):
+        print("making histogram")
+        cmd = "python3 makeHisto.py"
+        os.system(cmd)
+    
             
     def analyzeSignal(self):
         print("analyzing fitness signal")
