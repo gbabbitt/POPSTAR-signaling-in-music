@@ -354,7 +354,7 @@ def f0_var_stat(item):
     if(sum_diff == 0):
         FFV = 0.000001
     if(sum_diff != 0):
-        FFV = 1/((sum_diff/(len(notes)))+0.000001)
+        FFV = np.log(1/((sum_diff/(len(notes)))+0.000001))
         #FFV = 1/(sum_diff+0.000001)
     if(fileORfolder == "file"):
         print("FFV (f0 frequency control) = %s over %s notes for %s" % (FFV,n_notes,filename))
@@ -421,8 +421,8 @@ def beat_var(item):
     n_beats = len(beat_intervals)
     mean_beat_interval = np.mean(beat_intervals)
     EVIsum = ((beat_intervals - mean_beat_interval)**2)/mean_beat_interval
-    EVI = 1/(np.sum(EVIsum)/(n_beats+0.000001))
-    BIV = 1/((np.var(beat_intervals))+0.000001)
+    EVI = np.log(1/(np.sum(EVIsum)/(n_beats+0.000001)))
+    BIV = np.log(1/((np.var(beat_intervals))+0.000001))
     # Print the estimated tempo and beat intervals
     #print(f"Estimated tempo: {tempo} BPM")
     #print(f"Beat intervals: {beat_intervals}")
