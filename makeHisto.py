@@ -70,7 +70,7 @@ def mm_inf(df_order0, df_order1,dirname):
         logLik_gmm2 = gmm.score(df_order1)
         print("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
         txt_out.write("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
-        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        #txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
         if(bic_gmm2 < test):
             best = bic_gmm2
             test = bic_gmm2
@@ -86,7 +86,7 @@ def mm_inf(df_order0, df_order1,dirname):
         logLik_gmm3 = gmm.score(df_order1)
         print("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
         txt_out.write("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
-        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        #txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
         if(bic_gmm3 < test):
             best = bic_gmm3
             test = bic_gmm3
@@ -212,7 +212,7 @@ def mm_inf(df_order0, df_order1,dirname):
         logLik_gmm2 = gmm.score(df_order0)
         print("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
         txt_out.write("gmm2 | logLik %s AIC %s BIC %s\n" % (logLik_gmm2, aic_gmm2, bic_gmm2))
-        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        #txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
         if(bic_gmm2 < test):
             best = bic_gmm2
             test = bic_gmm2
@@ -228,7 +228,7 @@ def mm_inf(df_order0, df_order1,dirname):
         logLik_gmm3 = gmm.score(df_order0)
         print("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
         txt_out.write("gmm3 | logLik %s AIC %s BIC %s\n" % (logLik_gmm3, aic_gmm3, bic_gmm3))
-        txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
+        #txt_out.write("parameters | %s %s\n" % (str(means),str(covs)))
         if(bic_gmm3 < test):
             best = bic_gmm3
             test = bic_gmm3
