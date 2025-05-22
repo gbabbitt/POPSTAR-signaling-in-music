@@ -674,8 +674,9 @@ def norm_data():
     #print(df)
     df = df.iloc[:, 1:] # drop newlines
     print(df)
-    df = df.drop(df.index[-1]) # drop last line due to lack of signal
-    df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
+    df[np.isinf(df)] = np.nan # replace inf with nan
+    #df = df.drop(df.index[-1]) # drop last line due to lack of signal
+    #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
     df_norm = df.copy()
     column = 'AC1values'
     df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
@@ -877,6 +878,7 @@ def norm_data_batch():
         df = df.fillna(0.000001) # replace nan and inf with near zero values
         print(df)
         df = df.iloc[:, 1:]
+        df[np.isinf(df)] = np.nan # replace inf with nan
         #df = df.drop(df.index[-1]) # drop last line due to lack of signal
         #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
         df_norm = df.copy()
@@ -945,7 +947,7 @@ def main():
         create_file_lists_batch()
         print(data_file_paths)
         print(sound_file_paths)
-    
+    '''
     ####################
     # energy metrics
     ####################
@@ -992,7 +994,7 @@ def main():
     #txt_out.close
     #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
     #    pool.map(adf_stat, sound_file_paths)
-            
+    '''        
     ###################    
     if(fileORfolder == "file"):
         print("collecting data")
