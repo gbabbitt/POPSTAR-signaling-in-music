@@ -343,7 +343,8 @@ def f0_var_stat(item):
             #print("bounds %s to %s" %(note_freq_lower_bound,note_freq_upper_bound))
             if(freq < note_freq_upper_bound and freq >= note_freq_lower_bound): 
                 notes.append(note)
-                sum_diff = sum_diff + abs(freq - note_freq)
+                #sum_diff = sum_diff + abs(freq - note_freq)
+                sum_diff = sum_diff + (((freq - note_freq)**2)/note_freq)
                 #print("detected %s in oct%s" % (note, octave))
         
     ##############
@@ -354,6 +355,7 @@ def f0_var_stat(item):
         FFV = 0.000001
     if(sum_diff != 0):
         FFV = 1/((sum_diff/(len(notes)))+0.000001)
+        #FFV = 1/(sum_diff+0.000001)
     if(fileORfolder == "file"):
         print("FFV (f0 frequency control) = %s over %s notes for %s" % (FFV,n_notes,filename))
     if(fileORfolder == "folder"):
@@ -416,19 +418,20 @@ def beat_var(item):
     beat_times = librosa.frames_to_time(beat_frames, sr=sr, hop_length=1024)
     # Analyze beat spacing
     beat_intervals = np.diff(beat_times)
+    n_beats = len(beat_intervals)
     mean_beat_interval = np.mean(beat_intervals)
-    EVI = ((beat_intervals - mean_beat_interval)**2)/mean_beat_interval
-    EVI = 1-np.sum(EVI)
+    EVIsum = ((beat_intervals - mean_beat_interval)**2)/mean_beat_interval
+    EVI = 1/(np.sum(EVIsum)/(n_beats+0.000001))
     BIV = 1/((np.var(beat_intervals))+0.000001)
     # Print the estimated tempo and beat intervals
     #print(f"Estimated tempo: {tempo} BPM")
     #print(f"Beat intervals: {beat_intervals}")
     if(fileORfolder == "file"):
         print("BIV (1/beat interval deviation) = %s for %s" % (BIV,filename))
-        print("EVI (beat interval sums of squares) = %s for %s" % (EVI,filename))
+        print("EVI (1/beat interval sums of squares) = %s for %s" % (EVI,filename))
     if(fileORfolder == "folder"):
         print("BIV (1/beat interval deviation) = %s for %s in %s" % (BIV,filename,foldername))
-        print("EVI (beat interval sums of squares) = %s for %s in %s" % (EVI,filename,foldername))
+        print("EVI (1/beat interval sums of squares) = %s for %s in %s" % (EVI,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,BIV))
     txt_out.close
     txt_out2.write("%s,%s\n" % (filename,EVI))
@@ -671,8 +674,8 @@ def norm_data():
     #print(df)
     df = df.iloc[:, 1:] # drop newlines
     print(df)
-    #df = df.drop(df.index[-1]) # drop last line due to lack of signal
-    #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
+    df = df.drop(df.index[-1]) # drop last line due to lack of signal
+    df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
     df_norm = df.copy()
     column = 'AC1values'
     df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
@@ -959,13 +962,13 @@ def main():
     ####################
     # control metrics
     ####################
-    print("calculating f0 variance")
+    print("calculating f0 control")
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(f0_var_stat, sound_file_paths)
     print("calculating fn harmonic energy")
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(fn_levels_stat, sound_file_paths)
-    print("calculating beat interval variance")
+    print("calculating beat interval control")
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(beat_var, sound_file_paths)
             
