@@ -294,7 +294,10 @@ def mli_stat(item):
     # Hurst Exponent (measure memory 0 = negative memry, 0.5 = no memory, 1 = positive memory)
     H, c, data = compute_Hc(signalData, kind='change', simplified=True)
     #print("Hurst Exp = %s" % str(H))
-    mem_level = 1-(2*abs(H-0.5)) # rescale 0-1  
+    if(isinstance(H, float)==True):
+        mem_level = 1-(2*abs(H-0.5)) # rescale 0-1  
+    if(isinstance(H, float)==False):
+        mem_level = 1.0
     if(fileORfolder == "file"):
         print("MLI (inverse memory level index) = %s for %s" % (mem_level,filename))
     if(fileORfolder == "folder"):

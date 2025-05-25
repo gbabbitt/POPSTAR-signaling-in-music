@@ -29,7 +29,7 @@ class Ui_Dialog(object):
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.makeFace)
         self.pushButton_2 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_2.setGeometry(QtCore.QRect(390, 620, 80, 31))
+        self.pushButton_2.setGeometry(QtCore.QRect(420, 620, 50, 31))
         self.pushButton_2.setObjectName("pushButton_2")
         self.pushButton_2.clicked.connect(self.closeIt)
         self.pushButton_3 = QtWidgets.QPushButton(Dialog)
@@ -41,7 +41,7 @@ class Ui_Dialog(object):
         self.pushButton_4.setObjectName("pushButton_4")
         self.pushButton_4.clicked.connect(self.processSound)
         self.progressBar = QtWidgets.QProgressBar(Dialog)
-        self.progressBar.setGeometry(QtCore.QRect(30, 620, 251, 31))
+        self.progressBar.setGeometry(QtCore.QRect(30, 620, 215, 31))
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
         self.label = QtWidgets.QLabel(Dialog)
@@ -68,9 +68,13 @@ class Ui_Dialog(object):
         self.pushButton_9.setObjectName("pushButton_9")
         self.pushButton_9.clicked.connect(self.makeHist)
         self.pushButton_10 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_10.setGeometry(QtCore.QRect(285, 620, 100, 31))
+        self.pushButton_10.setGeometry(QtCore.QRect(335, 620, 80, 31))
         self.pushButton_10.setObjectName("pushButton_10")
         self.pushButton_10.clicked.connect(self.compareIt)
+        self.pushButton_11 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_11.setGeometry(QtCore.QRect(250, 620, 80, 31))
+        self.pushButton_11.setObjectName("pushButton_11")
+        self.pushButton_11.clicked.connect(self.classifyIt)
         self.label_2 = QtWidgets.QLabel(Dialog)
         self.label_2.setGeometry(QtCore.QRect(30, 60, 421, 121))
         self.label_2.setText("")
@@ -145,6 +149,7 @@ class Ui_Dialog(object):
         self.pushButton_8.setText(_translate("Dialog", "see DOC"))
         self.pushButton_9.setText(_translate("Dialog", "step dist"))
         self.pushButton_10.setText(_translate("Dialog", "compare"))
+        self.pushButton_11.setText(_translate("Dialog", "classify"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - BabbittLab@RIT</span></p></body></html>"))
         self.pushButton_5.setText(_translate("Dialog", "4. make movies"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
@@ -240,8 +245,13 @@ class Ui_Dialog(object):
     def playTraj(self):
         print("playing movie file")
         cmd = "python3 playTplotMovie.py"
-        os.system(cmd)   
-    
+        os.system(cmd)
+        
+    def classifyIt(self):
+        print("random forest classification of two or more folders")
+        cmd = "python3 classifyIt.py"
+        os.system(cmd)
+        
     def compareIt(self):
         print("statistical comparison of two folders")
         cmd = "python3 compareIt.py"
