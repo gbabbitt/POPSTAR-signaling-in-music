@@ -151,12 +151,17 @@ def histPlot(p_value, ks_stat, kl_div):
     df = pd.read_csv(readPath, sep = "\t")
     print(df)
     data = df.groupby('folder').agg(list)
+    print(data)
     data1 = data.iloc[0,0]
     data2 = data.iloc[1,0]
+    row1 = data.iloc[0]
+    row2 = data.iloc[1]
+    label1 = row1.name
+    label2 = row2.name   
     data1 = np.array(data1)
     data2 = np.array(data2)
-    sns.histplot(data=data1, label= "%s" % inp1, kde=True) # kde=True adds density curve
-    sns.histplot(data=data2, label="%s" % inp2, kde=True)
+    sns.histplot(data=data1, label= "%s" % label1, kde=True) # kde=True adds density curve
+    sns.histplot(data=data2, label="%s" % label2, kde=True)
     plt.xlabel("Value")
     plt.ylabel("Frequency")
     ks_stat = round(ks_stat, 5)
