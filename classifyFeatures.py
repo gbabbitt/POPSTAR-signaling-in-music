@@ -43,7 +43,8 @@ from sklearn.metrics import accuracy_score
 # find number of cores
 num_cores = multiprocessing.cpu_count()
 #num_cores = 1 # activate this line for identifying/removing files that stop script with errors
-
+if not os.path.exists('popstar_results'):
+        os.mkdir('popstar_results')
 # read popstar ctl file
 infile = open("popstar-classify.ctl", "r")
 infile_lines = infile.readlines()
@@ -114,7 +115,7 @@ if(num_folders == 6):
 ##############################################################
 def collectDF():
     print("collecting dataframe")
-    writePath = "RF_features_%s.txt" % folder_list
+    writePath = "popstar_results/RF_features_%s.txt" % folder_list
     txt_out = open(writePath, "w")
     txt_out.write("folder\tenergy-AC1\tenergy-AMP\tcontrol-BIV\tcontrol-EVI\tcontrol-FFV\tcontrol-HEN\tsurprise-LZC\tsurprise-MLI\tsurprise-NVI\tenergy-TEMPO\n")
     
@@ -152,8 +153,8 @@ def collectDF():
         
 def RFclass():
     print("\nconducting RF (random forest) on %s (10 bootstraps)\n" % folder_list) 
-    readPath = "RF_features_%s.txt" % folder_list
-    writePath = "stats_RFclassifier_%s.txt" % folder_list
+    readPath = "popstar_results/RF_features_%s.txt" % folder_list
+    writePath = "popstar_results/stats_RFclassifier_%s.txt" % folder_list
     #readPath = "data_boxplots.dat"
     #writePath = "stats_classifiers.dat"
     outfile = open(writePath, "w")
@@ -211,7 +212,7 @@ def RFclass():
     #grp_color = ('red','orange','yellow','green','cyan','blue','violet','brown','gray','white','black')
     grp_color = ('red','orange','yellow','green','cyan','blue','violet','brown','gray','white') # option drop order 1 AC
     myplot = (ggplot(importance_df, aes(x='Feature', y='Importance')) + geom_bar(stat = "identity", fill = grp_color) + geom_errorbar(ymin=ylim_neg, ymax=ylim_pos) + labs(title='Feature Importance from Random Forest Model (500 trees, 100 bootstraps)', x='Feature', y='Importance (+- 2 SEM)') + theme(panel_background=element_rect(fill='black', alpha=.2)))
-    myplot.save("RF_featureImportance_%s.png" % folder_list, width=10, height=5, dpi=300)
+    myplot.save("popstar_results/RF_featureImportance_%s.png" % folder_list, width=10, height=5, dpi=300)
     #myplot.save("data_RF_featureImportance.png", width=10, height=5, dpi=300)
     #myplot.show()
     print(myplot)

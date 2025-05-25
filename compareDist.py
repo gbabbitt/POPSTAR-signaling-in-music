@@ -38,7 +38,8 @@ import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
 #num_cores = 1 # activate this line for identifying/removing files that stop script with errors
-
+if not os.path.exists('popstar_results'):
+        os.mkdir('popstar_results')
 # read popstar ctl file
 infile = open("popstar-compare.ctl", "r")
 infile_lines = infile.readlines()
@@ -65,7 +66,7 @@ print("comparing folders %s and %s" % (inp1,inp2))
 #####################################################################
 def collectDF():
     print("collecting dataframe")
-    writePath = "distance_order1_compare_%s_%s.txt" % (inp1,inp2)
+    writePath = "popstar_results/distance_order1_compare_%s_%s.txt" % (inp1,inp2)
     txt_out = open(writePath, "w")
     txt_out.write("folder\tdistance\n")
     lst = os.listdir("%s_analysis/intervals/" % (inp1)) # your directory path
@@ -105,7 +106,7 @@ def collectDF():
     
 def KLdiv():
     print("Kullback-Leibler divergence and 2 sample Kolmogorov-Smirnov test")
-    readPath = "distance_order1_compare_%s_%s.txt" % (inp1,inp2)
+    readPath = "popstar_results/distance_order1_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
     print(df)
     data = df.groupby('folder').agg(list)
@@ -147,7 +148,7 @@ def kl_divergence(p, q):
     
 def histPlot(p_value, ks_stat, kl_div):
     print("making plot")
-    readPath = "distance_order1_compare_%s_%s.txt" % (inp1,inp2)
+    readPath = "popstar_results/distance_order1_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
     print(df)
     data = df.groupby('folder').agg(list)
@@ -169,7 +170,7 @@ def histPlot(p_value, ks_stat, kl_div):
     plt.title("KS test | D=%s p=%s" % (ks_stat,p_value))
     plt.suptitle("KL divergence = %s" % (kl_div))
     plt.legend()
-    plt.savefig("compareDist_%s_%s.png" % (inp1,inp2))
+    plt.savefig("popstar_results/compareDist_%s_%s.png" % (inp1,inp2))
     plt.show()
     
         

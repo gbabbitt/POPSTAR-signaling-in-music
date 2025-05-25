@@ -34,6 +34,9 @@ import time
 
 from moviepy.editor import VideoFileClip, clips_array
 
+if not os.path.exists('popstar_results'):
+        os.mkdir('popstar_results')
+
 infile = open("popstar.ctl", "r")
 infile_lines = infile.readlines()
 for x in range(len(infile_lines)):
@@ -610,11 +613,11 @@ def combinedMovie_audio_video_batch():
 
 def copyMovie():
     print("loading movie")
-    shutil.copy2("%s_analysis/myMovieSound_faces.mp4" % inp, "myMovie_faces_%s.mp4" % inp)
-    shutil.copy2("%s_analysis/myMovieSound_tplots1.mp4" % inp, "myMovie_tplots1_%s.mp4" % inp)
+    shutil.copy2("%s_analysis/myMovieSound_faces.mp4" % inp, "popstar_results/myMovie_faces_%s.mp4" % inp)
+    shutil.copy2("%s_analysis/myMovieSound_tplots1.mp4" % inp, "popstar_results/myMovie_tplots1_%s.mp4" % inp)
     if(lyr == "yes"): 
-        shutil.copy2("%s_analysis/myMovieSound_tplots2.mp4" % inp, "myMovie_tplots2_%s.mp4" % inp)
-    shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "myMovie_combo_%s.mp4" % inp)
+        shutil.copy2("%s_analysis/myMovieSound_tplots2.mp4" % inp, "popstar_results/myMovie_tplots2_%s.mp4" % inp)
+    shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "popstar_results/myMovie_combo_%s.mp4" % inp)
 
 def copyMovie_batch():
     print("loading movie")
@@ -627,11 +630,11 @@ def copyMovie_batch():
     for fname in dir_list:
         print(fname)
         dirname = fname[:-4]
-        shutil.copy2("%s_analysis/myMovieSound_faces_%s.mp4" % (inp,dirname), "myMovie_faces_%s.mp4" % (dirname))
-        shutil.copy2("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname), "myMovie_tplots1_%s.mp4" % (dirname))
+        shutil.copy2("%s_analysis/myMovieSound_faces_%s.mp4" % (inp,dirname), "popstar_results/myMovie_faces_%s.mp4" % (dirname))
+        shutil.copy2("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname), "popstar_results/myMovie_tplots1_%s.mp4" % (dirname))
         if(lyr == "yes"): 
-            shutil.copy2("%s_analysis/myMovieSound_tplots2_%s.mp4" % (inp,dirname), "myMovie_tplots2_%s.mp4" % (dirname))
-        shutil.copy2("%s_analysis/myMovieSound_combined_%s.mp4" % (inp,dirname), "myMovie_combo_%s.mp4" % (dirname))
+            shutil.copy2("%s_analysis/myMovieSound_tplots2_%s.mp4" % (inp,dirname), "popstar_results/myMovie_tplots2_%s.mp4" % (dirname))
+        shutil.copy2("%s_analysis/myMovieSound_combined_%s.mp4" % (inp,dirname), "popstar_results/myMovie_combo_%s.mp4" % (dirname))
 
 def distances():
     print("calc distances")

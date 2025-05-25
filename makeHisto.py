@@ -19,6 +19,7 @@ from sklearn.mixture import GaussianMixture
 import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
+
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
 infile_lines = infile.readlines()

@@ -37,7 +37,8 @@ import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
 #num_cores = 1 # activate this line for identifying/removing files that stop script with errors
-
+if not os.path.exists('popstar_results'):
+        os.mkdir('popstar_results')
 # read popstar ctl file
 infile = open("popstar-compare.ctl", "r")
 infile_lines = infile.readlines()
@@ -64,10 +65,10 @@ print("comparing folders %s and %s" % (inp1,inp2))
 #####################################################################
 def collectDF():
     print("collecting dataframe")
-    writePath = "ternary_compare_%s_%s.txt" % (inp1,inp2)
-    writePath1 = "energy_compare_%s_%s.txt" % (inp1,inp2)
-    writePath2 = "control_compare_%s_%s.txt" % (inp1,inp2)
-    writePath3 = "surprise_compare_%s_%s.txt" % (inp1,inp2)
+    writePath = "popstar_results/ternary_compare_%s_%s.txt" % (inp1,inp2)
+    writePath1 = "popstar_results/energy_compare_%s_%s.txt" % (inp1,inp2)
+    writePath2 = "popstar_results/control_compare_%s_%s.txt" % (inp1,inp2)
+    writePath3 = "popstar_results/surprise_compare_%s_%s.txt" % (inp1,inp2)
     txt_out = open(writePath, "w")
     txt_out1 = open(writePath1, "w")
     txt_out2 = open(writePath2, "w")
@@ -136,7 +137,7 @@ def collectDF():
     
 def KruskalWallis():
     print("Kruskal-Wallis tests on energy, control and surprise")
-    readPath = "energy_compare_%s_%s.txt" % (inp1,inp2)
+    readPath = "popstar_results/energy_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
     groups = [df['energy'][df['folder'] == g] for g in df['folder'].unique()]
     stat, p = kruskal(*groups)
@@ -144,7 +145,7 @@ def KruskalWallis():
     global energy_p
     energy_H = round(stat,2)
     energy_p = round(p,2)
-    readPath = "control_compare_%s_%s.txt" % (inp1,inp2)
+    readPath = "popstar_results/control_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
     groups = [df['control'][df['folder'] == g] for g in df['folder'].unique()]
     stat, p = kruskal(*groups)
@@ -152,7 +153,7 @@ def KruskalWallis():
     global control_p
     control_H = round(stat,2)
     control_p = round(p,2)
-    readPath = "surprise_compare_%s_%s.txt" % (inp1,inp2)
+    readPath = "popstar_results/surprise_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
     groups = [df['surprise'][df['folder'] == g] for g in df['folder'].unique()]
     stat, p = kruskal(*groups)
@@ -173,7 +174,7 @@ def KruskalWallis():
     
 def  errorBarPlot(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):   
     # Create a sample dataframe
-    readPath = "ternary_compare_%s_%s.txt" % (inp1,inp2)
+    readPath = "popstar_results/ternary_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
     # Plotting the bar plot with error bars
     sns.barplot(x='folder', y='value', hue='ternary', data=df, errorbar='ci')
@@ -186,7 +187,7 @@ def  errorBarPlot(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):
 
     # Display the plot
     plt.legend(title='ternary axes')
-    plt.savefig("compareSignal_%s_%s.png" % (inp1,inp2))
+    plt.savefig("popstar_results/compareSignal_%s_%s.png" % (inp1,inp2))
     plt.show()
     
     
