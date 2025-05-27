@@ -117,7 +117,7 @@ def collectDF():
     print("collecting dataframe")
     writePath = "popstar_results/RF_features_%s.txt" % folder_list
     txt_out = open(writePath, "w")
-    txt_out.write("folder\tenergy-AC1\tenergy-AMP\tcontrol-BIV\tcontrol-EVI\tcontrol-FFV\tcontrol-HEN\tsurprise-LZC\tsurprise-MLI\tsurprise-NVI\tenergy-TEMPO\n")
+    txt_out.write("folder\tenergy-AC1\tenergy-AMP\tcontrol-BIV\tcontrol-EVI\tcontrol-FFV\tcontrol-HEN\tsurprise-LZC\tsurprise-MSE\tsurprise-NVI\tenergy-TEMPO\n")
     
     for i in range(len(folder_list)):
         inp = folder_list[i]
@@ -144,11 +144,11 @@ def collectDF():
                 FFVvalues = df_row[4]
                 HENvalues = df_row[5]
                 LZCvalues = df_row[6]
-                MLIvalues = df_row[7]
+                MSEvalues = df_row[7]
                 NVIvalues = df_row[8]
                 TEMPOvalues = df_row[9]
-                print("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (inp,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues))
-                txt_out.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (inp,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues))
+                print("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (inp,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues))
+                txt_out.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (inp,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues))
     txt_out.close()
         
 def RFclass():

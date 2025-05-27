@@ -43,6 +43,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn import metrics
 from sklearn.preprocessing import MinMaxScaler
 from hurst import compute_Hc, random_walk
+import EntropyHub as eh
 import re
 # for ggplot
 from plotnine import *
@@ -270,8 +271,47 @@ def adf_stat(item):
         print("ADF (augmented Dickey Fuller test) = %s for %s in %s" % (ADFtestStat,filename,foldername))
     txt_out.write("%s,%s\n" % (filename,ADFtestStat))
     txt_out.close
+
+def mse_stat(item):
+    infile = item
+    #print("myfile = %s" % item)    
+    path_objs = item.split("/")
+    if(fileORfolder == "file"):
+        filename = path_objs[2]
+        writePath = "%s_analysis/MSEvalues.txt" % (inp)
+    if(fileORfolder == "folder"):
+        foldername = path_objs[2]
+        filename = path_objs[3]     
+        writePath = "%s_analysis/MSEvalues_%s.txt" % (inp,foldername) 
+    txt_out = open(writePath, 'a')
+    
+    samplingFrequency, signalData = wavfile.read(infile)
+    #print(signalData[:,1])
+    #print(samplingFrequency)
+    # Matplotlib.pyplot.specgram() function to
+    # generate spectrogram
+    if(signalData.ndim != 1):
+        #print("flattening signal to 1D")
+        signalData = signalData[:,1]
+    signalData = np.float32(signalData)
+    #print(signalData)
+    signalData = signalData[0:5000] # subset first N data points
+    #signalData = np.random.choice(signalData, size=5000, replace=True) # subset random N data points
+    # refined multiscale sample entropy using example code at
+    # https://www.entropyhub.xyz/python/Examples/Ex7.html
+    Mobj = eh.MSobject('SampEn', m = 4, r = 1.25)
+    MSx, Ci = eh.rMSEn(signalData, Mobj, Scales = 5, F_Order = 3, F_Num = 0.6, RadNew = 4)
+    if(fileORfolder == "file"):
+        print("MSE (multiscale complexity index) = %s for %s" % (Ci,filename))
+    if(fileORfolder == "folder"):
+        print("MSE (multiscale complexity index) = %s for %s in %s" % (Ci,filename,foldername))
+    txt_out.write("%s,%s\n" % (filename,Ci))
+    txt_out.close
+    
     
 def mli_stat(item):
+    infile = item
+    print("myfile = %s" % item)    
     path_objs = item.split("/")
     if(fileORfolder == "file"):
         filename = path_objs[2]
@@ -281,7 +321,7 @@ def mli_stat(item):
         filename = path_objs[3]     
         writePath = "%s_analysis/MLIvalues_%s.txt" % (inp,foldername) 
     txt_out = open(writePath, 'a')
-    infile = item
+    
     samplingFrequency, signalData = wavfile.read(infile)
     #print(signalData[:,1])
     #print(samplingFrequency)
@@ -549,7 +589,7 @@ def coll_data():
     print("collecting data")
     writePath = "%s_analysis/features_raw.txt" % (inp)
     txt_out = open(writePath, 'w')
-    txt_out.write("file,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
+    txt_out.write("file,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
     readPath1 = "%s_analysis/AC1values.txt" % (inp)
     txt_in1 = open(readPath1, 'r')
     readPath2 = "%s_analysis/AMPvalues.txt" % (inp)
@@ -564,7 +604,7 @@ def coll_data():
     txt_in6 = open(readPath6, 'r')
     readPath7 = "%s_analysis/LZCvalues.txt" % (inp)
     txt_in7 = open(readPath7, 'r')
-    readPath8 = "%s_analysis/MLIvalues.txt" % (inp)
+    readPath8 = "%s_analysis/MSEvalues.txt" % (inp)
     txt_in8 = open(readPath8, 'r')
     readPath9 = "%s_analysis/NVIvalues.txt" % (inp)
     txt_in9 = open(readPath9, 'r')
@@ -577,7 +617,7 @@ def coll_data():
     FFV_lines = txt_in5.readlines()
     HEN_lines = txt_in6.readlines()
     LZC_lines = txt_in7.readlines()
-    MLI_lines = txt_in8.readlines()
+    MSE_lines = txt_in8.readlines()
     NVI_lines = txt_in9.readlines()
     TEMPO_lines = txt_in10.readlines()
     length = len(AC1_lines)
@@ -638,14 +678,14 @@ def coll_data():
                 print("LZC matching %s to %s" % (i,seg_num))
                 file_name = line_split2[0]
                 LZC= float(line_split2[1])
-        for line in MLI_lines:
+        for line in MSE_lines:
             line_split1 = line.split("_")
             seg_num = int(line_split1[0])
             line_split2 = line.split(",")
             if(i==seg_num):
                 print("MLI matching %s to %s" % (i,seg_num))
                 file_name = line_split2[0]
-                MLI= float(line_split2[1])
+                MSE= float(line_split2[1])
         for line in NVI_lines:
             line_split1 = line.split("_")
             seg_num = int(line_split1[0])
@@ -663,7 +703,7 @@ def coll_data():
                 file_name = line_split2[0]
                 TEMPO= float(line_split2[1])
                 
-        txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MLI,NVI,TEMPO))
+        txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MSE,NVI,TEMPO))
     txt_out.close
 
 
@@ -695,7 +735,7 @@ def norm_data():
     df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
     column = 'LZCvalues'
     df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'MLIvalues'
+    column = 'MSEvalues'
     df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
     column = 'NVIvalues'
     df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
@@ -704,7 +744,7 @@ def norm_data():
     df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
     print(df_norm)
     with open(writePath, 'w') as txt_out:
-        txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
+        txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
         for index, row in df_norm.iterrows():
             line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
@@ -712,11 +752,11 @@ def norm_data():
     if(maxOpt == "no"):
         df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
         df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
-        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
+        df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].mean(axis=1)
     if(maxOpt == "yes"):
         df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
         df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
-        df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
+        df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
     df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
     print(df_ternary)
     with open(writePath2, 'w') as txt_out:
@@ -747,7 +787,7 @@ def coll_data_batch():
         print("collecting data")
         writePath = "%s_analysis/features_raw_%s.txt" % (inp,foldername)
         txt_out = open(writePath, 'w')
-        txt_out.write("file,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
+        txt_out.write("file,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
         readPath1 = "%s_analysis/AC1values_%s.txt" % (inp,foldername)
         txt_in1 = open(readPath1, 'r')
         readPath2 = "%s_analysis/AMPvalues_%s.txt" % (inp,foldername)
@@ -762,7 +802,7 @@ def coll_data_batch():
         txt_in6 = open(readPath6, 'r')
         readPath7 = "%s_analysis/LZCvalues_%s.txt" % (inp,foldername)
         txt_in7 = open(readPath7, 'r')
-        readPath8 = "%s_analysis/MLIvalues_%s.txt" % (inp,foldername)
+        readPath8 = "%s_analysis/MSEvalues_%s.txt" % (inp,foldername)
         txt_in8 = open(readPath8, 'r')
         readPath9 = "%s_analysis/NVIvalues_%s.txt" % (inp,foldername)
         txt_in9 = open(readPath9, 'r')
@@ -775,7 +815,7 @@ def coll_data_batch():
         FFV_lines = txt_in5.readlines()
         HEN_lines = txt_in6.readlines()
         LZC_lines = txt_in7.readlines()
-        MLI_lines = txt_in8.readlines()
+        MSE_lines = txt_in8.readlines()
         NVI_lines = txt_in9.readlines()
         TEMPO_lines = txt_in10.readlines()
         length = len(AC1_lines)
@@ -836,14 +876,14 @@ def coll_data_batch():
                     print("LZC matching %s to %s" % (i,seg_num))
                     file_name = line_split2[0]
                     LZC= float(line_split2[1])
-            for line in MLI_lines:
+            for line in MSE_lines:
                 line_split1 = line.split("_")
                 seg_num = int(line_split1[0])
                 line_split2 = line.split(",")
                 if(i==seg_num):
-                    print("MLI matching %s to %s" % (i,seg_num))
+                    print("MSE matching %s to %s" % (i,seg_num))
                     file_name = line_split2[0]
-                    MLI= float(line_split2[1])
+                    MSE= float(line_split2[1])
             for line in NVI_lines:
                 line_split1 = line.split("_")
                 seg_num = int(line_split1[0])
@@ -861,7 +901,7 @@ def coll_data_batch():
                     file_name = line_split2[0]
                     TEMPO= float(line_split2[1])
             
-            txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MLI,NVI,TEMPO))
+            txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MSE,NVI,TEMPO))
         txt_out.close
 
 
@@ -899,7 +939,7 @@ def norm_data_batch():
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
         column = 'LZCvalues'
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'MLIvalues'
+        column = 'MSEvalues'
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
         column = 'NVIvalues'
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
@@ -908,7 +948,7 @@ def norm_data_batch():
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
         with open(writePath, 'w') as txt_out:
-            txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MLIvalues,NVIvalues,TEMPOvalues\n")
+            txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
             for index, row in df_norm.iterrows():
                 line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
                 txt_out.write(line + '\n')  # Write line to file with newline character
@@ -916,11 +956,11 @@ def norm_data_batch():
         if(maxOpt == "no"):
             df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
             df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
-            df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].mean(axis=1)
+            df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].mean(axis=1)
         if(maxOpt == "yes"):
             df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
             df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
-            df_surprise = df_norm[['LZCvalues', 'MLIvalues', 'NVIvalues']].max(axis=1)
+            df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
         df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
         print(df_ternary)
         with open(writePath2, 'w') as txt_out:
@@ -983,9 +1023,9 @@ def main():
     print("calculating Lempel-Ziv complexity")
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
         pool.map(lzc_stat, sound_file_paths)
-    print("calculating MLI statistic")
+    print("calculating MSE statistic")
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-        pool.map(mli_stat, sound_file_paths)
+        pool.map(mse_stat, sound_file_paths)
     print("calculating NVI statistic (zero order)")
     print("(Sawant et al. 2021 in MEE-BES)")
     with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
