@@ -177,9 +177,10 @@ def clusterEM():
     ax = fig.add_subplot(111, projection='3d')
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
     for i in range(n_clusters):
+        clusterID = i+1
         cluster_data = df[df['folder'] == i]
         ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
-                   c=colors[i % len(colors)], s=4, label=f'{folder_list[i]}')
+                   c=colors[i % len(colors)], s=4, label=f'{"cluster - %s" % clusterID}')
 
     ax.set_xlabel('energy')
     ax.set_ylabel('control')
