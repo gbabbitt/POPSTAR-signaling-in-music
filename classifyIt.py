@@ -20,7 +20,7 @@ class Ui_Dialog(object):
         self.pushButton_2.setObjectName("pushButton_2")
         self.pushButton_2.clicked.connect(self.closeIt)
         self.pushButton_4 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_4.setGeometry(QtCore.QRect(60, 390, 351, 31))
+        self.pushButton_4.setGeometry(QtCore.QRect(80, 390, 241, 31))
         self.pushButton_4.setObjectName("pushButton_4")
         self.pushButton_4.clicked.connect(self.classifyIt)
         self.label = QtWidgets.QLabel(Dialog)
@@ -32,9 +32,6 @@ class Ui_Dialog(object):
         self.label_2.setPixmap(QtGui.QPixmap("waveform.gif"))
         self.label_2.setScaledContents(True)
         self.label_2.setObjectName("label_2")
-        self.movie = QtGui.QMovie("waveform.gif")
-        self.label_2.setMovie(self.movie)
-        self.movie.start()
         self.lineEdit = QtWidgets.QLineEdit(Dialog)
         self.lineEdit.setGeometry(QtCore.QRect(290, 200, 161, 23))
         self.lineEdit.setObjectName("lineEdit")
@@ -71,7 +68,10 @@ class Ui_Dialog(object):
         self.label_8 = QtWidgets.QLabel(Dialog)
         self.label_8.setGeometry(QtCore.QRect(30, 350, 241, 31))
         self.label_8.setObjectName("label_8")
-
+        self.pushButton_5 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_5.setGeometry(QtCore.QRect(80, 430, 241, 31))
+        self.pushButton_5.setObjectName("pushButton_5")
+        self.pushButton_5.clicked.connect(self.clusterIt)
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
@@ -87,6 +87,7 @@ class Ui_Dialog(object):
         self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 4</span></p></body></html>"))
         self.label_7.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 5</span></p></body></html>"))
         self.label_8.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 6</span></p></body></html>"))
+        self.pushButton_5.setText(_translate("Dialog", "run 3D EM clustering"))
     
     def closeIt(self):
         print("POPSTAR program closed")
@@ -111,6 +112,26 @@ class Ui_Dialog(object):
         f.close()
         cmd = "python3 classifyFeatures.py"
         os.system(cmd)
+    
+    def clusterIt(self):
+        print("running EM clstering")
+        filename1 = self.lineEdit.text()
+        filename2 = self.lineEdit_2.text()
+        filename3 = self.lineEdit_3.text()
+        filename4 = self.lineEdit_4.text()
+        filename5 = self.lineEdit_5.text()
+        filename6 = self.lineEdit_6.text()
+        f = open("./popstar-classify.ctl", "w") 
+        f.write("folder1,%s,#reference folder to analyze\n" % filename1)
+        f.write("folder2,%s,#query folder to analyze\n" % filename2)
+        f.write("folder3,%s,#reference folder to analyze\n" % filename3)
+        f.write("folder4,%s,#query folder to analyze\n" % filename4)
+        f.write("folder5,%s,#reference folder to analyze\n" % filename5)
+        f.write("folder6,%s,#query folder to analyze\n" % filename6)
+        f.close()
+        cmd = "python3 clusterFeatures.py"
+        os.system(cmd)
+
 
 if __name__ == "__main__":
     import sys
