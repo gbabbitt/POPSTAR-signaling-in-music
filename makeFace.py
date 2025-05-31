@@ -92,8 +92,8 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=eye_width, height=eye_height, facecolor='white', edgecolor='black'))
 
     # Pupils
-    pupil_height = 0.02 + features[7] * 0.05
-    pupil_width = 0.02 + features[7] * 0.05
+    pupil_height = 0.02 + features[7] * 0.1
+    pupil_width = 0.02 + features[7] * 0.1
     ax.add_patch(Ellipse((x - 0.2, y + 0.2), width=pupil_width, height=pupil_height, facecolor='black'))
     ax.add_patch(Ellipse((x + 0.2, y + 0.2), width=pupil_width, height=pupil_height, facecolor='black'))
 
@@ -110,14 +110,14 @@ def chernoff_face(ax, x, y, features, facecolor='lightgray', edgecolor='black'):
     ax.add_patch(Ellipse((x, y), width=nose_width, height=nose_height, angle=features[5] * 45, facecolor='lightgray', edgecolor='black'))
 
     # Mouth
-    mouth_width = 0.2 + features[0] * 0.3
-    mouth_height = 0.05 + features[1] * 0.2
+    mouth_width = 0.2 + features[0] * 0.30
+    mouth_height = 0.05 + features[1] * 0.20
     mouth = Ellipse((x, y - 0.2), width=mouth_width, height=mouth_height, angle=0,facecolor='black', edgecolor='black')
     ax.add_patch(mouth)
     
     #Ears
-    ear_width = 0.05 + features[4] * 0.2
-    ear_height = 0.05 + features[3] * 0.3
+    ear_width = 0.05 + features[4] * 0.20
+    ear_height = 0.05 + features[3] * 0.30
     ax.add_patch(Ellipse((x - 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
     ax.add_patch(Ellipse((x + 0.5, y ), width=ear_width, height=ear_height, angle=0, facecolor=facecolor, edgecolor=edgecolor))
 
@@ -133,8 +133,9 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     if(i != 0):
         current_key, current_value = list(tdata.items())[-1]
         #print(current_value)
+        #tax.scatter([current_value], marker='o', color='red', label='current value')
+    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="song trajectory")
         tax.scatter([current_value], marker='o', color='orange', label='current value')
-    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
     max_fs = 32
     # corner font size
