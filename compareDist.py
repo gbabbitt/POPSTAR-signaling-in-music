@@ -152,9 +152,66 @@ def histPlot(p_value, ks_stat, kl_div):
     df = pd.read_csv(readPath, sep = "\t")
     print(df)
     data = df.groupby('folder').agg(list)
-    print(data)
+    print("calculating convergence rate")
     data1 = data.iloc[0,0]
     data2 = data.iloc[1,0]
+    #print(data1)
+    # convergence rate on data 1
+    myStepCnts = []
+    for j in range(100):
+        mySample = []
+        new1 = np.random.choice(data1, 1)
+        new2 = np.random.choice(data1, 1)
+        mySample.append(new1)
+        mySample.append(new2)
+        myMean_after = np.mean(mySample)
+        #print(myMean_after)
+        convergenceStep = ">1000"
+        myStop = "no"
+        for i in range(10000):
+            myMean_before = myMean_after
+            new = np.random.choice(data1, 1)
+            mySample.append(new)
+            myMean_after = np.mean(mySample)
+            #print(mySample)
+            diff = abs(myMean_before-myMean_after)
+            #print(diff)
+            if(diff<0.00001 and myStop == "no"):
+                  convergenceStep = i
+                  myStop = "yes"
+                  break
+        print("iteration %s converges in %s steps" % (j,convergenceStep))
+        myStepCnts.append(convergenceStep)
+    avgConv1 = np.mean(myStepCnts)
+    print("data 1 - average convergence in %s steps" % avgConv1)
+    # convergence rate on data 2
+    myStepCnts = []
+    for j in range(100):
+        mySample = []
+        new1 = np.random.choice(data2, 1)
+        new2 = np.random.choice(data2, 1)
+        mySample.append(new1)
+        mySample.append(new2)
+        myMean_after = np.mean(mySample)
+        #print(myMean_after)
+        convergenceStep = ">1000"
+        myStop = "no"
+        for i in range(10000):
+            myMean_before = myMean_after
+            new = np.random.choice(data2, 1)
+            mySample.append(new)
+            myMean_after = np.mean(mySample)
+            #print(mySample)
+            diff = abs(myMean_before-myMean_after)
+            #print(diff)
+            if(diff<0.00001 and myStop == "no"):
+                  convergenceStep = i
+                  myStop = "yes"
+                  break
+        print("iteration %s converges in %s steps" % (j,convergenceStep))
+        myStepCnts.append(convergenceStep)
+    avgConv2 = np.mean(myStepCnts)
+    print("data 2 - average convergence in %s steps" % avgConv2)
     row1 = data.iloc[0]
     row2 = data.iloc[1]
     label1 = row1.name
@@ -167,8 +224,8 @@ def histPlot(p_value, ks_stat, kl_div):
     plt.ylabel("Frequency")
     ks_stat = round(ks_stat, 5)
     p_value = round(p_value, 5)
-    plt.title("KS test | D=%s p=%s" % (ks_stat,p_value))
-    plt.suptitle("KL divergence = %s" % (kl_div))
+    plt.title("KS test | D=%s p=%s | KL = %s" % (ks_stat,p_value,kl_div))
+    plt.suptitle("%s converges in %s steps | %s converges in %s steps" % (label1,avgConv1,label2,avgConv2))
     plt.legend()
     plt.savefig("popstar_results/compareDist_%s_%s.png" % (inp1,inp2))
     plt.show()
