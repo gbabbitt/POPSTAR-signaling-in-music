@@ -121,9 +121,10 @@ def collectDF():
     writePath = "popstar_results/EM_features_%s.txt" % folder_list
     txt_out = open(writePath, "w")
     txt_out.write("folder\tenergy\tcontrol\tsurprise\n")
-    
-    for i in range(len(folder_list)):
-        inp = folder_list[i]
+    global correct_labels
+    correct_labels = []
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
         lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
         number_files = len(lst)
         print("number of files")
@@ -145,6 +146,7 @@ def collectDF():
                 surprise = df_row[2]
                 print("%s\t%s\t%s\t%s" % (inp,energy,control,surprise))
                 txt_out.write("%s\t%s\t%s\t%s\n" % (inp,energy,control,surprise))
+                correct_labels.append(j)
     txt_out.close()
         
 def clusterEM():
@@ -170,26 +172,95 @@ def clusterEM():
     gmm = GaussianMixture(n_components=n_clusters, random_state=0)
     gmm.fit(df)
     cluster_labels = gmm.predict(df)
-    df['folder'] = cluster_labels
-
+    #df['folder'] = cluster_labels
+    #print(len(cluster_labels))
+    correct_labels_array = np.array(correct_labels)
+    #print(len(correct_labels_array))
+    print(cluster_labels)
+    print(correct_labels_array)
+    
+    # sort groups by ascending size
+    unique_labels, inverse_indices = np.unique(cluster_labels, return_inverse=True)
+    group_counts = np.bincount(inverse_indices)
+    sorted_indices = np.argsort(group_counts)
+    sorted_cluster_labels = unique_labels[sorted_indices]
+    print(sorted_cluster_labels)
+    unique_labels, inverse_indices = np.unique(correct_labels_array, return_inverse=True)
+    group_counts = np.bincount(inverse_indices)
+    sorted_indices = np.argsort(group_counts)
+    sorted_correct_labels = unique_labels[sorted_indices]
+    print(sorted_correct_labels)
+    folder_list_sort = []
+    for i in range(len(folder_list)):
+        myIndex = sorted_correct_labels[i]
+        myFolder = folder_list[myIndex]
+        folder_list_sort.append(myFolder)
+    print(folder_list_sort)
+    # calculate % match
+    percent_matches = []
+    match = 0
+    total = 0
+    for i in range(len(sorted_correct_labels)):
+        test = sorted_cluster_labels[i]
+        truth = sorted_correct_labels[i]
+        match = 0
+        total = 0
+        for j in range(len(cluster_labels)-1):
+            mytest = cluster_labels[j]
+            mytruth = correct_labels[j]
+            if(test == mytest and truth == mytruth):
+                match = match+1
+                total = total+1
+            if(test != mytest or truth != mytruth):
+                total = total+1
+            percent_match = match/total
+        percent_matches.append(percent_match)
+    print(percent_matches)
+    
+    
     # 3D Scatter plot
+    df['folder'] = cluster_labels
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
     for i in range(n_clusters):
-        clusterID = i+1
+        clusterID = i
+        folderID = folder_list_sort[i]
+        percentID = round(percent_matches[i]*100,2)
         cluster_data = df[df['folder'] == i]
         ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
-                   c=colors[i % len(colors)], s=4, label=f'{"cluster - %s" % clusterID}')
-
+                   c=colors[i % len(colors)], s=4, label=f'{"cluster %s most probable match %s percent to %s" % (clusterID,percentID,folderID)}')
+        # just group number
+        #ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
+        #           c=colors[i % len(colors)], s=4, label=f'{"cluster %s" % (clusterID)}')
+    
     ax.set_xlabel('energy')
     ax.set_ylabel('control')
     ax.set_zlabel('surprise')
     ax.legend()
-    plt.title('EM Clustering on mean Energy,Control,Surprise values')
+    plt.title('EM Clustering of sound fragments on mean Energy,Control,Surprise values')
     plt.show()
+    # 3D Scatter plot
+    df['folder'] = correct_labels_array
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+    for i in range(n_clusters):
+        #clusterID = i
+        folderID = folder_list[i]
+        #percentID = round(percent_matches[i]*100,2)
+        cluster_data = df[df['folder'] == i]
+        #ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
+        #           c=colors[i % len(colors)], s=4, label=f'{"cluster %s match %s percent to %s" % (clusterID,percentID,folderID)}')
+        ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
+                   c=colors[i % len(colors)], s=4, label=f'{"folder = %s" % (folderID)}')
     
-
+    ax.set_xlabel('energy')
+    ax.set_ylabel('control')
+    ax.set_zlabel('surprise')
+    ax.legend()
+    plt.title('correct labels of sound fragments on mean Energy,Control,Surprise values')
+    plt.show()
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
