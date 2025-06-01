@@ -137,7 +137,7 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="song trajectory")
         tax.scatter([current_value], marker='o', color='orange', label='current value')
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
-    max_fs = 32
+    max_fs = 40
     # corner font size
     fsX = valX*max_fs
     fsY = valY*max_fs
@@ -182,7 +182,7 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
         tax.scatter([current_value], marker='o', color='orange', label='current value')
     #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
     tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
-    max_fs = 32
+    max_fs = 40
     # corner font size
     fsX = valX*max_fs
     fsY = valY*max_fs
