@@ -119,8 +119,8 @@ def collectDF():
     txt_out = open(writePath, "w")
     txt_out.write("folder\tenergy-AC1\tenergy-AMP\tcontrol-BIV\tcontrol-EVI\tcontrol-FFV\tcontrol-HEN\tsurprise-LZC\tsurprise-MSE\tsurprise-NVI\tenergy-TEMPO\n")
     
-    for i in range(len(folder_list)):
-        inp = folder_list[i]
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
         lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
         number_files = len(lst)
         print("number of files")

@@ -123,10 +123,10 @@ class Ui_Dialog(object):
         self.checkBox_3 = QtWidgets.QCheckBox(Dialog)
         self.checkBox_3.setGeometry(QtCore.QRect(375, 450, 80, 31))
         self.checkBox_3.setObjectName("checkBox")
-        self.checkBox_3.setChecked(False)
+        self.checkBox_3.setChecked(True)
         self.label_9 = QtWidgets.QLabel(Dialog)
         self.label_9.setGeometry(QtCore.QRect(395, 450, 80, 31))
-        self.label_9.setText("max value")
+        self.label_9.setText("self-norm")
         ### picture window
         self.label_5 = QtWidgets.QLabel(Dialog)
         self.label_5.setGeometry(QtCore.QRect(30, 190, 421, 221))
@@ -207,9 +207,18 @@ class Ui_Dialog(object):
         elif self.checkBox_2.isChecked() == False:
             lyricOption = "no"
         if self.checkBox_3.isChecked() == True:
-            maxOption = "yes" 
+            nrmOption = "yes" 
         elif self.checkBox_3.isChecked() == False:
-            maxOption = "no"   
+            nrmOption = "no"   
+        if(nrmOption == "yes" and fileORfolder == "folder"):
+            print("WARNING - comparative analysis best requires 'self-norm' be deactivated")
+            print("The 'self-norm' option normalizes the fitness signal within each sound file")
+            print("Thus, it is best used when analyzing changes within a single file")
+            print("When 'self-norm' is not clicked all fitness signals are normalized ")
+            print("to average feature values generally observed in human speech")
+            print("Thus, this is best when comparing many files grouped in folders")
+            print("...press (ctl+c) to stop, otherrrrwise the analysis will start in 30s")
+            time.sleep(30)        
         interval = self.lineEdit.text()
         f = open("./popstar.ctl", "w") 
         f.write("name,%s,#file or folder name to analyze\n" % filename)
@@ -217,7 +226,7 @@ class Ui_Dialog(object):
         f.write("input,%s,#input type\n" % fileORfolder)
         f.write("metro,%s,#use metronome\n" % metroOption)
         f.write("lyrics,%s,#lyrics present in feature data\n" % lyricOption)
-        f.write("max,%s,#use maximum values in feature data rather than averages\n" % maxOption)
+        f.write("nrm,%s,#self normalize to the song center value\n" % nrmOption)
         f.close()
         print("pre-processing sound file(s)")
         # setting for loop to set value of progress bar 

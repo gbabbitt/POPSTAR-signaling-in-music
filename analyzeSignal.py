@@ -81,9 +81,9 @@ for x in range(len(infile_lines)):
     if(header == "lyrics"):
         lyr = value
         print("lyrics present is",lyr)
-    if(header == "max"):
-        maxOpt = value
-        print("use max values",maxOpt)
+    if(header == "nrm"):
+        nrmOpt = value
+        print("self-normalize",nrmOpt)
     if(header == "metro"):
         met = value
         print("my metronome option is",met)    
@@ -93,7 +93,7 @@ inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
 lyr = ""+lyr+""
-maxOpt = ""+maxOpt+""
+nrmOpt = ""+nrmOpt+""
 fileORfolder = fof
 met = ""+met+""
 
@@ -720,43 +720,94 @@ def norm_data():
     df[np.isinf(df)] = np.nan # replace inf with nan
     #df = df.drop(df.index[-1]) # drop last line due to lack of signal
     #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
-    df_norm = df.copy()
-    column = 'AC1values'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'AMPvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'BIVvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'EVIvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'FFVvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'HENvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'LZCvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'MSEvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'NVIvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    column = 'TEMPOvalues'
-    df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-    df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
-    print(df_norm)
+    ##############################################################
+    ###### minmax normalization individually on each column ######
+    ##############################################################
+    if(nrmOpt == "yes"):
+        df_norm = df.copy()
+        column = 'AC1values'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'AMPvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'BIVvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'EVIvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'FFVvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'HENvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'LZCvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'MSEvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'NVIvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'TEMPOvalues'
+        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
+        print(df_norm)
+           
+    ########################################################
+    ##### z-score to normalize signal to human speech  #####
+    ########################################################
+    if(nrmOpt == "no"):  # note: z score is rescaled from -1,1 to 0,1
+        df_norm = df.copy() 
+        column = 'AC1values'
+        mean = 0.949214173352932
+        sd = 0.0601940546883669
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'AMPvalues'
+        mean =  23.4233734767798 
+        sd = 5.61137334598524
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'BIVvalues'
+        mean = 6.30536719531844  
+        sd = 1.90448547602485
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'EVIvalues'
+        mean = 6.80084850562953
+        sd = 7.43177197236326
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'FFVvalues'
+        mean = 2.9199533843274  
+        sd = 0.719197572142818
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'HENvalues'
+        mean = 8.42027318443921  
+        sd = 1.83382917348368
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'LZCvalues'
+        mean = 12.5059093945709  
+        sd = 0.656758193570298
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'MSEvalues'
+        mean = 0.959080514957559  
+        sd = 0.569137483747565
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'NVIvalues'
+        mean = 0.683926081755977  
+        sd = 0.122670730550913
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        column = 'TEMPOvalues'
+        mean = 124.785422049581  
+        sd = 36.7788654827943
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
+        print(df_norm)
+              
     with open(writePath, 'w') as txt_out:
         txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
         for index, row in df_norm.iterrows():
             line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
         txt_out.close
-    if(maxOpt == "no"):
-        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
-        df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
-        df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].mean(axis=1)
-    if(maxOpt == "yes"):
-        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
-        df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
-        df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
+    df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
+    df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
+    df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].mean(axis=1)
+    #df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
+    #df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
+    #df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
     df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
     print(df_ternary)
     with open(writePath2, 'w') as txt_out:
@@ -765,6 +816,7 @@ def norm_data():
             line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
         txt_out.close
+    df_ternary = df_ternary.abs() # hardens against extreme values in plots normalized to human speech
     df_ternary_norm = df_ternary.div(df_ternary.sum(axis=1), axis=0)
     print(df_ternary_norm)
     with open(writePath3, 'w') as txt_out:
@@ -924,43 +976,94 @@ def norm_data_batch():
         df[np.isinf(df)] = np.nan # replace inf with nan
         #df = df.drop(df.index[-1]) # drop last line due to lack of signal
         #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
-        df_norm = df.copy()
-        column = 'AC1values'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'AMPvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'BIVvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'EVIvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'FFVvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'HENvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'LZCvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'MSEvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'NVIvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        column = 'TEMPOvalues'
-        df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
-        df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
-        print(df_norm)
+        ##############################################################
+        ###### minmax normalization individually on each column ######
+        ##############################################################
+        if(nrmOpt == "yes"):
+            df_norm = df.copy()
+            column = 'AC1values'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'AMPvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'BIVvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'EVIvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'FFVvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'HENvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'LZCvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'MSEvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'NVIvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'TEMPOvalues'
+            df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
+            print(df_norm)
+           
+        ########################################################
+        ##### z-score to normalize signal to human speech  #####
+        ########################################################
+        if(nrmOpt == "no"):  # note: z score is rescaled from -1,1 to 0,1
+            df_norm = df.copy() 
+            column = 'AC1values'
+            mean = 0.949214173352932
+            sd = 0.0601940546883669
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'AMPvalues'
+            mean =  23.4233734767798 
+            sd = 5.61137334598524
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'BIVvalues'
+            mean = 6.30536719531844  
+            sd = 1.90448547602485
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'EVIvalues'
+            mean = 6.80084850562953
+            sd = 7.43177197236326
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'FFVvalues'
+            mean = 2.9199533843274  
+            sd = 0.719197572142818
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'HENvalues'
+            mean = 8.42027318443921  
+            sd = 1.83382917348368
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'LZCvalues'
+            mean = 12.5059093945709  
+            sd = 0.656758193570298
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'MSEvalues'
+            mean = 0.959080514957559  
+            sd = 0.569137483747565
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'NVIvalues'
+            mean = 0.683926081755977  
+            sd = 0.122670730550913
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            column = 'TEMPOvalues'
+            mean = 124.785422049581  
+            sd = 36.7788654827943
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
+            print(df_norm)
+               
         with open(writePath, 'w') as txt_out:
             txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
             for index, row in df_norm.iterrows():
                 line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
                 txt_out.write(line + '\n')  # Write line to file with newline character
             txt_out.close
-        if(maxOpt == "no"):
-            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
-            df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
-            df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].mean(axis=1)
-        if(maxOpt == "yes"):
-            df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
-            df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
-            df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
+        df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].mean(axis=1)
+        df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].mean(axis=1)
+        df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].mean(axis=1)
+        #df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
+        #df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
+        #df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
         df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
         print(df_ternary)
         with open(writePath2, 'w') as txt_out:
@@ -969,6 +1072,7 @@ def norm_data_batch():
                 line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
                 txt_out.write(line + '\n')  # Write line to file with newline character
             txt_out.close
+        df_ternary = df_ternary.abs() # hardens against extreme values in plots normalized to human speech
         df_ternary_norm = df_ternary.div(df_ternary.sum(axis=1), axis=0)
         print(df_ternary_norm)
         with open(writePath3, 'w') as txt_out:
@@ -1037,7 +1141,7 @@ def main():
     #txt_out.close
     #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
     #    pool.map(adf_stat, sound_file_paths)
-            
+           
     ###################    
     if(fileORfolder == "file"):
         print("collecting data")

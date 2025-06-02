@@ -44,12 +44,15 @@ for x in range(len(infile_lines)):
     if(header == "lyrics"):
         lyr = value
         print("lyrics present is",lyr)
-       
+    if(header == "nrm"):
+        nrmOpt = value
+        print("self-normalize",nrmOpt)   
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
 lyr = ""+lyr+""
+nrmOpt = ""+nrmOpt+""
 
 if(fof=="file"):
     # calculate number of faces for single file
@@ -153,7 +156,10 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     tax.left_axis_label("intellectual impact", fontsize=fsE, color='green') # A
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
-    tax.set_title("Audio Fitness Signal", fontsize=18, y=-0.15)
+    if(nrmOpt == "yes"):
+       tax.set_title("Audio Fitness Signal - distance from song center", fontsize=14, y=-0.15)
+    if(nrmOpt == "no"):
+       tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
 
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
@@ -198,7 +204,10 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
     tax.left_axis_label("intellectual impact", fontsize=fsE, color='green') # A
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
-    tax.set_title("Audio Fitness Signal", fontsize=18, y=-0.15)
+    if(nrmOpt == "yes"):
+       tax.set_title("Audio Fitness Signal - distance from song center", fontsize=14, y=-0.15)
+    if(nrmOpt == "no"):
+       tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
 
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
