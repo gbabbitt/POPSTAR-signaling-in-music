@@ -171,6 +171,8 @@ class Ui_Dialog(object):
         if selected:
             self.label.setText("self-normalization is now selected")
             global selfOption
+            global spchOption
+            global musiOption
             selfOption = "yes"
             spchOption = "no"
             musiOption = "no"
@@ -178,7 +180,9 @@ class Ui_Dialog(object):
     def spchselected(self, selected):
         if selected:
             self.label.setText("speech-normalization is now selected")
+            global selfOption
             global spchOption
+            global musiOption
             selfOption = "no"
             spchOption = "yes"
             musiOption = "no"
@@ -186,6 +190,8 @@ class Ui_Dialog(object):
     def musiselected(self, selected):
         if selected:
             self.label.setText("music-normalization is now selected")
+            global selfOption
+            global spchOption
             global musiOption
             selfOption = "no"
             spchOption = "no"
