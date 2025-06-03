@@ -40,15 +40,13 @@ for x in range(len(infile_lines)):
     if(header == "input"):
         fof = value
         print("file or folder is",fof)
-    if(header == "lyrics"):
-        lyr = value
-        print("lyrics present is",lyr)
+    
        
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
-lyr = ""+lyr+""
+lyr = "no"
 
 def mm_inf(df_order0, df_order1,dirname):
         print("make AIC/BIC")

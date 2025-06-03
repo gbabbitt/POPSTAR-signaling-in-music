@@ -78,12 +78,15 @@ for x in range(len(infile_lines)):
     if(header == "input"):
         fof = value
         print("file or folder is",fof)
-    if(header == "lyrics"):
-        lyr = value
-        print("lyrics present is",lyr)
-    if(header == "nrm"):
-        nrmOpt = value
-        print("self-normalize",nrmOpt)
+    if(header == "spch"):
+        spchOpt = value
+        print("speech-normalize",spchOpt)
+    if(header == "self"):
+        selfOpt = value
+        print("self-normalize",selfOpt)
+    if(header == "musi"):
+        musiOpt = value
+        print("music-normalize",musiOpt)
     if(header == "metro"):
         met = value
         print("my metronome option is",met)    
@@ -92,8 +95,9 @@ infile.close()
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
-lyr = ""+lyr+""
-nrmOpt = ""+nrmOpt+""
+spchOpt = ""+spchOpt+""
+selfOpt = ""+selfOpt+""
+musiOpt = ""+musiOpt+""
 fileORfolder = fof
 met = ""+met+""
 
@@ -723,7 +727,7 @@ def norm_data():
     ##############################################################
     ###### minmax normalization individually on each column ######
     ##############################################################
-    if(nrmOpt == "yes"):
+    if(selfOpt == "yes"):
         df_norm = df.copy()
         column = 'AC1values'
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
@@ -751,51 +755,100 @@ def norm_data():
     ########################################################
     ##### z-score to normalize signal to human speech  #####
     ########################################################
-    if(nrmOpt == "no"):  # note: z score is rescaled from -1,1 to 0,1
+    if(spchOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
         df_norm = df.copy() 
+        sf = 0.5  # scaling factor
         column = 'AC1values'
         mean = 0.949214173352932
         sd = 0.0601940546883669
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'AMPvalues'
         mean =  23.4233734767798 
         sd = 5.61137334598524
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'BIVvalues'
         mean = 6.30536719531844  
         sd = 1.90448547602485
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'EVIvalues'
         mean = 6.80084850562953
         sd = 7.43177197236326
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'FFVvalues'
         mean = 2.9199533843274  
         sd = 0.719197572142818
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'HENvalues'
         mean = 8.42027318443921  
         sd = 1.83382917348368
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'LZCvalues'
         mean = 12.5059093945709  
         sd = 0.656758193570298
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'MSEvalues'
         mean = 0.959080514957559  
         sd = 0.569137483747565
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'NVIvalues'
         mean = 0.683926081755977  
         sd = 0.122670730550913
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'TEMPOvalues'
         mean = 124.785422049581  
         sd = 36.7788654827943
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
-              
+    ########################################################
+    ##### z-score to normalize signal to human music  #####
+    ########################################################
+    if(musiOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
+        df_norm = df.copy() 
+        sf = 0.5  # scaling factor
+        column = 'AC1values'
+        mean = 0.949214173352932
+        sd = 0.0601940546883669
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'AMPvalues'
+        mean =  23.4233734767798 
+        sd = 5.61137334598524
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'BIVvalues'
+        mean = 6.30536719531844  
+        sd = 1.90448547602485
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'EVIvalues'
+        mean = 6.80084850562953
+        sd = 7.43177197236326
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'FFVvalues'
+        mean = 2.9199533843274  
+        sd = 0.719197572142818
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'HENvalues'
+        mean = 8.42027318443921  
+        sd = 1.83382917348368
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'LZCvalues'
+        mean = 12.5059093945709  
+        sd = 0.656758193570298
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'MSEvalues'
+        mean = 0.959080514957559  
+        sd = 0.569137483747565
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'NVIvalues'
+        mean = 0.683926081755977  
+        sd = 0.122670730550913
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'TEMPOvalues'
+        mean = 124.785422049581  
+        sd = 36.7788654827943
+        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
+        print(df_norm)
+        
     with open(writePath, 'w') as txt_out:
         txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
         for index, row in df_norm.iterrows():
@@ -979,7 +1032,7 @@ def norm_data_batch():
         ##############################################################
         ###### minmax normalization individually on each column ######
         ##############################################################
-        if(nrmOpt == "yes"):
+        if(selfOpt == "yes"):
             df_norm = df.copy()
             column = 'AC1values'
             df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
@@ -1007,51 +1060,100 @@ def norm_data_batch():
         ########################################################
         ##### z-score to normalize signal to human speech  #####
         ########################################################
-        if(nrmOpt == "no"):  # note: z score is rescaled from -1,1 to 0,1
+        if(spchOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
             df_norm = df.copy() 
+            sf = 0.5  # scaling factor
             column = 'AC1values'
             mean = 0.949214173352932
             sd = 0.0601940546883669
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'AMPvalues'
             mean =  23.4233734767798 
             sd = 5.61137334598524
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'BIVvalues'
             mean = 6.30536719531844  
             sd = 1.90448547602485
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'EVIvalues'
             mean = 6.80084850562953
             sd = 7.43177197236326
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'FFVvalues'
             mean = 2.9199533843274  
             sd = 0.719197572142818
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'HENvalues'
             mean = 8.42027318443921  
             sd = 1.83382917348368
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'LZCvalues'
             mean = 12.5059093945709  
             sd = 0.656758193570298
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'MSEvalues'
             mean = 0.959080514957559  
             sd = 0.569137483747565
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'NVIvalues'
             mean = 0.683926081755977  
             sd = 0.122670730550913
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'TEMPOvalues'
             mean = 124.785422049581  
             sd = 36.7788654827943
-            df_norm[column] = np.array((((df_norm[column]-mean)/sd)+1)/2)
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
-               
+        ########################################################
+        ##### z-score to normalize signal to human music  #####
+        ########################################################
+        if(musiOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
+            df_norm = df.copy() 
+            sf = 0.5  # scaling factor
+            column = 'AC1values'
+            mean = 0.949214173352932
+            sd = 0.0601940546883669
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'AMPvalues'
+            mean =  23.4233734767798 
+            sd = 5.61137334598524
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'BIVvalues'
+            mean = 6.30536719531844  
+            sd = 1.90448547602485
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'EVIvalues'
+            mean = 6.80084850562953
+            sd = 7.43177197236326
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'FFVvalues'
+            mean = 2.9199533843274  
+            sd = 0.719197572142818
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'HENvalues'
+            mean = 8.42027318443921  
+            sd = 1.83382917348368
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'LZCvalues'
+            mean = 12.5059093945709  
+            sd = 0.656758193570298
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'MSEvalues'
+            mean = 0.959080514957559  
+            sd = 0.569137483747565
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'NVIvalues'
+            mean = 0.683926081755977  
+            sd = 0.122670730550913
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'TEMPOvalues'
+            mean = 124.785422049581  
+            sd = 36.7788654827943
+            df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
+            print(df_norm)
+            
         with open(writePath, 'w') as txt_out:
             txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
             for index, row in df_norm.iterrows():
@@ -1141,7 +1243,7 @@ def main():
     #txt_out.close
     #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
     #    pool.map(adf_stat, sound_file_paths)
-           
+          
     ###################    
     if(fileORfolder == "file"):
         print("collecting data")

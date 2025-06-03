@@ -41,18 +41,24 @@ for x in range(len(infile_lines)):
     if(header == "input"):
         fof = value
         print("file or folder is",fof)
-    if(header == "lyrics"):
-        lyr = value
-        print("lyrics present is",lyr)
-    if(header == "nrm"):
-        nrmOpt = value
-        print("self-normalize",nrmOpt)   
+    if(header == "spch"):
+        spchOpt = value
+        print("speech-normalize",spchOpt)
+    if(header == "musi"):
+        musiOpt = value
+        print("music-normalize",musiOpt)
+    if(header == "self"):
+        selfOpt = value
+        print("self-normalize",selfOpt)   
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
-lyr = ""+lyr+""
-nrmOpt = ""+nrmOpt+""
+spchOpt = ""+spchOpt+""
+selfOpt = ""+selfOpt+""
+musiOpt = ""+musiOpt+""
+
+lyr = "no"
 
 if(fof=="file"):
     # calculate number of faces for single file
@@ -156,9 +162,9 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     tax.left_axis_label("intellectual impact", fontsize=fsE, color='green') # A
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
-    if(nrmOpt == "yes"):
+    if(selfOpt == "yes"):
        tax.set_title("Audio Fitness Signal - distance from song center", fontsize=14, y=-0.15)
-    if(nrmOpt == "no"):
+    if(selfOpt == "no"):
        tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
 
     # Remove default Matplotlib axes
@@ -204,9 +210,9 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
     tax.left_axis_label("intellectual impact", fontsize=fsE, color='green') # A
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
-    if(nrmOpt == "yes"):
+    if(selfOpt == "yes"):
        tax.set_title("Audio Fitness Signal - distance from song center", fontsize=14, y=-0.15)
-    if(nrmOpt == "no"):
+    if(selfOpt == "no"):
        tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
 
     # Remove default Matplotlib axes
@@ -359,7 +365,7 @@ def main():
             # save image
             tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
             tax.close()
-
+   
 ##################################################################        
 
 def create_list():   

@@ -59,9 +59,6 @@ for x in range(len(infile_lines)):
     if(header == "metro"):
         met = value
         print("my metronome option is",met)
-    if(header == "lyrics"):
-        lyr = value
-        print("lyrics present is",lyr)
     if(header == "duration"):
         dur = value
         print("duration is",dur)    
@@ -79,7 +76,9 @@ inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
 met = ""+met+""
-lyr = ""+lyr+""
+
+lyr = "no"
+
 if(fof=="file"):
     tmp = float(tmp)
     btInt = float(btInt)
@@ -254,6 +253,7 @@ def renderTplotMovie():
             vid_writer.write(loaded_img)
 
     vid_writer.release()
+    
     ############################
     if(lyr == "yes"):  
         print("rendering movie 2")
@@ -279,7 +279,7 @@ def renderTplotMovie():
                 vid_writer.write(loaded_img)
 
         vid_writer.release()
-
+    
 def renderTplotMovie_batch():
     print("rendering movie 1")
     lst = os.listdir(inp) # your directory path
@@ -333,6 +333,7 @@ def renderTplotMovie_batch():
         vid_writer.release()
         trk1 = trk1 + 1
     ############################
+    
     if(lyr == "yes"):  
         print("rendering movie 2")
         lst = os.listdir(inp) # your directory path
@@ -385,7 +386,7 @@ def renderTplotMovie_batch():
 
             vid_writer.release()
             trk2 = trk2 + 1
-            
+                
 def tplotMovie_audio_video():
     # map MMD in chimerax
     print("combining audio and video for movie 1 for %s" % inp)
@@ -410,6 +411,7 @@ def tplotMovie_audio_video():
     # save the final clip
     final_clip.write_videofile("%s_analysis/myMovieSound_tplots1.mp4" % inp)
     #####################
+    
     if(lyr == "yes"):  
         print("combining audio and video for movie 2 for %s" % inp)
         audio_file = "%s_analysis/trimmed_%s.wav" % (inp,inp)
@@ -432,7 +434,7 @@ def tplotMovie_audio_video():
         final_clip = video_clip.set_audio(audio_clip)
         # save the final clip
         final_clip.write_videofile("%s_analysis/myMovieSound_tplots2.mp4" % inp)
-
+    
 
     
 def tplotMovie_audio_video_batch():
@@ -469,6 +471,7 @@ def tplotMovie_audio_video_batch():
         # save the final clip
         final_clip.write_videofile("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname))
     #####################
+    
     if(lyr == "yes"):  
         print("rendering movie")
         lst = os.listdir(inp) # your directory path
@@ -502,7 +505,7 @@ def tplotMovie_audio_video_batch():
             final_clip = video_clip.set_audio(audio_clip)
             # save the final clip
             final_clip.write_videofile("%s_analysis/myMovieSound_tplots2_%s.mp4" % (inp,dirname))
-
+    
 
 def combine_side_by_side():
     # Load the two video clips

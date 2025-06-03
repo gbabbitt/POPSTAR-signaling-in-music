@@ -18,7 +18,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import time
 
-
+selfOption = "no"
+spchOption = "no"
+musiOption = "no"
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -90,10 +92,10 @@ class Ui_Dialog(object):
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
         self.lineEdit = QtWidgets.QLineEdit(Dialog)
-        self.lineEdit.setGeometry(QtCore.QRect(290, 450, 81, 23))
+        self.lineEdit.setGeometry(QtCore.QRect(250, 450, 110, 23))
         self.lineEdit.setObjectName("lineEdit")
         self.lineEdit_2 = QtWidgets.QLineEdit(Dialog)
-        self.lineEdit_2.setGeometry(QtCore.QRect(290, 420, 161, 23))
+        self.lineEdit_2.setGeometry(QtCore.QRect(250, 420, 110, 23))
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.lineEdit.setText("6")
         self.lineEdit_2.setText("test.mp3")
@@ -103,7 +105,7 @@ class Ui_Dialog(object):
         self.label_4 = QtWidgets.QLabel(Dialog)
         self.label_4.setGeometry(QtCore.QRect(30, 450, 271, 31))
         self.label_4.setObjectName("label_4")
-        # normalize box
+        # beat tracker box
         self.checkBox = QtWidgets.QCheckBox(Dialog)
         self.checkBox.setGeometry(QtCore.QRect(375, 490, 80, 31))
         self.checkBox.setObjectName("checkBox")
@@ -111,29 +113,38 @@ class Ui_Dialog(object):
         self.label_7 = QtWidgets.QLabel(Dialog)
         self.label_7.setGeometry(QtCore.QRect(395, 490, 80, 31))
         self.label_7.setText("beats?")       
-        # lyrics box
-        self.checkBox_2 = QtWidgets.QCheckBox(Dialog)
-        self.checkBox_2.setGeometry(QtCore.QRect(375, 470, 80, 31))
-        self.checkBox_2.setObjectName("checkBox")
-        self.checkBox_2.setChecked(False)
-        self.label_8 = QtWidgets.QLabel(Dialog)
-        self.label_8.setGeometry(QtCore.QRect(395, 470, 80, 31))
-        self.label_8.setText("lyrics?")
-        # mean or max box
-        self.checkBox_3 = QtWidgets.QCheckBox(Dialog)
-        self.checkBox_3.setGeometry(QtCore.QRect(375, 450, 80, 31))
-        self.checkBox_3.setObjectName("checkBox")
-        self.checkBox_3.setChecked(True)
-        self.label_9 = QtWidgets.QLabel(Dialog)
-        self.label_9.setGeometry(QtCore.QRect(395, 450, 80, 31))
-        self.label_9.setText("self-norm")
+        
         ### picture window
         self.label_5 = QtWidgets.QLabel(Dialog)
         self.label_5.setGeometry(QtCore.QRect(30, 190, 421, 221))
         self.label_5.setText("")
         self.label_5.setPixmap(QtGui.QPixmap("starDavid.JPG"))
         self.label_5.setScaledContents(True)
+        ###########################################
+        self.label_6 = QtWidgets.QLabel(Dialog)
+        self.label_6.setGeometry(QtCore.QRect(375, 410, 80, 31))
+        self.label_6.setObjectName("label_6")
         
+        # Radio button for self normalization option
+        self.radioButton_self = QtWidgets.QRadioButton(Dialog)
+        self.radioButton_self.setGeometry(QtCore.QRect(375, 470, 80, 31))
+        # adding signal and slot 
+        self.radioButton_self.toggled.connect(self.selfselected)
+        self.radioButton_self.setText("self")
+        # Radio button for speech normalization option
+        self.radioButton_spch = QtWidgets.QRadioButton(Dialog)
+        self.radioButton_spch.setGeometry(QtCore.QRect(375, 450, 80, 31))
+        # adding signal and slot 
+        self.radioButton_spch.toggled.connect(self.spchselected)
+        self.radioButton_spch.setText("speech")
+        # Radio button for music normalization option
+        self.radioButton_musi = QtWidgets.QRadioButton(Dialog)
+        self.radioButton_musi.setGeometry(QtCore.QRect(375, 430, 80, 31))
+        # adding signal and slot 
+        self.radioButton_musi.toggled.connect(self.musiselected)
+        self.radioButton_musi.setText("music")
+        
+        ###########################################
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
@@ -153,8 +164,33 @@ class Ui_Dialog(object):
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - BabbittLab@RIT</span></p></body></html>"))
         self.pushButton_5.setText(_translate("Dialog", "4. make movies"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
-        self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">length of window (seconds)</span></p></body></html>"))
+        self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">window length (seconds)</span></p></body></html>"))
+        self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">normalize</span></p></body></html>"))
 ######################################### subroutines ######################################################
+    def selfselected(self, selected):
+        if selected:
+            self.label.setText("self-normalization is now selected")
+            global selfOption
+            selfOption = "yes"
+            spchOption = "no"
+            musiOption = "no"
+            
+    def spchselected(self, selected):
+        if selected:
+            self.label.setText("speech-normalization is now selected")
+            global spchOption
+            selfOption = "no"
+            spchOption = "yes"
+            musiOption = "no"
+               
+    def musiselected(self, selected):
+        if selected:
+            self.label.setText("music-normalization is now selected")
+            global musiOption
+            selfOption = "no"
+            spchOption = "no"
+            musiOption = "yes"
+            
     def closeIt(self):
         print("POPSTAR program closed")
         sys.exit(app.exec_())
@@ -202,31 +238,39 @@ class Ui_Dialog(object):
             metroOption = "yes" 
         elif self.checkBox.isChecked() == False:
             metroOption = "no"
+        '''
         if self.checkBox_2.isChecked() == True:
-            lyricOption = "yes" 
+            spchOption = "yes" 
         elif self.checkBox_2.isChecked() == False:
-            lyricOption = "no"
+            spchOption = "no"
         if self.checkBox_3.isChecked() == True:
-            nrmOption = "yes" 
+            selfOption = "yes" 
         elif self.checkBox_3.isChecked() == False:
-            nrmOption = "no"   
-        if(nrmOption == "yes" and fileORfolder == "folder"):
-            print("WARNING - comparative analysis best requires 'self-norm' be deactivated")
+            selfOption = "no"   
+        '''
+        if(selfOption == "no" and spchOption == "no" and musiOption == "no"):
+            print("\nWARNING - you must choose a normalization option prior to run")
+            print("...open interface and try again, ... will close in 5s\n")
+            time.sleep(5)
+            exit()
+        if(selfOption == "yes" and fileORfolder == "folder"):
+            print("\nWARNING - comparative analysis best requires 'self-norm' be DEACTIVATED")
             print("The 'self-norm' option normalizes the fitness signal within each sound file")
             print("Thus, it is best used when analyzing changes within a single file")
-            print("When 'self-norm' is not clicked all fitness signals are normalized ")
-            print("to average feature values generally observed in human speech")
-            print("Thus, this is best when comparing many files grouped in folders")
-            print("...press (ctl+c) to stop, otherrrrwise the analysis will start in 30s")
-            time.sleep(30)        
+            print("When 'self-norm' is not chosen all fitness signals are normalized ")
+            print("to average feature values generally observed in human speech or music")
+            print("Thus, these options are best when comparing many files grouped in folders")
+            print("...press (ctl+c) to stop, otherwise the analysis will start in 20s\n")
+            time.sleep(20)        
         interval = self.lineEdit.text()
         f = open("./popstar.ctl", "w") 
         f.write("name,%s,#file or folder name to analyze\n" % filename)
         f.write("int,%s,#size of sliding window (seconds)\n" % interval)
         f.write("input,%s,#input type\n" % fileORfolder)
         f.write("metro,%s,#use metronome\n" % metroOption)
-        f.write("lyrics,%s,#lyrics present in feature data\n" % lyricOption)
-        f.write("nrm,%s,#self normalize to the song center value\n" % nrmOption)
+        f.write("spch,%s,#normalize to human speech average\n" % spchOption)
+        f.write("musi,%s,#normalize to human music average\n" % musiOption)
+        f.write("self,%s,#self normalize to the song center value\n" % selfOption)
         f.close()
         print("pre-processing sound file(s)")
         # setting for loop to set value of progress bar 
