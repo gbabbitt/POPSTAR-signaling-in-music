@@ -800,6 +800,7 @@ def norm_data():
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
+    
     ########################################################
     ##### z-score to normalize signal to human music  #####
     ########################################################
@@ -807,44 +808,44 @@ def norm_data():
         df_norm = df.copy() 
         sf = 0.5  # scaling factor
         column = 'AC1values'
-        mean = 0.949214173352932
-        sd = 0.0601940546883669
+        mean = 0.978570312462978
+        sd = 0.0251514414736247
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'AMPvalues'
-        mean =  23.4233734767798 
-        sd = 5.61137334598524
+        mean =  20.2099728190069
+        sd = 0.991788536734373
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'BIVvalues'
-        mean = 6.30536719531844  
-        sd = 1.90448547602485
+        mean = 6.71957900465
+        sd = 1.73273175191284
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'EVIvalues'
-        mean = 6.80084850562953
-        sd = 7.43177197236326
+        mean = 7.94289391235205
+        sd = 9.82103359686939
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'FFVvalues'
-        mean = 2.9199533843274  
-        sd = 0.719197572142818
+        mean = 3.67177998163758
+        sd = 1.07276813061257
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'HENvalues'
-        mean = 8.42027318443921  
-        sd = 1.83382917348368
+        mean = 9.5106370437411
+        sd = 1.18830936244522
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'LZCvalues'
-        mean = 12.5059093945709  
-        sd = 0.656758193570298
+        mean = 12.7994269829973
+        sd = 0.367462171339297
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'MSEvalues'
-        mean = 0.959080514957559  
-        sd = 0.569137483747565
+        mean = 0.942933863211891
+        sd = 0.434700264879575
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'NVIvalues'
-        mean = 0.683926081755977  
-        sd = 0.122670730550913
+        mean = 0.629494287114833
+        sd = 0.131704249990761
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'TEMPOvalues'
-        mean = 124.785422049581  
-        sd = 36.7788654827943
+        mean = 126.274104792716
+        sd = 31.8314668399539
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
@@ -1105,6 +1106,7 @@ def norm_data_batch():
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
+        
         ########################################################
         ##### z-score to normalize signal to human music  #####
         ########################################################
@@ -1112,44 +1114,44 @@ def norm_data_batch():
             df_norm = df.copy() 
             sf = 0.5  # scaling factor
             column = 'AC1values'
-            mean = 0.949214173352932
-            sd = 0.0601940546883669
+            mean = 0.978570312462978
+            sd = 0.0251514414736247
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'AMPvalues'
-            mean =  23.4233734767798 
-            sd = 5.61137334598524
+            mean =  20.2099728190069
+            sd = 0.991788536734373
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'BIVvalues'
-            mean = 6.30536719531844  
-            sd = 1.90448547602485
+            mean = 6.71957900465
+            sd = 1.73273175191284
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'EVIvalues'
-            mean = 6.80084850562953
-            sd = 7.43177197236326
+            mean = 7.94289391235205
+            sd = 9.82103359686939
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'FFVvalues'
-            mean = 2.9199533843274  
-            sd = 0.719197572142818
+            mean = 3.67177998163758
+            sd = 1.07276813061257
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'HENvalues'
-            mean = 8.42027318443921  
-            sd = 1.83382917348368
+            mean = 9.5106370437411
+            sd = 1.18830936244522
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'LZCvalues'
-            mean = 12.5059093945709  
-            sd = 0.656758193570298
+            mean = 12.7994269829973
+            sd = 0.367462171339297
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'MSEvalues'
-            mean = 0.959080514957559  
-            sd = 0.569137483747565
+            mean = 0.942933863211891
+            sd = 0.434700264879575
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'NVIvalues'
-            mean = 0.683926081755977  
-            sd = 0.122670730550913
+            mean = 0.629494287114833
+            sd = 0.131704249990761
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'TEMPOvalues'
-            mean = 124.785422049581  
-            sd = 36.7788654827943
+            mean = 126.274104792716
+            sd = 31.8314668399539
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
