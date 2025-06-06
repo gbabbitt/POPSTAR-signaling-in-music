@@ -82,7 +82,7 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "BabbittLab@RIT"))
         self.pushButton_2.setText(_translate("Dialog", "exit"))
-        self.pushButton_4.setText(_translate("Dialog", "run random forest classifier"))
+        self.pushButton_4.setText(_translate("Dialog", "run RF classifier and CFA"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - Classify</span></p></body></html>"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 1</span></p></body></html>"))
         self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 2</span></p></body></html>"))
