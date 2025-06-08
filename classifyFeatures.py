@@ -282,7 +282,7 @@ def runEFA():
         # Define the model
         data  = pd.DataFrame({'energy-AC1': df.values[0],'energy-AMP': df.values[1],'energy-TEMPO': df.values[9],'control-EVI': df.values[3],'control-FFV': df.values[4],'control-HEN': df.values[5],'surprise-LZC': df.values[6],'surprise-MSE': df.values[7],'surprise-NVI': df.values[8]})
         
-        fa = FactorAnalyzer(rotation=None)
+        fa = FactorAnalyzer(n_factors=3, rotation='varimax')
         fa.fit(data)
         # Get the factor loadings
         loadings = fa.loadings_
