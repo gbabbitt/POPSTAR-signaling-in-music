@@ -18,7 +18,7 @@ from matplotlib.colors import ListedColormap
 import seaborn as sns
 # for ggplot
 from plotnine import *
-from factor_analyzer import (ConfirmatoryFactorAnalyzer, ModelSpecificationParser)
+from factor_analyzer import (FactorAnalyzer, ConfirmatoryFactorAnalyzer, ModelSpecificationParser)
 
 #######################
 import math
@@ -251,17 +251,57 @@ def runCFA():
         # Get the factor loadings
         loadings = cfa.loadings_
         #print(loadings)
+        outfile.write("factor loadings\n")
         outfile.write(str(loadings))
         print("Factor Loadings:\n", loadings)
         
     outfile.close()
     
+def runEFA():   
+    print("running exploratory factor analysis (CFA) on each folder")
+    readPath = "popstar_results/RF_features_%s.txt" % folder_list
+    writePath = "popstar_results/stats_EFA_%s.txt" % folder_list
+    outfile = open(writePath, "w")
+    # get data
+    df_original = pd.read_csv(readPath, delimiter='\t',header=0)
+    #print(df_original)
     
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
+        print("my folder is %s\n" % inp)
+        outfile.write("\n\nmy folder is %s\n\n" % inp)
+        # Set the first column as index
+        #myIndex = {'folder': ["energy-AC1", "energy-AMP", "energy-TEMPO", "control-EVI", "control-FFV", "control-HEN", "surprise-LZC", "surprise-MSE", "surprise-NVI"]}
+        #index_df = pd.DataFrame(myIndex)
+        df_indexed = df_original.set_index('folder')
+        # Select rows where index (first column) is 'label1'
+        df_indexed = df_indexed.loc['%s'%inp]
+        #print(df_indexed)
+        # remove index column
+        df = df_indexed.iloc[:, 1:]
+        # Define the model
+        data  = pd.DataFrame({'energy-AC1': df.values[0],'energy-AMP': df.values[1],'energy-TEMPO': df.values[9],'control-EVI': df.values[3],'control-FFV': df.values[4],'control-HEN': df.values[5],'surprise-LZC': df.values[6],'surprise-MSE': df.values[7],'surprise-NVI': df.values[8]})
+        
+        fa = FactorAnalyzer(rotation=None)
+        fa.fit(data)
+        # Get the factor loadings
+        loadings = fa.loadings_
+        coms = fa.get_communalities()
+        #print(loadings)
+        outfile.write("factor loadings\n")
+        outfile.write(str(loadings))
+        outfile.write("\ncommunalities\n")
+        outfile.write(str(coms))
+        print("Factor Loadings:\n", loadings)
+        print("Communalities:\n", coms)
+        
+        
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
 def main():
     collectDF()
+    runEFA()
     runCFA()
     RFclass()
     
