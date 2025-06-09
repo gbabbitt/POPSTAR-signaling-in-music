@@ -114,7 +114,7 @@ if(num_folders == 6):
     folder_list = [inp1,inp2,inp3,inp4,inp5,inp6]     
     
 ##############################################################
-def collectDF():
+def collectDFrf():
     print("collecting dataframe")
     writePath = "popstar_results/RF_features_%s.txt" % folder_list
     txt_out = open(writePath, "w")
@@ -294,17 +294,78 @@ def runEFA():
         outfile.write(str(coms))
         print("Factor Loadings:\n", loadings)
         print("Communalities:\n", coms)
-        
+
+def collectDFeb():
+    print("collecting dataframe")
+    writePath = "popstar_results/ternary_compare_%s.txt" % (folder_list)
+    writePath1 = "popstar_results/energy_compare_%s.txt" % (folder_list)
+    writePath2 = "popstar_results/control_compare_%s.txt" % (folder_list)
+    writePath3 = "popstar_results/surprise_compare_%s.txt" % (folder_list)
+    txt_out = open(writePath, "w")
+    txt_out1 = open(writePath1, "w")
+    txt_out2 = open(writePath2, "w")
+    txt_out3 = open(writePath3, "w")
+    txt_out.write("folder\tternary\tvalue\n")
+    txt_out1.write("folder\tenergy\n")
+    txt_out2.write("folder\tcontrol\n")
+    txt_out3.write("folder\tsurprise\n")
+    
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
+        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        print(dir_list)
+        for fname in dir_list:
+            print(fname)
+            dirname = fname
+            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
+            df = pd.read_csv(readPath, sep = "\t")
+            #print(df)
+            for i in range(len(df)-1):
+                df_row = df.iloc[i,0]
+                df_row = df_row.split(",")
+                #print(df_row)
+                energy = df_row[0]
+                control = df_row[1]
+                surprise = df_row[2]
+                print("%s\t%s\t%s\t%s" % (inp,energy, control, surprise))
+                txt_out.write("%s\tenergy\t%s\n" % (inp,energy))
+                txt_out.write("%s\tcontrol\t%s\n" % (inp,control))
+                txt_out.write("%s\tsurprise\t%s\n" % (inp,surprise))
+                txt_out1.write("%s\t%s\n" % (inp,energy))
+                txt_out2.write("%s\t%s\n" % (inp,control))
+                txt_out3.write("%s\t%s\n" % (inp,surprise))
+
+def  errorBarPlot():   
+    # Create a sample dataframe
+    readPath = "popstar_results/ternary_compare_%s.txt" % (folder_list)
+    df = pd.read_csv(readPath, sep = "\t")
+    # Plotting the bar plot with error bars
+    sns.barplot(x='folder', y='value', hue='ternary', data=df, errorbar='ci')
+
+    # Adding labels and title
+    plt.xlabel('folder')
+    plt.ylabel('normalized feature value')
+    plt.title('fitness signal comparison')
+
+    # Display the plot
+    plt.legend(title='ternary axes')
+    plt.savefig("popstar_results/compareSignal_%s.png" % (folder_list))
+    plt.show()        
         
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
 def main():
-    collectDF()
+    collectDFrf()
+    collectDFeb()
     runEFA()
     runCFA()
     RFclass()
-    
+    errorBarPlot()
     print("\nsignal classification is complete\n")   
     
         
