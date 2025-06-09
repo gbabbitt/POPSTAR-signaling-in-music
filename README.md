@@ -10,7 +10,7 @@ TO RUN: python3 popstar.py
 
 INPUT: myFile.wav or myFile.mp3 or myDir (...where myDir is a directory with multiple sound files for batch processing) Files provided for testing the code are test.mp3 and the folder test-cases which has 3 copies of this file. 
 
-DEPENDENCIES: PyQt5, PIL, python-ternary, hurst, EntropyHub, FactorAnalyzer, librosa, soundfile, pydub, moviepy (use pip install moviepy==1.0.3 to avoid recent bug), and the usual suspects for data analysis (numpy, scipy, pandas, matplotlib, statsmodels, multiprocessing)
+DEPENDENCIES: PyQt5, PIL, python-ternary, EntropyHub, factor_analyzer, yt-dlp, librosa, soundfile, pydub, moviepy (use pip install moviepy==1.0.3 to avoid recent bug), and the usual suspects for data analysis (numpy, scipy, pandas, matplotlib, statsmodels, multiprocessing)
 
 Quick look at the GUI
 
