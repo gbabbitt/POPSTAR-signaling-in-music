@@ -230,6 +230,7 @@ def runCFA():
     for j in range(len(folder_list)):
         inp = folder_list[j]
         print("my folder is %s\n" % inp)
+        outfile.write("\n-------------------------------------------------\n")
         outfile.write("\n\nmy folder is %s\n\n" % inp)
         # Set the first column as index
         #myIndex = {'folder': ["energy-AC1", "energy-AMP", "energy-TEMPO", "control-EVI", "control-FFV", "control-HEN", "surprise-LZC", "surprise-MSE", "surprise-NVI"]}
@@ -246,15 +247,31 @@ def runCFA():
         # Parse the model specification
         model_spec = ModelSpecificationParser.parse_model_specification_from_dict(data, model_dict)
         # Create and fit the CFA model
-        cfa = ConfirmatoryFactorAnalyzer(model_spec, disp=True)
+        cfa = ConfirmatoryFactorAnalyzer(model_spec, disp=True, n_obs=len(df), is_cov_matrix=True)
         cfa.fit(data.values)
         # Get the factor loadings
         loadings = cfa.loadings_
+        modcov = cfa.get_model_implied_cov()
+        factvarcovs = cfa.factor_varcovs_
+        se = cfa.get_standard_errors()
+        cfa = ConfirmatoryFactorAnalyzer(model_spec, disp=True, is_cov_matrix=False)
+        cfa.fit(data.values)
+        logL = cfa.log_likelihood_
+        aic = cfa.aic_
+        bic = cfa.bic_
         #print(loadings)
-        outfile.write("factor loadings\n")
+        outfile.write("\nmodel implied covariance\n")
+        outfile.write(str(modcov))
+        outfile.write("\nfactor variance/covariance\n")
+        outfile.write(str(factvarcovs))
+        outfile.write("\nfactor loadings\n")
         outfile.write(str(loadings))
+        outfile.write("\nstandard errors\n")
+        outfile.write(str(se))
+        outfile.write("\nlogL = %s aic= %s bic = %s\n" % (logL,aic,bic))
+        outfile.write("\n-------------------------------------------------\n")
         print("Factor Loadings:\n", loadings)
-        
+        print("logL = %s aic= %s bic = %s\n" % (logL,aic,bic))
     outfile.close()
     
 def runEFA():   
