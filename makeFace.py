@@ -143,9 +143,11 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
         current_key, current_value = list(tdata.items())[-1]
         #print(current_value)
         #tax.scatter([current_value], marker='o', color='red', label='current value')
-    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="song trajectory")
         tax.scatter([current_value], marker='o', color='orange', label='current value')
-    tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
+    if(selfOpt == "yes"):
+        tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
+    if(selfOpt == "no"):
+        tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")
     max_fs = 40
     # corner font size
     fsX = valX*max_fs
@@ -192,8 +194,10 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
         current_key, current_value = list(tdata.items())[-1]
         #print(current_value)
         tax.scatter([current_value], marker='o', color='orange', label='current value')
-    #tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
-    tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory")  
+    if(selfOpt == "yes"):
+        tax.plot_colored_trajectory(tdata.values(), linewidth=0.8, label="trajectory")
+    if(selfOpt == "no"):
+        tax.plot_colored_trajectory(tdata.values(), linewidth=0.6, color='black', label="song trajectory") 
     max_fs = 40
     # corner font size
     fsX = valX*max_fs
