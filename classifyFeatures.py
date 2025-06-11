@@ -237,41 +237,72 @@ def runCFA():
         #index_df = pd.DataFrame(myIndex)
         df_indexed = df_original.set_index('folder')
         # Select rows where index (first column) is 'label1'
-        df_indexed = df_indexed.loc['%s'%inp]
-        #print(df_indexed)
-        # remove index column
-        df = df_indexed.iloc[:, 1:]
+        df_subset = df_indexed.loc['%s'%inp]
+        #print(df_subset)
+        energy_AC1 = df_subset['energy-AC1']
+        #print(energy_AC1.values)
+        energy_AMP = df_subset['energy-AMP']
+        #print(energy_AMP.values)
+        energy_TEMPO = df_subset['energy-TEMPO']
+        #print(energy_TEMPO.values)
+        control_EVI = df_subset['control-EVI']
+        #print(control_EVI.values)
+        control_FFV = df_subset['control-FFV']
+        #print(control_FFV.values)
+        control_HEN = df_subset['control-HEN']
+        #print(control_HEN.values)
+        surprise_LZC = df_subset['surprise-LZC']
+        #print(surprise_LZC.values)
+        surprise_MSE = df_subset['surprise-MSE']
+        #print(surprise_MSE.values)
+        surprise_NVI = df_subset['surprise-NVI']
+        #print(surprise_NVI.values)
         # Define the model
-        data  = pd.DataFrame({'energy-AC1': df.values[0],'energy-AMP': df.values[1],'energy-TEMPO': df.values[9],'control-EVI': df.values[3],'control-FFV': df.values[4],'control-HEN': df.values[5],'surprise-LZC': df.values[6],'surprise-MSE': df.values[7],'surprise-NVI': df.values[8]})
-        model_dict = {"F1": ["energy-AC1", "energy-AMP", "energy-TEMPO"], "F2": ["control-EVI", "control-FFV", "control-HEN"], "F3": ["surprise-LZC", "surprise-MSE", "surprise-NVI"]}
-        # Parse the model specification
-        model_spec = ModelSpecificationParser.parse_model_specification_from_dict(data, model_dict)
-        # Create and fit the CFA model
-        cfa = ConfirmatoryFactorAnalyzer(model_spec, disp=True, n_obs=len(df), is_cov_matrix=True)
-        cfa.fit(data.values)
+        data  = pd.DataFrame({'energy-AC1': energy_AC1 ,'energy-AMP': energy_AMP,'energy-TEMPO': energy_TEMPO,'control-EVI': control_EVI,'control-FFV': control_FFV,'control-HEN': control_HEN,'surprise-LZC': surprise_LZC,'surprise-MSE': surprise_MSE,'surprise-NVI': surprise_NVI})
+        #print(data)
+        matrix = pd.DataFrame.cov(data)
+        #print(matrix)
+        #shuffled_data = data.sample(axis=1, frac=1) # shuffled columns in data frame
+        #data = shuffled_data
+        #print(myStop)
+        ########################################################
+        print("\nmodel - hypothesized 3 factor fitness signal = F1:E1,E2,E3 | F2:C1,C2,C3 | F3:S1,S2,S3\n")
+        outfile.write("\nmodel - hypothesized 3 factor fitness signal = F1:E1,E2,E3 | F2:C1,C2,C3 | F3:S1,S2,S3\n")
+        model_dict = {"F1": ['energy-AC1', 'energy-AMP', 'energy-TEMPO'], "F2": ['control-EVI', 'control-FFV', 'control-HEN'], "F3": ['surprise-LZC', 'surprise-MSE', 'surprise-NVI']}
+        
+        # using covariance matrix
+        model_spec = ModelSpecificationParser.parse_model_specification_from_dict(matrix, model_dict)
+        cfa = ConfirmatoryFactorAnalyzer(model_spec, disp=False, n_obs = 9, is_cov_matrix=True)
+        cfa.fit(matrix.values)
+        
+        # using dataframe (gives same result)
+        #model_spec = ModelSpecificationParser.parse_model_specification_from_dict(data, model_dict)
+        #cfa = ConfirmatoryFactorAnalyzer(model_spec, disp=True, is_cov_matrix=False)
+        #cfa.fit(data.values)
+        
         # Get the factor loadings
         loadings = cfa.loadings_
         modcov = cfa.get_model_implied_cov()
         factvarcovs = cfa.factor_varcovs_
         se = cfa.get_standard_errors()
-        cfa = ConfirmatoryFactorAnalyzer(model_spec, disp=True, is_cov_matrix=False)
-        cfa.fit(data.values)
         logL = cfa.log_likelihood_
         aic = cfa.aic_
         bic = cfa.bic_
         #print(loadings)
-        outfile.write("\nmodel implied covariance\n")
-        outfile.write(str(modcov))
-        outfile.write("\nfactor variance/covariance\n")
-        outfile.write(str(factvarcovs))
+        #outfile.write("\nmodel implied covariance\n")
+        #outfile.write(str(modcov))
+        #outfile.write("\nfactor variance/covariance\n")
+        #outfile.write(str(factvarcovs))
         outfile.write("\nfactor loadings\n")
         outfile.write(str(loadings))
-        outfile.write("\nstandard errors\n")
-        outfile.write(str(se))
-        outfile.write("\nlogL = %s aic= %s bic = %s\n" % (logL,aic,bic))
+        #outfile.write("\nstandard errors\n")
+        #outfile.write(str(se))
+        #outfile.write("\nlogL = %s aic= %s bic = %s\n" % (logL,aic,bic))
         outfile.write("\n-------------------------------------------------\n")
         print("Factor Loadings:\n", loadings)
-        print("logL = %s aic= %s bic = %s\n" % (logL,aic,bic))
+        #print("logL = %s aic= %s bic = %s\n" % (logL,aic,bic))
+        ########################################################
+        
     outfile.close()
     
 def runEFA():   
