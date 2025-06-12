@@ -119,6 +119,9 @@ def collectDFrf():
     writePath = "popstar_results/RF_features_%s.txt" % folder_list
     txt_out = open(writePath, "w")
     txt_out.write("folder\tenergy-AC1\tenergy-AMP\tcontrol-BIV\tcontrol-EVI\tcontrol-FFV\tcontrol-HEN\tsurprise-LZC\tsurprise-MSE\tsurprise-NVI\tenergy-TEMPO\n")
+    writePath2 = "popstar_results/FILES_list_%s.txt" % folder_list
+    txt_out2 = open(writePath2, "w")
+    txt_out2.write("folder\tfilename\n")
     
     for j in range(len(folder_list)):
         inp = folder_list[j]
@@ -132,6 +135,7 @@ def collectDFrf():
             print(fname)
             dirname = fname
             readPath = "%s_analysis/features_norm_%s.txt" % (inp,dirname)
+            txt_out2.write("%s\t%s\n" % (inp,dirname))
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             for i in range(len(df)-1):
@@ -151,7 +155,8 @@ def collectDFrf():
                 print("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (inp,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues))
                 txt_out.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (inp,AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues))
     txt_out.close()
-        
+    txt_out2.close()
+    
 def RFclass():
     print("\nconducting RF (random forest) on %s (10 bootstraps)\n" % folder_list) 
     readPath = "popstar_results/RF_features_%s.txt" % folder_list

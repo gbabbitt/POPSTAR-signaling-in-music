@@ -75,6 +75,10 @@ class Ui_Dialog(object):
         self.pushButton_5.setGeometry(QtCore.QRect(80, 430, 241, 31))
         self.pushButton_5.setObjectName("pushButton_5")
         self.pushButton_5.clicked.connect(self.clusterIt)
+        self.pushButton_6 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_6.setGeometry(QtCore.QRect(350, 390, 120, 31))
+        self.pushButton_6.setObjectName("pushButton_6")
+        self.pushButton_6.clicked.connect(self.heatmapIt)
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
@@ -91,12 +95,18 @@ class Ui_Dialog(object):
         self.label_7.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 5</span></p></body></html>"))
         self.label_8.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 6</span></p></body></html>"))
         self.pushButton_5.setText(_translate("Dialog", "run 3D EM clustering"))
+        self.pushButton_6.setText(_translate("Dialog", "heatmap CFA"))
+
     
     def closeIt(self):
         print("POPSTAR program closed")
         sys.exit(app.exec_())
     
-    
+    def heatmapIt(self):
+        print("making heatmap for CES signals (beta weights from CFA model)")
+        cmd = "python3 CESheatmap.py"
+        os.system(cmd)
+        
     def classifyIt(self):
         print("running RF classifier")
         filename1 = self.lineEdit.text()
