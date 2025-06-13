@@ -10,6 +10,7 @@
 
 import getopt, sys # Allows for command line arguments
 import os
+import shutil
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -23,32 +24,21 @@ if os.path.exists('YouTube_audio'):
     print("folder already exists...")
 if not os.path.exists('YouTube_audio'):
         os.mkdir('YouTube_audio')
-if os.path.exists('YouTube_video'):
-    print("folder already exists...")
-if not os.path.exists('YouTube_video'):
-        os.mkdir('YouTube_video')
-        
-def download_audio(url, output_path='YouTube_audio', output_format='mp3'):
-       ydl_opts = {
-           'format': 'bestaudio/best',
-           'outtmpl': f'{output_path}/%(title)s.%(ext)s',
-           'extract_audio': True,
-           'audio_format': output_format,
-           'postprocessor_args': ['-vn'] 
-       }
-       with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-           ydl.download([url])
 
-def download_video(url, output_path='YouTube_video', output_format='mp4'):
-       ydl_opts = {
-           'format': 'bestvideo/best',
-           'outtmpl': f'{output_path}/%(title)s.%(ext)s',
-           'extract_audio': False,
-           'audio_format': output_format,
-           'postprocessor_args': ['-vn'] 
-       }
-       with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-           ydl.download([url])
+def move_wav_files(source_folder, destination_folder):
+    """Moves all .wav files from source_folder to destination_folder."""
+
+    if not os.path.exists(destination_folder):
+        os.makedirs(destination_folder)
+
+    for filename in os.listdir(source_folder):
+        if filename.endswith(".wav"):
+            source_path = os.path.join(source_folder, filename)
+            destination_path = os.path.join(destination_folder, filename)
+            shutil.move(source_path, destination_path)
+            print(f"Moved: {filename}")
+
+        
 def main():
     ##################
     #video_url = input("Enter the video URL: ")
@@ -61,21 +51,12 @@ def main():
         infile_line_array = str.split(infile_line, ",")
         myURL = infile_line_array[0]
         print("my URL is ",myURL)
-        download_audio(myURL)
-        download_video(myURL)
+        cmd = "yt-dlp -x --audio-format wav %s" % (myURL)
+        os.system(cmd)
     infile.close()
-    ##################
-    folder_path = "YouTube_audio"
-    old_extension1 = ".webm"
-    old_extension2 = ".mp4"
-    new_extension = ".mp3"
-    for filename in os.listdir(folder_path):
-        if filename.endswith(old_extension1):
-            new_name = filename.replace(old_extension1, new_extension)
-            os.rename(os.path.join(folder_path, filename), os.path.join(folder_path, new_name))
-        if filename.endswith(old_extension2):
-            new_name = filename.replace(old_extension2, new_extension)
-            os.rename(os.path.join(folder_path, filename), os.path.join(folder_path, new_name))
+    source_folder = "." # Replace with your source folder path
+    destination_folder = "YouTube_audio" # Replace with your destination folder path
+    move_wav_files(source_folder, destination_folder)
     print("Audio download complete")
 
 ###############################################################
