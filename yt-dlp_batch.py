@@ -66,11 +66,15 @@ def main():
     infile.close()
     ##################
     folder_path = "YouTube_audio"
-    old_extension = ".webm"
+    old_extension1 = ".webm"
+    old_extension2 = ".mp4"
     new_extension = ".mp3"
     for filename in os.listdir(folder_path):
-        if filename.endswith(old_extension):
-            new_name = filename.replace(old_extension, new_extension)
+        if filename.endswith(old_extension1):
+            new_name = filename.replace(old_extension1, new_extension)
+            os.rename(os.path.join(folder_path, filename), os.path.join(folder_path, new_name))
+        if filename.endswith(old_extension2):
+            new_name = filename.replace(old_extension2, new_extension)
             os.rename(os.path.join(folder_path, filename), os.path.join(folder_path, new_name))
     print("Audio download complete")
 
