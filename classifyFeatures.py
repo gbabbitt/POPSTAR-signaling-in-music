@@ -293,6 +293,25 @@ def runCFA():
         logL = cfa.log_likelihood_
         aic = cfa.aic_
         bic = cfa.bic_
+        X, p = sp.stats.chisquare(loadings)
+        X1 = X[0]
+        X2 = X[1]
+        X3 = X[2]
+        p1 = p[0]
+        p2 = p[1]
+        p3 = p[2]
+        if(X1<0):
+            p1=1-p1  # reverse to other tail if loadings are negative
+        if(X2<0):
+            p2=1-p2
+        if(X3<0):
+            p3=1-p3    
+        print("ENERGY | chi sq = %s, p = %s" % (X1,p1))
+        print("CONTROL | chi sq = %s, p = %s" % (X2,p2))
+        print("SURPRISE | chi sq = %s, p = %s" % (X3,p3))
+        outfile.write("\nENERGY | chi sq = %s, p = %s\n" % (X1,p1))
+        outfile.write("\nCONTROL | chi sq = %s, p = %s\n" % (X2,p2))
+        outfile.write("\nSURPRISE | chi sq = %s, p = %s\n" % (X3,p3))
         #print(loadings)
         #outfile.write("\nmodel implied covariance\n")
         #outfile.write(str(modcov))
@@ -311,7 +330,7 @@ def runCFA():
     outfile.close()
     
 def runEFA():   
-    print("running exploratory factor analysis (CFA) on each folder")
+    print("running exploratory factor analysis (EFA) on each folder")
     readPath = "popstar_results/RF_features_%s.txt" % folder_list
     writePath = "popstar_results/stats_EFA_%s.txt" % folder_list
     outfile = open(writePath, "w")
@@ -335,7 +354,7 @@ def runEFA():
         # Define the model
         data  = pd.DataFrame({'energy-AC1': df.values[0],'energy-AMP': df.values[1],'energy-TEMPO': df.values[9],'control-EVI': df.values[3],'control-FFV': df.values[4],'control-HEN': df.values[5],'surprise-LZC': df.values[6],'surprise-MSE': df.values[7],'surprise-NVI': df.values[8]})
         
-        fa = FactorAnalyzer(n_factors=3, rotation='varimax')
+        fa = FactorAnalyzer(n_factors=1, rotation='varimax')
         fa.fit(data)
         # Get the factor loadings
         loadings = fa.loadings_
@@ -417,8 +436,8 @@ def main():
     collectDFeb()
     runEFA()
     runCFA()
-    RFclass()
     errorBarPlot()
+    RFclass()
     print("\nsignal classification is complete\n")   
     
         
