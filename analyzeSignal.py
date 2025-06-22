@@ -32,6 +32,7 @@ import math
 import random
 bootstp = 50
 import random as rnd
+import warnings as wrn
 #import pytraj as pt
 #import nglview as nv
 from scipy.spatial import distance
@@ -42,7 +43,8 @@ from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.decomposition import TruncatedSVD
 from sklearn import metrics
 from sklearn.preprocessing import MinMaxScaler
-from hurst import compute_Hc, random_walk
+from sklearn.mixture import GaussianMixture
+#from hurst import compute_Hc, random_walk
 import EntropyHub as eh
 import re
 # for ggplot
@@ -365,35 +367,104 @@ def f0_var_stat(item):
     f0, voiced_flag, voiced_probs = librosa.pyin(y,sr=sr,fmin=librosa.note_to_hz('C2'),fmax=librosa.note_to_hz('C7'))
     times = librosa.times_like(f0, sr=sr)
     #pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
+    
+    #print("f0 data")
     #print(f0)
     #print(times)
-    notes = []
-    sum_diff = 0
-    ##################
-    # equal tempered scale - octave range (octave 0 - 8)
-    readPath = "NoteFreqHz.csv"
-    note_freqs = pd.read_csv(readPath, delimiter=',',header=1)
-    #print(note_freqs)
-    for freq in f0:
-        #print(freq)
-        if(freq == "nan"):
-            continue
-        for i in range(len(note_freqs)-1):
-            note = note_freqs.iloc[i,0]
-            note_freq_lower = note_freqs.iloc[i-1,1]
-            note_freq = note_freqs.iloc[i,1]
-            note_freq_upper = note_freqs.iloc[i+1,1]
-            octave = note_freqs.iloc[i,2]
-            #print("%s %s %s" %(note, note_freq, octave))
-            note_freq_upper_bound = note_freq + 0.5*(note_freq_upper - note_freq)
-            note_freq_lower_bound = note_freq - 0.5*(note_freq - note_freq_lower)
-            #print("bounds %s to %s" %(note_freq_lower_bound,note_freq_upper_bound))
-            if(freq < note_freq_upper_bound and freq >= note_freq_lower_bound): 
+    #print(voiced_flag)
+    #print(voiced_probs)
+    
+    ###############
+    if(selfOpt == "yes" or spchOpt == "yes"):
+        # no pitch scale assumed - determined by optimal EM clustering of F0 values
+        df = pd.DataFrame(f0, columns=['freqs'])
+        #print(df)
+        df = df.dropna()
+        #print(df)
+        if(len(df)<=2): # when list is empty
+            notes = []
+            sum_diff = 0
+        if(len(df)>2):
+            # find best GMM model
+            bic = []
+            # set range so smallest clusters will average not less than 10 notes
+            # when best GMM fit requires many components
+            if(len(df)>=50):
+                n_components_range = range(1, int(0.1*len(df)))
+            if(len(df)<50):
+                n_components_range = range(1, len(df))
+            for n_components in n_components_range:
+                wrn.simplefilter("ignore") # suppress convergence warnings when testing range beyond n distinct clusters found (note: BIC won't let these be used)  
+                gmm = GaussianMixture(n_components=n_components, random_state=0)
+                gmm.fit(df)
+                bic.append(gmm.bic(df))
+            #print("bic list")
+            #print(bic)
+            if(len(bic)!=0):
+                min_value = min(bic)  # Find the minimum value
+                min_index = bic.index(min_value) + 1  # Get the index of the minimum value
+            if(len(bic)==0):
+                min_value = 0
+                min_index = 1
+            # EM clustering
+            n_clusters = min_index
+            #print(n_clusters)
+            gmm = GaussianMixture(n_components=n_clusters, random_state=0)
+            gmm.fit(df)
+            cluster_labels = gmm.predict(df)
+            #print("f0 clustering")
+            #print(cluster_labels)
+            freqs = df.values
+            freqs = [item for sublist in freqs for item in sublist] # flatten list of single element lists to simple 1D list
+            #print(freqs)
+            #print(len(freqs))
+            #print(len(cluster_labels))
+            # compute freq avgs for each cluster and make array of exp values
+            df_freqs = pd.DataFrame({'Value': freqs, 'Label': cluster_labels})
+            df_avg_freqs = df_freqs.groupby('Label')['Value'].mean()
+            #print(df_avg_freqs)    
+            exp_freqs = []
+            for j in range(len(cluster_labels)):
+                label = cluster_labels[j]
+                exp_freqs.append(df_avg_freqs.loc[label])
+            #print(exp_freqs)
+            notes = []
+            sum_diff = 0
+            for k in range(len(cluster_labels)):
+                note = cluster_labels[k]
                 notes.append(note)
-                #sum_diff = sum_diff + abs(freq - note_freq)
-                sum_diff = sum_diff + (((freq - note_freq)**2)/note_freq)
-                #print("detected %s in oct%s" % (note, octave))
-        
+                obs_freq = freqs[k]
+                exp_freq = exp_freqs[k]
+                sum_diff = sum_diff + (((obs_freq - exp_freq)**2)/exp_freq)
+                #print(sum_diff)
+    ##################   
+    if(musiOpt == "yes"):
+        notes = []
+        sum_diff = 0
+        # equal tempered scale assumed - octave range (octave 0 - 8)
+        readPath = "NoteFreqHz.csv"
+        note_freqs = pd.read_csv(readPath, delimiter=',',header=1)
+        #print(note_freqs)
+        for freq in f0:
+            #print(freq)
+            if(freq == "nan"):
+                continue
+            for i in range(len(note_freqs)-1):
+                note = note_freqs.iloc[i,0]
+                note_freq_lower = note_freqs.iloc[i-1,1]
+                note_freq = note_freqs.iloc[i,1]
+                note_freq_upper = note_freqs.iloc[i+1,1]
+                octave = note_freqs.iloc[i,2]
+                #print("%s %s %s" %(note, note_freq, octave))
+                note_freq_upper_bound = note_freq + 0.5*(note_freq_upper - note_freq)
+                note_freq_lower_bound = note_freq - 0.5*(note_freq - note_freq_lower)
+                #print("bounds %s to %s" %(note_freq_lower_bound,note_freq_upper_bound))
+                if(freq < note_freq_upper_bound and freq >= note_freq_lower_bound): 
+                    notes.append(note)
+                    #sum_diff = sum_diff + abs(freq - note_freq)
+                    sum_diff = sum_diff + (((freq - note_freq)**2)/note_freq)
+                    #print("detected %s in oct%s" % (note, octave))
+                    #print(sum_diff)
     ##############
     #print("notes detected")
     #print(notes)
@@ -401,8 +472,10 @@ def f0_var_stat(item):
     if(sum_diff == 0):
         FFV = 0.000001
     if(sum_diff != 0):
-        FFV = np.log(1/((sum_diff/(len(notes)))+0.000001))
-        #FFV = 1/(sum_diff+0.000001)
+        if(musiOpt == "yes"):
+            FFV = np.log(1/((sum_diff/(len(notes)))+0.000001))
+        if(spchOpt == "yes" or selfOpt == "yes"):
+            FFV = np.log(1/((sum_diff/(len(notes)))+0.000001))
     if(fileORfolder == "file"):
         print("FFV (f0 frequency control) = %s over %s notes for %s" % (FFV,n_notes,filename))
     if(fileORfolder == "folder"):
@@ -775,8 +848,8 @@ def norm_data():
         sd = 7.43177197236326
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'FFVvalues'
-        mean = 2.9199533843274  
-        sd = 0.719197572142818
+        mean = 1.19364352118119  
+        sd = 2.36131279954623
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
         column = 'HENvalues'
         mean = 8.42027318443921  
@@ -1057,7 +1130,7 @@ def norm_data_batch():
             df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
-           
+        
         ########################################################
         ##### z-score to normalize signal to human speech  #####
         ########################################################
@@ -1065,48 +1138,48 @@ def norm_data_batch():
             df_norm = df.copy() 
             sf = 0.5  # scaling factor
             column = 'AC1values'
-            mean = 0.949214173352932
-            sd = 0.0601940546883669
+            mean = 0.971152375002843
+            sd = 0.0467425213070013
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'AMPvalues'
-            mean =  23.4233734767798 
-            sd = 5.61137334598524
+            mean =  21.4876519266283 
+            sd = 4.22712930761677
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'BIVvalues'
-            mean = 6.30536719531844  
-            sd = 1.90448547602485
+            mean = 6.01624970647998  
+            sd = 1.46101172617656
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'EVIvalues'
-            mean = 6.80084850562953
-            sd = 7.43177197236326
+            mean = 6.23722478815894
+            sd = 4.98574811239143
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'FFVvalues'
-            mean = 2.9199533843274  
-            sd = 0.719197572142818
+            mean = 3.05263745713409  
+            sd = 0.574772419641423
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'HENvalues'
-            mean = 8.42027318443921  
-            sd = 1.83382917348368
+            mean = 8.99800719325214  
+            sd = 1.14024827192511
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'LZCvalues'
-            mean = 12.5059093945709  
-            sd = 0.656758193570298
+            mean = 12.6991417434703  
+            sd = 0.444517995584392
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'MSEvalues'
-            mean = 0.959080514957559  
-            sd = 0.569137483747565
+            mean = 0.839984689623735  
+            sd = 0.485631560637814
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'NVIvalues'
-            mean = 0.683926081755977  
-            sd = 0.122670730550913
+            mean = 0.700753508156807  
+            sd = 0.101200261910785
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             column = 'TEMPOvalues'
-            mean = 124.785422049581  
-            sd = 36.7788654827943
+            mean = 123.474723977777  
+            sd = 33.7279137178354
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
-        
+            
         ########################################################
         ##### z-score to normalize signal to human music  #####
         ########################################################
