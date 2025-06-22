@@ -122,7 +122,7 @@ class Ui_Dialog(object):
         self.label_5.setScaledContents(True)
         ###########################################
         self.label_6 = QtWidgets.QLabel(Dialog)
-        self.label_6.setGeometry(QtCore.QRect(375, 410, 80, 31))
+        self.label_6.setGeometry(QtCore.QRect(365, 410, 100, 31))
         self.label_6.setObjectName("label_6")
         
         # Radio button for self normalization option
@@ -130,13 +130,13 @@ class Ui_Dialog(object):
         self.radioButton_self.setGeometry(QtCore.QRect(375, 470, 80, 31))
         # adding signal and slot 
         self.radioButton_self.toggled.connect(self.selfselected)
-        self.radioButton_self.setText("self")
+        self.radioButton_self.setText("single")
         # Radio button for speech normalization option
         self.radioButton_spch = QtWidgets.QRadioButton(Dialog)
         self.radioButton_spch.setGeometry(QtCore.QRect(375, 450, 80, 31))
         # adding signal and slot 
         self.radioButton_spch.toggled.connect(self.spchselected)
-        self.radioButton_spch.setText("speech")
+        self.radioButton_spch.setText("other")
         # Radio button for music normalization option
         self.radioButton_musi = QtWidgets.QRadioButton(Dialog)
         self.radioButton_musi.setGeometry(QtCore.QRect(375, 430, 80, 31))
@@ -165,7 +165,7 @@ class Ui_Dialog(object):
         self.pushButton_5.setText(_translate("Dialog", "4. make movies"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
         self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">window length (seconds)</span></p></body></html>"))
-        self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">normalize</span></p></body></html>"))
+        self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:500;\">sound-type</span></p></body></html>"))
 ######################################### subroutines ######################################################
     def selfselected(self, selected):
         if selected:
@@ -255,17 +255,17 @@ class Ui_Dialog(object):
             selfOption = "no"   
         '''
         if(selfOption == "no" and spchOption == "no" and musiOption == "no"):
-            print("\nWARNING - you must choose a normalization option prior to run")
+            print("\nWARNING - you must choose a sound-type option prior to run")
             print("...open interface and try again, ... will close in 5s\n")
             time.sleep(5)
             exit()
         if(selfOption == "yes" and fileORfolder == "folder"):
-            print("\nWARNING - comparative analysis best requires 'self-norm' be DEACTIVATED")
-            print("The 'self-norm' option normalizes the fitness signal within each sound file")
+            print("\nWARNING - comparative analysis requires 'single' sound-typw be NOT SELECTED")
+            print("The 'single' sound-type option normalizes the fitness signal within each sound file")
             print("Thus, it is best used when analyzing changes within a single file")
-            print("When 'self-norm' is not chosen all fitness signals are normalized ")
-            print("to average feature values generally observed in human speech or music")
-            print("Thus, these options are best when comparing many files grouped in folders")
+            print("When 'single' is not chosen, all fitness signals are normalized ")
+            print("to average feature values observed in human speech (= other) or music (= music)")
+            print("Thus, these options are best when intending to compare many files grouped in folders")
             print("...press (ctl+c) to stop, otherwise the analysis will start in 20s\n")
             time.sleep(20)        
         interval = self.lineEdit.text()
