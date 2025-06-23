@@ -375,7 +375,7 @@ def f0_var_stat(item):
     #print(voiced_probs)
     
     ###############
-    if(selfOpt == "yes" or spchOpt == "yes"):
+    if(spchOpt == "yes"):
         # no pitch scale assumed - determined by optimal EM clustering of F0 values
         df = pd.DataFrame(f0, columns=['freqs'])
         #print(df)
@@ -438,7 +438,7 @@ def f0_var_stat(item):
                 sum_diff = sum_diff + (((obs_freq - exp_freq)**2)/exp_freq)
                 #print(sum_diff)
     ##################   
-    if(musiOpt == "yes"):
+    if(musiOpt == "yes" or selfOpt == "yes"):
         notes = []
         sum_diff = 0
         # equal tempered scale assumed - octave range (octave 0 - 8)
