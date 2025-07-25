@@ -166,9 +166,10 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
     if(selfOpt == "yes"):
        tax.set_title("Audio Fitness Signal - distance from song center", fontsize=14, y=-0.15)
-    if(selfOpt == "no"):
+    if(spchOpt == "yes"):
        tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
-
+    if(musiOpt == "yes"):
+       tax.set_title("Audio Fitness Signal - distance from avg human music", fontsize=14, y=-0.15)
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
 
@@ -218,7 +219,10 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
        tax.set_title("Audio Fitness Signal - distance from song center", fontsize=14, y=-0.15)
     if(selfOpt == "no"):
        tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
-
+    if(spchOpt == "yes"):
+       tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
+    if(musiOpt == "yes"):
+       tax.set_title("Audio Fitness Signal - distance from avg human music", fontsize=14, y=-0.15)
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
 
