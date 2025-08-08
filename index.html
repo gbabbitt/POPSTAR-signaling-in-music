@@ -131,7 +131,7 @@ https://templatemo.com/tm-536-dream-pulse
 						  <h2 class="tm-color-primary tm-section-title mb-4">A biopsychological model of attention</h2>
                           <img src="img/theory4.png" alt="Client Image" class="img-fluid tm-client-img" /></img>
 						  <p class="mb-5">
-                          Our "popstar model" depicted here is a biopsychological model that proposes that our perceived musicality of certain sounds relies upon an underlying balance of acoustic signals that convey strong motor control (through control of pitch, timing and harmonics), high energy and dimension (through amplitude modulation, tempo, and reverberation), and a lot of surprise (through variation and complexity). This balance is represented by the gray triangle in the model. The inverted green triangle represents how these Darwinian fitness signals affect our cognition in a physical, emotional, and intellectual space. This model proposes that the popular music that captivates the attention of a large majority of us is created by a balance of signaling in control, energy and surprise. It also creates a psychological balance in the physical, emotional, and intellectual space of the mind.  
+                          Our "popstar model" depicted here is a biopsychological model that proposes that our perceived musicality of certain sounds relies upon an underlying balance of acoustic signals that convey strong motor control (through control of pitch, timing and harmonics), high energy and dimension (through amplitude modulation, tempo, and reverberation), and a lot of surprise (through variation and complexity). This balance is represented by the gray triangle in the model. The inverted green triangle represents how these Darwinian fitness signals affect our cognition in a physical, emotional, and intellectual space. This model cojectures that the popular music that captivates the attention of a large majority of us is created by a balance of signaling in control, energy and surprise. It also creates a psychological balance in the physical, emotional, and intellectual space of the mind.  
                           </p>
 						  <h2 class="tm-color-primary tm-section-title mb-4">Musical genres under the popstar model</h2>
                           <img src="img/theory5.png" alt="Client Image" class="img-fluid tm-client-img" /></img>
@@ -150,10 +150,10 @@ https://templatemo.com/tm-536-dream-pulse
 						  <p>Eye height = note variability index (derived from spectral cross-correlation)</p>
 						  <p>Eye width = Lempel-Ziv complexity (derived from substring counts)</p>
 						  <p>Pupil area = Complexity Index (derived from refined multi-scale entropy)</p>
-						  <p>Eyebrow slant level = tempo (beats per minute) </p>
+						  <p>Eyebrow slant level = tempo (beats per minute)</p>
 						  <p>Mouth height = amplitude volume</p>
 						  <p>Mouth width = sound size or ambient dimension (derived from 1st order autocorrelation)</p>
-                                                  <p>Ear height = fundamental frequency (f0) control or control of pitch</p>
+                          <p>Ear height = fundamental frequency (f0) control or control of pitch</p>
 						  <p>Ear width = evenness or control of beat intervals (derived from sums of square differences)</p>
 						  <p>Nose slant = level of harmonic energy or number of harmonic frequencies (fN)</p>
 						  
@@ -177,7 +177,7 @@ https://templatemo.com/tm-536-dream-pulse
               <div>
                 
 			  <p>
-			  POPSTAR: python modules dependencies: PyQt5, PIL, python-ternary, EntropyHub, factor_analyzer, yt-dlp, librosa, soundfile, pydub, moviepy (use pip install moviepy==1.0.3 to avoid recent bug), and the usual suspects for data analysis (numpy, scipy, pandas, matplotlib, seaborn, statsmodels, multiprocessing) NOTE: for best results, the CPU on the computer should support at least 4 cores.  
+			  POPSTAR: python modules dependencies (PyQt5, numpy, scipy, pandas, multiprocessing, scikit-learn, matplotlib, seaborn, plotnine, progress, librosa, soundfile, pydub, moviepy, hurst, EntropyHub, ternary) NOTE: for best results, the CPU on the computer should support at least 4 cores.  
               </p>
 			  <p>QUICK START (Linux or Mac terminal, or Windows cmd): </p>
               <p>pip3 install  PyQt5, numpy, scipy, pandas, etc. </p>
@@ -185,6 +185,21 @@ https://templatemo.com/tm-536-dream-pulse
 			  <p>python3 popstar.py</p>
 			  <p> on GUI, enter file or folder to analyze, select sound-type (self=single file, music, or other), click buttons in numbered order on the user interface</p>
 			  <p> NOTE: we highly recommend building this within a unique conda environment</p>
+			  
+			   <h2 class="tm-color-primary tm-section-title mb-4">validation</h2>
+				 <p>POPSTAR can predict Billboard magazine peak chart positions</p>
+              </div>
+                 <img src="img/statsBjork.png" alt="Client Image" class="img-fluid tm-client-img" />
+              <div>
+                
+			  <p>
+			  Here we used POPSTAR software to analyze Darwinian fitness signals in the the Icelandic popstar and musician Bjork's extensive career. The X axis are the beta weights (i.e. slopes) from a confirmatory factor analysis that tests the balance between the three features of the calculus of attention in the CES model (i.e. control, energy, and surprise). The Y axis contains the peak average Billbord chart positions internationally for the LP and for the singles released in the UK. The heatmap shows the beta weights in the CES model. Here more negative values indicate stronger relationships between features measured in the acoustics and the prediction of the CES attention model. Right away we notice that Bjork's live performances tend to hold attention much better than some of her studio work which is more variable...and we also notice that her top most charting LP's and singles have stronger relationships to attention signaling as well. 
+              </p>
+			  
+			  
+			  
+			  
+			  
 			  </section>
 			  
               </div>                             
