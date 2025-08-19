@@ -377,6 +377,53 @@ def main():
         plt.title("best model %s|1st order =%s|0th order =%s" % (inp,bestLABEL_order1,bestLABEL_order0))
         plt.savefig("%s_analysis/histogram.png" % (inp))
         plt.show()
+        ############## permutation test ################
+        if not os.path.exists('%s_analysis/permutation_test' % (inp)):
+            os.mkdir('%s_analysis/permutation_test' % (inp))
+        #readPath = "%s_analysis/distances_order1.txt" % (inp)
+        print("running permutations test on %s" % (inp))
+        readPath = "%s_analysis/ternary_norm.txt" % (inp)
+        df_obs = pd.read_csv(readPath, delimiter=',',header=0)
+        cnt_above = 0
+        cnt_below = 0
+        p_value = 0.5
+        distances = []
+        for i in range(len(df_obs)-1):
+            x2 = df_obs.iloc[i+1,0]
+            x1 = df_obs.iloc[i,0]
+            y2 = df_obs.iloc[i+1,1]
+            y1 = df_obs.iloc[i,1]
+            z2 = df_obs.iloc[i+1,2]
+            z1 = df_obs.iloc[i,2]
+            dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+            distances.append(dist)
+        obs_dist = np.sum(distances)
+        for x in range(1000):
+            df_shuffled = df_obs.sample(frac=1)
+            #print(df_obs)
+            #print(df_shuffled)
+            df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
+            #print(df_shuffled)
+            distances = []
+            for i in range(len(df_shuffled)-1):
+                x2 = df_shuffled.iloc[i+1,0]
+                x1 = df_shuffled.iloc[i,0]
+                y2 = df_shuffled.iloc[i+1,1]
+                y1 = df_shuffled.iloc[i,1]
+                z2 = df_shuffled.iloc[i+1,2]
+                z1 = df_shuffled.iloc[i,2]
+                dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+                distances.append(dist)
+            shuffled_dist = np.sum(distances)
+            #print("%s obs_dist=%s | shuffled_dist=%s" % (x,obs_dist, shuffled_dist))
+            if(obs_dist >= shuffled_dist):
+                cnt_above = cnt_above + 1
+            if(obs_dist < shuffled_dist):
+                cnt_below = cnt_below + 1    
+            cnt_ttl = cnt_above + cnt_below
+            p_value = cnt_above/(cnt_ttl+0.00001)
+        print("permutation test completed")
+        print("empirical p-value = %s" % p_value)
         
     if(fof=="folder"):
         print("make histograms")    
@@ -419,6 +466,53 @@ def main():
             plt.title("best model %s|1st order =%s|0th order =%s" % (dirname,bestLABEL_order1,bestLABEL_order0))
             plt.savefig("%s_analysis/histogram_%s.png" % (inp,dirname))
             plt.show()
+            ############## permutation test ################
+            print("running permutations test on %s %s" % (inp,dirname))
+            if not os.path.exists('%s_analysis/permutation_test/%s' % (inp,dirname)):
+                os.mkdir('%s_analysis/permutation_test/%' % (inp,dirname))
+            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
+            df_obs = pd.read_csv(readPath, delimiter=',',header=0)
+            cnt_above = 0
+            cnt_below = 0
+            p_value = 0.5
+            distances = []
+            for i in range(len(df_obs)-1):
+                x2 = df_obs.iloc[i+1,0]
+                x1 = df_obs.iloc[i,0]
+                y2 = df_obs.iloc[i+1,1]
+                y1 = df_obs.iloc[i,1]
+                z2 = df_obs.iloc[i+1,2]
+                z1 = df_obs.iloc[i,2]
+                dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+                distances.append(dist)
+            obs_dist = distances.sum()
+            for x in range(1000):
+                df_shuffled = df_obs.sample(frac=1)
+                #print(df_obs)
+                #print(df_shuffled)
+                df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
+                #print(df_shuffled)
+                distances = []
+                for i in range(len(df_shuffled)-1):
+                    x2 = df_shuffled.iloc[i+1,0]
+                    x1 = df_shuffled.iloc[i,0]
+                    y2 = df_shuffled.iloc[i+1,1]
+                    y1 = df_shuffled.iloc[i,1]
+                    z2 = df_shuffled.iloc[i+1,2]
+                    z1 = df_shuffled.iloc[i,2]
+                    dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+                    distances.append(dist)
+                shuffled_dist = distances.sum()
+                #print("%s %s obs_dist=%s | shuffled_dist=%s" % (dirname, x,obs_dist, shuffled_dist))
+                if(obs_dist >= shuffled_dist):
+                    cnt_above = cnt_above + 1
+                if(obs_dist < shuffled_dist):
+                    cnt_below = cnt_below + 1    
+                cnt_ttl = cnt_above + cnt_below
+                p_value = cnt_above/(cnt_ttl+0.00001)
+            print("permutation test completed")
+            print("empirical p-value = %s" % p_value)
+            
 ###############################################################
 if __name__ == '__main__':
     main()

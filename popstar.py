@@ -158,7 +158,7 @@ class Ui_Dialog(object):
         self.pushButton_6.setText(_translate("Dialog", "6. play faces"))
         self.pushButton_7.setText(_translate("Dialog", "5. play trajectory"))
         self.pushButton_8.setText(_translate("Dialog", "see DOC"))
-        self.pushButton_9.setText(_translate("Dialog", "step dist"))
+        self.pushButton_9.setText(_translate("Dialog", "p-value"))
         self.pushButton_10.setText(_translate("Dialog", "compare"))
         self.pushButton_11.setText(_translate("Dialog", "classify"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - BabbittLab@RIT</span></p></body></html>"))

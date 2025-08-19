@@ -86,7 +86,7 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "BabbittLab@RIT"))
         self.pushButton_2.setText(_translate("Dialog", "exit"))
-        self.pushButton_4.setText(_translate("Dialog", "run RF classifier and CFA"))
+        self.pushButton_4.setText(_translate("Dialog", "run RF classifier"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - Classify</span></p></body></html>"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 1</span></p></body></html>"))
         self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 2</span></p></body></html>"))
@@ -95,7 +95,7 @@ class Ui_Dialog(object):
         self.label_7.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 5</span></p></body></html>"))
         self.label_8.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 6</span></p></body></html>"))
         self.pushButton_5.setText(_translate("Dialog", "run 3D EM clustering"))
-        self.pushButton_6.setText(_translate("Dialog", "heatmap CFA"))
+        self.pushButton_6.setText(_translate("Dialog", "heatmap CES"))
 
     
     def closeIt(self):
@@ -103,7 +103,7 @@ class Ui_Dialog(object):
         sys.exit(app.exec_())
     
     def heatmapIt(self):
-        print("making heatmap for CES signals (beta weights from CFA model)")
+        print("making heatmap for CES signals")
         cmd = "python3 CESheatmap.py"
         os.system(cmd)
         

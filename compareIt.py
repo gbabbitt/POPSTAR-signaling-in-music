@@ -60,7 +60,7 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(_translate("Dialog", "BabbittLab@RIT"))
         self.pushButton_2.setText(_translate("Dialog", "exit"))
         self.pushButton_3.setText(_translate("Dialog", "compare fitness (energy, control, surprise)"))
-        self.pushButton_4.setText(_translate("Dialog", "compare step distributions"))
+        self.pushButton_4.setText(_translate("Dialog", "compare p-values and step distributions"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - Comparison</span></p></body></html>"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 1 (reference)</span></p></body></html>"))
         self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 2 (query)</span></p></body></html>"))
