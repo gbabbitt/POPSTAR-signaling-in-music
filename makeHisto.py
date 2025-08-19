@@ -387,43 +387,42 @@ def main():
         cnt_above = 0
         cnt_below = 0
         p_value = 0.5
-        distances = []
-        for i in range(len(df_obs)-1):
-            x2 = df_obs.iloc[i+1,0]
-            x1 = df_obs.iloc[i,0]
-            y2 = df_obs.iloc[i+1,1]
-            y1 = df_obs.iloc[i,1]
-            z2 = df_obs.iloc[i+1,2]
-            z1 = df_obs.iloc[i,2]
-            dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
-            distances.append(dist)
-        obs_dist = np.sum(distances)
         for x in range(1000):
             df_shuffled = df_obs.sample(frac=1)
             #print(df_obs)
             #print(df_shuffled)
             df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
             #print(df_shuffled)
-            distances = []
             for i in range(len(df_shuffled)-1):
-                x2 = df_shuffled.iloc[i+1,0]
-                x1 = df_shuffled.iloc[i,0]
-                y2 = df_shuffled.iloc[i+1,1]
-                y1 = df_shuffled.iloc[i,1]
-                z2 = df_shuffled.iloc[i+1,2]
-                z1 = df_shuffled.iloc[i,2]
-                dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
-                distances.append(dist)
-            shuffled_dist = np.sum(distances)
-            #print("%s obs_dist=%s | shuffled_dist=%s" % (x,obs_dist, shuffled_dist))
-            if(obs_dist >= shuffled_dist):
-                cnt_above = cnt_above + 1
-            if(obs_dist < shuffled_dist):
-                cnt_below = cnt_below + 1    
-            cnt_ttl = cnt_above + cnt_below
-            p_value = cnt_above/(cnt_ttl+0.00001)
+                # obs steps
+                x2 = df_obs.iloc[i+1,0]
+                x1 = df_obs.iloc[i,0]
+                y2 = df_obs.iloc[i+1,1]
+                y1 = df_obs.iloc[i,1]
+                z2 = df_obs.iloc[i+1,2]
+                z1 = df_obs.iloc[i,2]
+                dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+                # shuffled steps
+                x2r = df_shuffled.iloc[i+1,0]
+                x1r = df_shuffled.iloc[i,0]
+                y2r = df_shuffled.iloc[i+1,1]
+                y1r = df_shuffled.iloc[i,1]
+                z2r = df_shuffled.iloc[i+1,2]
+                z1r = df_shuffled.iloc[i,2]
+                dist_rand = np.sqrt((x2r-x1r)**2 + (y2r-y1r)**2 +(z2r-z1r)**2)
+                #print("%s obs_dist=%s | shuffled_dist=%s" % (x,dist_obs, dist_rand))
+                if(dist_obs >= dist_rand):
+                    cnt_above = cnt_above + 1
+                if(dist_obs < dist_rand):
+                    cnt_below = cnt_below + 1    
+                cnt_ttl = cnt_above + cnt_below
+                p_value = cnt_above/(cnt_ttl+0.00001)
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
+        writePath = "%s_analysis/permutation_test/permutation_test.txt" % (inp)
+        txt_out = open(writePath, "w")
+        txt_out.write("%s empirical p-value = %s" % (inp,p_value))
+        txt_out.close
         
     if(fof=="folder"):
         print("make histograms")    
@@ -475,43 +474,42 @@ def main():
             cnt_above = 0
             cnt_below = 0
             p_value = 0.5
-            distances = []
-            for i in range(len(df_obs)-1):
-                x2 = df_obs.iloc[i+1,0]
-                x1 = df_obs.iloc[i,0]
-                y2 = df_obs.iloc[i+1,1]
-                y1 = df_obs.iloc[i,1]
-                z2 = df_obs.iloc[i+1,2]
-                z1 = df_obs.iloc[i,2]
-                dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
-                distances.append(dist)
-            obs_dist = distances.sum()
             for x in range(1000):
                 df_shuffled = df_obs.sample(frac=1)
                 #print(df_obs)
                 #print(df_shuffled)
                 df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
                 #print(df_shuffled)
-                distances = []
                 for i in range(len(df_shuffled)-1):
-                    x2 = df_shuffled.iloc[i+1,0]
-                    x1 = df_shuffled.iloc[i,0]
-                    y2 = df_shuffled.iloc[i+1,1]
-                    y1 = df_shuffled.iloc[i,1]
-                    z2 = df_shuffled.iloc[i+1,2]
-                    z1 = df_shuffled.iloc[i,2]
-                    dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
-                    distances.append(dist)
-                shuffled_dist = distances.sum()
-                #print("%s %s obs_dist=%s | shuffled_dist=%s" % (dirname, x,obs_dist, shuffled_dist))
-                if(obs_dist >= shuffled_dist):
-                    cnt_above = cnt_above + 1
-                if(obs_dist < shuffled_dist):
-                    cnt_below = cnt_below + 1    
-                cnt_ttl = cnt_above + cnt_below
-                p_value = cnt_above/(cnt_ttl+0.00001)
+                    # obs steps
+                    x2 = df_obs.iloc[i+1,0]
+                    x1 = df_obs.iloc[i,0]
+                    y2 = df_obs.iloc[i+1,1]
+                    y1 = df_obs.iloc[i,1]
+                    z2 = df_obs.iloc[i+1,2]
+                    z1 = df_obs.iloc[i,2]
+                    dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+                    # shuffled steps
+                    x2r = df_shuffled.iloc[i+1,0]
+                    x1r = df_shuffled.iloc[i,0]
+                    y2r = df_shuffled.iloc[i+1,1]
+                    y1r = df_shuffled.iloc[i,1]
+                    z2r = df_shuffled.iloc[i+1,2]
+                    z1r = df_shuffled.iloc[i,2]
+                    dist_rand = np.sqrt((x2r-x1r)**2 + (y2r-y1r)**2 +(z2r-z1r)**2)
+                    print("%s %s obs_dist=%s | shuffled_dist=%s" % (dirname,x,dist_obs, dist_rand))
+                    if(dist_obs >= dist_rand):
+                        cnt_above = cnt_above + 1
+                    if(dist_obs < dist_rand):
+                        cnt_below = cnt_below + 1    
+                    cnt_ttl = cnt_above + cnt_below
+                    p_value = cnt_above/(cnt_ttl+0.00001)
             print("permutation test completed")
             print("empirical p-value = %s" % p_value)
+            writePath = "%s_analysis/permutation_test/%s/permutation_test.txt" % (inp,dirname)
+            txt_out = open(writePath, "w")
+            txt_out.write("%s empirical p-value = %s" % (inp,p_value))
+            txt_out.close
             
 ###############################################################
 if __name__ == '__main__':
