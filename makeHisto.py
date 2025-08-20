@@ -19,7 +19,7 @@ from sklearn.mixture import GaussianMixture
 import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
-
+n_permutations = 100
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
 infile_lines = infile.readlines()
@@ -41,7 +41,9 @@ for x in range(len(infile_lines)):
         fof = value
         print("file or folder is",fof)
     
-       
+if not os.path.exists('popstar_results'):
+    os.mkdir('popstar_results')
+    
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
@@ -345,6 +347,8 @@ def mm_inf(df_order0, df_order1,dirname):
    
 def main():
     if(fof=="file"):
+        if not os.path.exists('%s_analysis/permutation_test' % (inp)):
+            os.mkdir('%s_analysis/permutation_test' % (inp))
         print("make histogram")    
         readPath = "%s_analysis/distances.txt" % (inp)
         df = pd.read_csv(readPath, sep = "\t")
@@ -375,19 +379,17 @@ def main():
         df_bic_best = df_bic_best.split(" ")
         bestLABEL_order0 = str(df_bic_best[3])
         plt.title("best model %s|1st order =%s|0th order =%s" % (inp,bestLABEL_order1,bestLABEL_order0))
-        plt.savefig("%s_analysis/histogram.png" % (inp))
+        plt.savefig("%s_analysis/permutation_test/histogram.png" % (inp))
+        plt.savefig("popstar_results/histogram_%s.png" % (inp))
         plt.show()
         ############## permutation test ################
-        if not os.path.exists('%s_analysis/permutation_test' % (inp)):
-            os.mkdir('%s_analysis/permutation_test' % (inp))
-        #readPath = "%s_analysis/distances_order1.txt" % (inp)
         print("running permutations test on %s" % (inp))
         readPath = "%s_analysis/ternary_norm.txt" % (inp)
         df_obs = pd.read_csv(readPath, delimiter=',',header=0)
         cnt_above = 0
         cnt_below = 0
         p_value = 0.5
-        for x in range(1000):
+        for x in range(n_permutations):
             df_shuffled = df_obs.sample(frac=1)
             #print(df_obs)
             #print(df_shuffled)
@@ -416,13 +418,22 @@ def main():
                 if(dist_obs < dist_rand):
                     cnt_below = cnt_below + 1    
                 cnt_ttl = cnt_above + cnt_below
-                p_value = cnt_above/(cnt_ttl+0.00001)
+                p_value = cnt_below/(cnt_ttl+0.00001)
+                if(p_value < 0.5):
+                    p_value = 0.5
+                percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
         writePath = "%s_analysis/permutation_test/permutation_test.txt" % (inp)
         txt_out = open(writePath, "w")
-        txt_out.write("%s empirical p-value = %s" % (inp,p_value))
+        txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
+        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         txt_out.close
+        writePath2 = "popstar_results/permutation_test_%s.txt" % (dirname)
+        txt_out2 = open(writePath2, "w")
+        txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
+        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out2.close
         
     if(fof=="folder"):
         if not os.path.exists('%s_analysis/permutation_test' % (inp)):
@@ -437,6 +448,8 @@ def main():
         for fname in dir_list:
             print(fname)
             dirname = fname
+            if not os.path.exists('%s_analysis/permutation_test/%s' % (inp,dirname)):
+                os.mkdir('%s_analysis/permutation_test/%s' % (inp,dirname))
             readPath = "%s_analysis/distances_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             print(df)
@@ -465,18 +478,17 @@ def main():
             df_bic_best = df_bic_best.split(" ")
             bestLABEL_order0 = str(df_bic_best[3])
             plt.title("best model %s|1st order =%s|0th order =%s" % (dirname,bestLABEL_order1,bestLABEL_order0))
-            plt.savefig("%s_analysis/histogram_%s.png" % (inp,dirname))
+            plt.savefig("%s_analysis/permutation_test/%s/histogram_%s.png" % (inp,dirname,dirname))
+            plt.savefig("popstar_results/histogram_%s_%s.png" % (inp,dirname))
             #plt.show()
             ############## permutation test ################
             print("running permutations test on %s %s" % (inp,dirname))
-            if not os.path.exists('%s_analysis/permutation_test/%s' % (inp,dirname)):
-                os.mkdir('%s_analysis/permutation_test/%s' % (inp,dirname))
             readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
             df_obs = pd.read_csv(readPath, delimiter=',',header=0)
             cnt_above = 0
             cnt_below = 0
             p_value = 0.5
-            for x in range(1000):
+            for x in range(n_permutations):
                 df_shuffled = df_obs.sample(frac=1)
                 #print(df_obs)
                 #print(df_shuffled)
@@ -505,14 +517,22 @@ def main():
                     if(dist_obs < dist_rand):
                         cnt_below = cnt_below + 1    
                     cnt_ttl = cnt_above + cnt_below
-                    p_value = cnt_above/(cnt_ttl+0.00001)
+                    p_value = cnt_below/(cnt_ttl+0.00001)
+                    if(p_value < 0.5):
+                        p_value = 0.5
+                    percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
             print("permutation test completed")
             print("empirical p-value = %s" % p_value)
             writePath = "%s_analysis/permutation_test/%s/permutation_test.txt" % (inp,dirname)
             txt_out = open(writePath, "w")
-            txt_out.write("%s empirical p-value = %s" % (inp,p_value))
+            txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
+            txt_out.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
             txt_out.close
-            
+            writePath2 = "popstar_results/permutation_test_%s.txt" % (dirname)
+            txt_out2 = open(writePath2, "w")
+            txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
+            txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+            txt_out2.close
 ###############################################################
 if __name__ == '__main__':
     main()

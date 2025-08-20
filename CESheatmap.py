@@ -26,7 +26,7 @@ import csv
 
 ###############################################################################
 ###############################################################################
-features = ['energy-AC1','energy-AMP','energy-TEMPO','control-EVI','control-FFV','control-HEN','surprise-LZC','surprise-MSE','surprise-NVI']
+features = ['% nonrandom']
 
 # build list of input files
 lst = []
@@ -35,7 +35,7 @@ dir_list = os.listdir("popstar_results/")
 for i in range(len(dir_list)):
     myFile = dir_list[i]
     print(myFile[0:9])
-    if(myFile[0:9] == "stats_CFA"):
+    if(myFile[0:11] == "permutation"):
         lst.append(str(myFile))
 print(lst)
 
@@ -45,7 +45,7 @@ def collectDF():
     print("collecting dataframe")
     writePath = "popstar_results/CES_signal.txt"
     txt_out = open(writePath, 'w')
-    #txt_out.write("folder\tCES\tvalue\n")
+    #txt_out.write("folder\tp-value\tnonrandom\n")
     labels = []
     number_files = len(lst)
     print("number of files")
@@ -61,59 +61,40 @@ def collectDF():
                 #print(line_array)
                 if(len(line_array) == 0):
                     continue
-                if(str(line_array[0]) == "factor"):
-                    myFolder = line_array[3]
+                if(str(line_array[0]) == "empirical"):
+                    myPval = line_array[3]
+                    myFolder = line_array[5]
                     print("folder is %s" % myFolder)
                     labels.append(myFolder)
-                matches = re.findall(r"[-+]?\d*\.\d+|\d+", line)
-                floats = []
-                for match in matches:
-                    try:
-                        floats.append(float(match))
-                    except ValueError:
-                        print("Could not convert to float")
-                if(len(floats)==3):
-                    print("my floats are %s" % floats)
-                    floats = np.array(floats)
-                    if(floats[0] != 0):
-                        myType = "energy"
-                    if(floats[1] != 0):
-                        myType = "control"
-                    if(floats[2] != 0):
-                        myType = "surprise"    
-                    non_zero_floats = floats[floats != 0]
-                    myValue = non_zero_floats[0]
-                    print("%s\t%s\t%s\n" % (myFolder, myType, myValue))
-                    txt_out.write("%s\t%s\t%s\n" % (myFolder, myType, myValue))
+                if(str(line_array[0]) == "interpretation"):
+                    myNRval = line_array[2]
+            # print all files    
+            print("%s\t%s\t%s\n" % (myFolder, myPval, myNRval))
+            txt_out.write("%s\t%s\t%s\n" % (myFolder, myPval, myNRval))
+            
+            
     txt_out.close()
     print("CES_signal.txt is completed")
     global comparisons
     comparisons = labels
 
-def matrix_maker():
-    writePath = "popstar_results/CES_signal_matrix.txt"
+def matrix_maker_files():
+    writePath = "popstar_results/CES_signal_matrix_files.txt"
     txt_out = open(writePath, 'w')
     readPath = "popstar_results/CES_signal.txt"
     with open(readPath, "r") as file:
         lines = file.readlines()
-        cnt = 0
         for line in lines:
-            cnt = cnt+1
             line_array = line.split()
             print(line_array)
             myValue = line_array[2]
-            print("%s\t" % myValue)
-            if(cnt < 9):
-                txt_out.write("%s\t" % myValue)
-            if(cnt == 9):
-                print("%s\n" % myValue)
-                txt_out.write("%s\n" % myValue)
-                cnt = 0
+            print("%s\n" % myValue)
+            txt_out.write("%s\n" % myValue)
     txt_out.close()
     print("\nmatrix is done\n")
     
-def heat_map():
-    readPath = "popstar_results/CES_signal_matrix.txt"
+def heat_map_files():
+    readPath = "popstar_results/CES_signal_matrix_files.txt"
     
     with open(readPath, 'r') as file:
         csv_reader = csv.reader(file, delimiter='\t')
@@ -125,21 +106,53 @@ def heat_map():
     txt_in = np.round(txt_in, 2)
     print(txt_in)
     fig, ax = plt.subplots(figsize=(8, 6))
-    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = comparisons, annot = False)
+    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = comparisons, annot = False, vmin = 0, vmax = 100)
     ax.set_aspect('equal') # Ensure square cells
     plt.tight_layout()
-    plt.savefig('popstar_results/CES_signal_matrix.jpg')
+    plt.savefig('popstar_results/CES_signal_matrix_files.jpg')
     plt.show()
     plt.close()
     print("\nheatmap is done\n") 
 
+def matrix_maker_folders():
+    writePath = "popstar_results/CES_signal_matrix_folders.txt"
+    readPath = "popstar_results/CES_signal.txt"
+    df = pd.read_csv(readPath, sep = "\t", header=None)
+    avgs_df = df.groupby(0, as_index=False).mean()
+    print(df)
+    print(avgs_df)
+    avgs_df[2].to_csv(writePath, index=False, header=False)
+    global avg_comparisons
+    avg_comparisons = avgs_df[0].to_numpy()
+    print("\nmatrix is done\n")
+    
+def heat_map_folders():
+    readPath = "popstar_results/CES_signal_matrix_folders.txt"
+    with open(readPath, 'r') as file:
+        csv_reader = csv.reader(file, delimiter='\t')
+        txt_in = list(csv_reader)
+    print(txt_in)
+    txt_in = np.array(txt_in)
+    txt_in = txt_in.astype(float)
+    txt_in = np.round(txt_in, 2)
+    print(txt_in)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = avg_comparisons, annot = False, vmin = 0, vmax = 100)
+    ax.set_aspect('equal') # Ensure square cells
+    plt.tight_layout()
+    plt.savefig('popstar_results/CES_signal_matrix_folders.jpg')
+    plt.show()
+    plt.close()
+    print("\nheatmap is done\n") 
 
 ###############################################################
 ###############################################################
 def main():
     collectDF()
-    matrix_maker()
-    heat_map()
+    matrix_maker_files()
+    heat_map_files()
+    matrix_maker_folders()
+    heat_map_folders()
     print("\nheatmap is completed\n")
 ###############################################################
 if __name__ == '__main__':
