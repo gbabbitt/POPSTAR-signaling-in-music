@@ -425,6 +425,8 @@ def main():
         txt_out.close
         
     if(fof=="folder"):
+        if not os.path.exists('%s_analysis/permutation_test' % (inp)):
+            os.mkdir('%s_analysis/permutation_test' % (inp))
         print("make histograms")    
         lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
         number_files = len(lst)
@@ -468,7 +470,7 @@ def main():
             ############## permutation test ################
             print("running permutations test on %s %s" % (inp,dirname))
             if not os.path.exists('%s_analysis/permutation_test/%s' % (inp,dirname)):
-                os.mkdir('%s_analysis/permutation_test/%' % (inp,dirname))
+                os.mkdir('%s_analysis/permutation_test/%s' % (inp,dirname))
             readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
             df_obs = pd.read_csv(readPath, delimiter=',',header=0)
             cnt_above = 0
@@ -497,7 +499,7 @@ def main():
                     z2r = df_shuffled.iloc[i+1,2]
                     z1r = df_shuffled.iloc[i,2]
                     dist_rand = np.sqrt((x2r-x1r)**2 + (y2r-y1r)**2 +(z2r-z1r)**2)
-                    print("%s %s obs_dist=%s | shuffled_dist=%s" % (dirname,x,dist_obs, dist_rand))
+                    #print("%s %s obs_dist=%s | shuffled_dist=%s" % (dirname,x,dist_obs, dist_rand))
                     if(dist_obs >= dist_rand):
                         cnt_above = cnt_above + 1
                     if(dist_obs < dist_rand):
