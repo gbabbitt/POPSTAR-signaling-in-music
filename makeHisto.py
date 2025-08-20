@@ -466,7 +466,7 @@ def main():
             bestLABEL_order0 = str(df_bic_best[3])
             plt.title("best model %s|1st order =%s|0th order =%s" % (dirname,bestLABEL_order1,bestLABEL_order0))
             plt.savefig("%s_analysis/histogram_%s.png" % (inp,dirname))
-            plt.show()
+            #plt.show()
             ############## permutation test ################
             print("running permutations test on %s %s" % (inp,dirname))
             if not os.path.exists('%s_analysis/permutation_test/%s' % (inp,dirname)):
