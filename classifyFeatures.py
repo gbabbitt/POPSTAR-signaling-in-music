@@ -396,20 +396,30 @@ def collectDFeb():
             readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
+            energy_list = []
+            control_list = []
+            surprise_list = []
             for i in range(len(df)-1):
                 df_row = df.iloc[i,0]
                 df_row = df_row.split(",")
                 #print(df_row)
-                energy = df_row[0]
-                control = df_row[1]
-                surprise = df_row[2]
+                energy = float(df_row[0])
+                control = float(df_row[1])
+                surprise = float(df_row[2])
                 print("%s\t%s\t%s\t%s" % (inp,energy, control, surprise))
-                txt_out.write("%s\tenergy\t%s\n" % (inp,energy))
-                txt_out.write("%s\tcontrol\t%s\n" % (inp,control))
-                txt_out.write("%s\tsurprise\t%s\n" % (inp,surprise))
-                txt_out1.write("%s\t%s\n" % (inp,energy))
-                txt_out2.write("%s\t%s\n" % (inp,control))
-                txt_out3.write("%s\t%s\n" % (inp,surprise))
+                energy_list.append(energy)
+                control_list.append(control)
+                surprise_list.append(surprise)
+            # avg over each file
+            energy_avg = np.mean(energy_list)
+            control_avg = np.mean(control_list)
+            surprise_avg = np.mean(surprise_list)
+            txt_out.write("%s\tenergy\t%s\n" % (inp,energy_avg))
+            txt_out.write("%s\tcontrol\t%s\n" % (inp,control_avg))
+            txt_out.write("%s\tsurprise\t%s\n" % (inp,surprise_avg))
+            txt_out1.write("%s\t%s\n" % (inp,energy_avg))
+            txt_out2.write("%s\t%s\n" % (inp,control_avg))
+            txt_out3.write("%s\t%s\n" % (inp,surprise_avg))
 
 def  errorBarPlot():   
     # Create a sample dataframe
@@ -421,21 +431,60 @@ def  errorBarPlot():
     # Adding labels and title
     plt.xlabel('folder')
     plt.ylabel('normalized feature value')
-    plt.title('fitness signal comparison')
-
+    plt.suptitle('energy H=%s p=%s | control H=%s p=%s' % (energy_H,energy_p,control_H,control_p))
+    plt.title('surprise H=%s p=%s' % (surprise_H,surprise_p))
     # Display the plot
     plt.legend(title='ternary axes')
     plt.savefig("popstar_results/compareSignal_%s.png" % (folder_list))
-    plt.show()        
-        
+    plt.show()
+    
+    
+def KruskalWallis():
+    print("Kruskal-Wallis tests on energy, control and surprise")
+    print(folder_list)
+    readPath = "popstar_results/energy_compare_%s.txt" % (folder_list)
+    df = pd.read_csv(readPath, sep = "\t")
+    groups = [df['energy'][df['folder'] == g] for g in df['folder'].unique()]
+    stat, p = kruskal(*groups)
+    global energy_H
+    global energy_p
+    energy_H = round(stat,2)
+    energy_p = round(p,2)
+    readPath = "popstar_results/control_compare_%s.txt" % (folder_list)
+    df = pd.read_csv(readPath, sep = "\t")
+    groups = [df['control'][df['folder'] == g] for g in df['folder'].unique()]
+    stat, p = kruskal(*groups)
+    global control_H
+    global control_p
+    control_H = round(stat,2)
+    control_p = round(p,2)
+    readPath = "popstar_results/surprise_compare_%s.txt" % (folder_list)
+    df = pd.read_csv(readPath, sep = "\t")
+    groups = [df['surprise'][df['folder'] == g] for g in df['folder'].unique()]
+    stat, p = kruskal(*groups)
+    global surprise_H
+    global surprise_p
+    surprise_H = round(stat,2)
+    surprise_p = round(p,2)
+    print("Kruskal-Wallis tests")
+    print("energy| H=%s p=%s" % (energy_H,energy_p))
+    print("control| H=%s p=%s" % (control_H,control_p))
+    print("surprise| H=%s p=%s" % (surprise_H,surprise_p))
+    return energy_H
+    return energy_p
+    return control_H
+    return control_p
+    return surprise_H
+    return surprise_p        
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
 def main():
     collectDFrf()
     collectDFeb()
-    #runEFA()
+    runEFA()
     runCFA()
+    KruskalWallis()
     errorBarPlot()
     RFclass()
     print("\nsignal classification is complete\n")   

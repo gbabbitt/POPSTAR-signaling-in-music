@@ -89,20 +89,30 @@ def collectDF():
         readPath = "%s_analysis/ternary_norm_%s.txt" % (inp1,dirname)
         df = pd.read_csv(readPath, sep = "\t")
         #print(df)
+        energy_list = []
+        control_list = []
+        surprise_list = []
         for i in range(len(df)-1):
             df_row = df.iloc[i,0]
             df_row = df_row.split(",")
             #print(df_row)
-            energy = df_row[0]
-            control = df_row[1]
-            surprise = df_row[2]
+            energy = float(df_row[0])
+            control = float(df_row[1])
+            surprise = float(df_row[2])
             print("%s\t%s\t%s\t%s" % (inp1,energy, control, surprise))
-            txt_out.write("%s\tenergy\t%s\n" % (inp1,energy))
-            txt_out.write("%s\tcontrol\t%s\n" % (inp1,control))
-            txt_out.write("%s\tsurprise\t%s\n" % (inp1,surprise))
-            txt_out1.write("%s\t%s\n" % (inp1,energy))
-            txt_out2.write("%s\t%s\n" % (inp1,control))
-            txt_out3.write("%s\t%s\n" % (inp1,surprise))
+            energy_list.append(energy)
+            control_list.append(control)
+            surprise_list.append(surprise)
+        # avg over each file
+        energy_avg = np.mean(energy_list)
+        control_avg = np.mean(control_list)
+        surprise_avg = np.mean(surprise_list)
+        txt_out.write("%s\tenergy\t%s\n" % (inp1,energy_avg))
+        txt_out.write("%s\tcontrol\t%s\n" % (inp1,control_avg))
+        txt_out.write("%s\tsurprise\t%s\n" % (inp1,surprise_avg))
+        txt_out1.write("%s\t%s\n" % (inp1,energy_avg))
+        txt_out2.write("%s\t%s\n" % (inp1,control_avg))
+        txt_out3.write("%s\t%s\n" % (inp1,surprise_avg))
     ####################################
     lst = os.listdir("%s_analysis/intervals/" % (inp2)) # your directory path
     number_files = len(lst)
@@ -116,20 +126,30 @@ def collectDF():
         readPath = "%s_analysis/ternary_norm_%s.txt" % (inp2,dirname)
         df = pd.read_csv(readPath, sep = "\t")
         #print(df)    
+        energy_list = []
+        control_list = []
+        surprise_list = []
         for i in range(len(df)-1):
             df_row = df.iloc[i,0]
             df_row = df_row.split(",")
             #print(df_row)
-            energy = df_row[0]
-            control = df_row[1]
-            surprise = df_row[2]
+            energy = float(df_row[0])
+            control = float(df_row[1])
+            surprise = float(df_row[2])
             print("%s\t%s\t%s\t%s" % (inp2,energy, control, surprise))
-            txt_out.write("%s\tenergy\t%s\n" % (inp2,energy))
-            txt_out.write("%s\tcontrol\t%s\n" % (inp2,control))
-            txt_out.write("%s\tsurprise\t%s\n" % (inp2,surprise))
-            txt_out1.write("%s\t%s\n" % (inp2,energy))
-            txt_out2.write("%s\t%s\n" % (inp2,control))
-            txt_out3.write("%s\t%s\n" % (inp2,surprise))
+            energy_list.append(energy)
+            control_list.append(control)
+            surprise_list.append(surprise)
+        # avg over each file
+        energy_avg = np.mean(energy_list)
+        control_avg = np.mean(control_list)
+        surprise_avg = np.mean(surprise_list)
+        txt_out.write("%s\tenergy\t%s\n" % (inp2,energy_avg))
+        txt_out.write("%s\tcontrol\t%s\n" % (inp2,control_avg))
+        txt_out.write("%s\tsurprise\t%s\n" % (inp2,surprise_avg))
+        txt_out1.write("%s\t%s\n" % (inp2,energy_avg))
+        txt_out2.write("%s\t%s\n" % (inp2,control_avg))
+        txt_out3.write("%s\t%s\n" % (inp2,surprise_avg))
     txt_out.close()
     txt_out1.close()
     txt_out2.close()
