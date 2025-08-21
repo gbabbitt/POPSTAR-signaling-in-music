@@ -17,6 +17,7 @@ import re
 import pandas as pd
 import numpy as np
 import scipy as sp
+from scipy.stats import kruskal
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from plotnine import *
@@ -124,6 +125,13 @@ def matrix_maker_folders():
     avgs_df[2].to_csv(writePath, index=False, header=False)
     global avg_comparisons
     avg_comparisons = avgs_df[0].to_numpy()
+    # KW test
+    group_data = [group[2].values for name, group in df.groupby(0)]
+    global h_statistic
+    global p_value
+    h_statistic, p_value = kruskal(*group_data)
+    print(f"H-statistic: {h_statistic}")
+    print(f"P-value: {p_value}")
     print("\nmatrix is done\n")
     
 def heat_map_folders():
@@ -139,6 +147,7 @@ def heat_map_folders():
     fig, ax = plt.subplots(figsize=(8, 6))
     hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = avg_comparisons, annot = False, vmin = 0, vmax = 100)
     ax.set_aspect('equal') # Ensure square cells
+    plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
     plt.tight_layout()
     plt.savefig('popstar_results/CES_signal_matrix_folders.jpg')
     plt.show()
