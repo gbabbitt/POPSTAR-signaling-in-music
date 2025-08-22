@@ -113,6 +113,15 @@ def heat_map_files():
     plt.savefig('popstar_results/CES_signal_matrix_files.jpg')
     plt.show()
     plt.close()
+    myMIN = np.min(txt_in)
+    myMAX = np.max(txt_in)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = comparisons, annot = False, vmin = myMIN, vmax = myMAX)
+    ax.set_aspect('equal') # Ensure square cells
+    plt.tight_layout()
+    plt.savefig('popstar_results/CES_signal_matrix_files_scaled.jpg')
+    plt.show()
+    plt.close()
     print("\nheatmap is done\n") 
 
 def matrix_maker_folders():
@@ -150,6 +159,16 @@ def heat_map_folders():
     plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
     plt.tight_layout()
     plt.savefig('popstar_results/CES_signal_matrix_folders.jpg')
+    plt.show()
+    plt.close()
+    myMIN = np.min(txt_in)
+    myMAX = np.max(txt_in)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = avg_comparisons, annot = False, vmin = myMIN, vmax = myMAX)
+    ax.set_aspect('equal') # Ensure square cells
+    plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
+    plt.tight_layout()
+    plt.savefig('popstar_results/CES_signal_matrix_folders_scaled.jpg')
     plt.show()
     plt.close()
     print("\nheatmap is done\n") 

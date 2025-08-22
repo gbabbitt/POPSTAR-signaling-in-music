@@ -482,8 +482,8 @@ def KruskalWallis():
 def main():
     collectDFrf()
     collectDFeb()
-    runEFA()
-    runCFA()
+    #runEFA()
+    #runCFA()
     KruskalWallis()
     errorBarPlot()
     RFclass()
