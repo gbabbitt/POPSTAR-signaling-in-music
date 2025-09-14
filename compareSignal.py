@@ -27,7 +27,7 @@ import random as rnd
 #import nglview as nv
 from scipy.spatial import distance
 from scipy.stats import entropy
-from scipy.stats import ks_2samp, kruskal, f_oneway
+from scipy.stats import ks_2samp, kruskal, f_oneway, ansari
 from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.decomposition import TruncatedSVD
 from sklearn import metrics
@@ -192,7 +192,7 @@ def KruskalWallis():
     return surprise_H
     return surprise_p
     
-def  errorBarPlot(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):   
+def  errorBarPlot1(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):   
     # Create a sample dataframe
     readPath = "popstar_results/ternary_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
@@ -203,24 +203,74 @@ def  errorBarPlot(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):
     plt.xlabel('folder')
     plt.ylabel('normalized feature value')
     plt.suptitle('energy H=%s p=%s | control H=%s p=%s' % (energy_H,energy_p,control_H,control_p))
-    plt.title('surprise H=%s p=%s' % (surprise_H,surprise_p))
+    plt.title('surprise H=%s p=%s for Kruskal-Wallis test' % (surprise_H,surprise_p))
 
     # Display the plot
     plt.legend(title='ternary axes')
     plt.savefig("popstar_results/compareSignal_%s_%s.png" % (inp1,inp2))
     plt.show()
     
+def ansari():    
+    readPath = "popstar_results/energy_compare_%s_%s.txt" % (inp1,inp2)
+    df = pd.read_csv(readPath, sep = "\t")
+    groups = [df['energy'][df['folder'] == g] for g in df['folder'].unique()]
+    stat, p = sp.stats.ansari(*groups)
+    print(f"Ansari-Bradley test statistic - energy: {stat}")
+    print(f"P-value - energy: {p}")
+    global energy_H
+    global energy_p
+    energy_H = round(stat,2)
+    energy_p = round(p,2)
+    readPath = "popstar_results/control_compare_%s_%s.txt" % (inp1,inp2)
+    df = pd.read_csv(readPath, sep = "\t")
+    groups = [df['control'][df['folder'] == g] for g in df['folder'].unique()]
+    stat, p = sp.stats.ansari(*groups)
+    print(f"Ansari-Bradley test statistic - control: {stat}")
+    print(f"P-value - control: {p}")
+    global control_H
+    global control_p
+    control_H = round(stat,2)
+    control_p = round(p,2)
+    readPath = "popstar_results/surprise_compare_%s_%s.txt" % (inp1,inp2)
+    df = pd.read_csv(readPath, sep = "\t")
+    groups = [df['surprise'][df['folder'] == g] for g in df['folder'].unique()]
+    stat, p = sp.stats.ansari(*groups)
+    print(f"Ansari-Bradley test statistic - surprise: {stat}")
+    print(f"P-value - surprise: {p}")
+    global surprise_H
+    global surprise_p
+    surprise_H = round(stat,2)
+    surprise_p = round(p,2)
     
     
     
-        
+def  errorBarPlot2(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):   
+    # Create a sample dataframe
+    readPath = "popstar_results/ternary_compare_%s_%s.txt" % (inp1,inp2)
+    df = pd.read_csv(readPath, sep = "\t")
+    # Plotting the bar plot with error bars
+    sns.barplot(x='folder', y='value', hue='ternary', data=df, errorbar='ci')
+
+    # Adding labels and title
+    plt.xlabel('folder')
+    plt.ylabel('normalized feature value')
+    plt.suptitle('energy h=%s p=%s | control h=%s p=%s' % (energy_H,energy_p,control_H,control_p))
+    plt.title('surprise h=%s p=%s for Ansari-Bradley test' % (surprise_H,surprise_p))
+
+    # Display the plot
+    plt.legend(title='ternary axes')
+    plt.savefig("popstar_results/compareSignal_%s_%s_variance.png" % (inp1,inp2))
+    plt.show()    
+    
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
 def main():
     collectDF()
     KruskalWallis()
-    errorBarPlot(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p)
+    errorBarPlot1(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p)
+    ansari()
+    errorBarPlot2(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p)
     print("\nsignal comparison is complete\n")   
     
         
