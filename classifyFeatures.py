@@ -448,24 +448,24 @@ def KruskalWallis():
     stat, p = kruskal(*groups)
     global energy_H
     global energy_p
-    energy_H = round(stat,2)
-    energy_p = round(p,2)
+    energy_H = round(stat,3)
+    energy_p = round(p,3)
     readPath = "popstar_results/control_compare_%s.txt" % (folder_list)
     df = pd.read_csv(readPath, sep = "\t")
     groups = [df['control'][df['folder'] == g] for g in df['folder'].unique()]
     stat, p = kruskal(*groups)
     global control_H
     global control_p
-    control_H = round(stat,2)
-    control_p = round(p,2)
+    control_H = round(stat,3)
+    control_p = round(p,3)
     readPath = "popstar_results/surprise_compare_%s.txt" % (folder_list)
     df = pd.read_csv(readPath, sep = "\t")
     groups = [df['surprise'][df['folder'] == g] for g in df['folder'].unique()]
     stat, p = kruskal(*groups)
     global surprise_H
     global surprise_p
-    surprise_H = round(stat,2)
-    surprise_p = round(p,2)
+    surprise_H = round(stat,3)
+    surprise_p = round(p,3)
     print("Kruskal-Wallis tests")
     print("energy| H=%s p=%s" % (energy_H,energy_p))
     print("control| H=%s p=%s" % (control_H,control_p))

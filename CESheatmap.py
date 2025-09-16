@@ -141,6 +141,8 @@ def matrix_maker_folders():
     h_statistic, p_value = kruskal(*group_data)
     print(f"H-statistic: {h_statistic}")
     print(f"P-value: {p_value}")
+    h_statistic = round(h_statistic, 3)
+    p_value = round(p_value, 3)
     print("\nmatrix is done\n")
     
 def heat_map_folders():
