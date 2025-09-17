@@ -175,6 +175,23 @@ def heat_map_folders():
     plt.close()
     print("\nheatmap is done\n") 
 
+def errorbar_folders():
+    readPath = "popstar_results/CES_signal.txt"
+    df = pd.read_csv(readPath, sep = "\t", header=None)
+    print(df)
+    folder = df[0]
+    value = df[2]
+    sn.barplot(x=folder, y=value, hue=folder, palette='viridis', data=df, errorbar='ci')
+    #sn.barplot(x=folder, y=value, hue=value, palette='viridis', data=df)
+    # Adding labels and title
+    plt.xlabel('folder')
+    plt.ylabel('% stability (CES)')
+    plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
+    
+    # Display the plot
+    plt.savefig("popstar_results/CES_signal_bars.png")
+    plt.show()
+    print("\nerror chart is done\n") 
 ###############################################################
 ###############################################################
 def main():
@@ -183,6 +200,7 @@ def main():
     heat_map_files()
     matrix_maker_folders()
     heat_map_folders()
+    errorbar_folders()
     print("\nheatmap is completed\n")
 ###############################################################
 if __name__ == '__main__':
