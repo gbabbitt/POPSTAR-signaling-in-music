@@ -435,6 +435,14 @@ def main():
         txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
         txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         txt_out2.close
+        sns.histplot(df, x="distance", hue="order", kde=True)
+        p_value = round(p_value,4)
+        plt.title("stability in CES (control, energy, surprise) = %s for %s\n" % (p_value,inp))
+        plt.savefig("%s_analysis/permutation_test/histogram_CES_stability.png" % (inp))
+        plt.savefig("popstar_results/histogram-CES_stability_%s.png" % (inp))
+        plt.show()
+        
+        
         
     if(fof=="folder"):
         if not os.path.exists('%s_analysis/permutation_test' % (inp)):
@@ -535,6 +543,13 @@ def main():
             txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
             txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
             txt_out2.close
+            sns.histplot(df, x="distance", hue="order", kde=True)
+            p_value = round(p_value,4)
+            plt.title("stability in CES (control, energy, surprise) = %s for %s\n" % (p_value,dirname))
+            plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_%s.png" % (inp,dirname,dirname))
+            plt.savefig("popstar_results/histogram-CES_stability_%s_%s.png" % (inp,dirname))
+            #plt.show()
+            
 ###############################################################
 if __name__ == '__main__':
     main()
