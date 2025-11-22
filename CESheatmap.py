@@ -110,7 +110,10 @@ def heat_map_files():
     df = pd.DataFrame(txt_in)
     sorted_rows = df.sum(axis=1).sort_values(ascending=False).index
     df_sorted_rows = df.reindex(index=sorted_rows)
+    lb = pd.DataFrame(comparisons)
+    sorted_labels = lb.reindex(index=sorted_rows)
     txt_in = df_sorted_rows.to_numpy()
+    sorted_labels = sorted_labels[0].values
     # make plot
     fig, ax = plt.subplots(figsize=(8, 6))
     hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = comparisons, annot = False, vmin = 0, vmax = 100)
@@ -165,10 +168,13 @@ def heat_map_folders():
     df = pd.DataFrame(txt_in)
     sorted_rows = df.sum(axis=1).sort_values(ascending=False).index
     df_sorted_rows = df.reindex(index=sorted_rows)
+    lb = pd.DataFrame(avg_comparisons)
+    sorted_labels = lb.reindex(index=sorted_rows)
     txt_in = df_sorted_rows.to_numpy()
+    sorted_labels = sorted_labels[0].values
     # make plot
     fig, ax = plt.subplots(figsize=(8, 6))
-    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = avg_comparisons, annot = False, vmin = 0, vmax = 100)
+    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = sorted_labels, annot = False, vmin = 0, vmax = 100)
     ax.set_aspect('equal') # Ensure square cells
     plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
     plt.tight_layout()
@@ -178,7 +184,7 @@ def heat_map_folders():
     myMIN = np.min(txt_in)
     myMAX = np.max(txt_in)
     fig, ax = plt.subplots(figsize=(8, 6))
-    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = avg_comparisons, annot = False, vmin = myMIN, vmax = myMAX)
+    hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = sorted_labels, annot = False, vmin = myMIN, vmax = myMAX)
     ax.set_aspect('equal') # Ensure square cells
     plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
     plt.tight_layout()
