@@ -106,6 +106,12 @@ def heat_map_files():
     txt_in = txt_in.astype(float)
     txt_in = np.round(txt_in, 2)
     print(txt_in)
+    # sort rows ascending
+    df = pd.DataFrame(txt_in)
+    sorted_rows = df.sum(axis=1).sort_values(ascending=False).index
+    df_sorted_rows = df.reindex(index=sorted_rows)
+    txt_in = df_sorted_rows.to_numpy()
+    # make plot
     fig, ax = plt.subplots(figsize=(8, 6))
     hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = comparisons, annot = False, vmin = 0, vmax = 100)
     ax.set_aspect('equal') # Ensure square cells
@@ -155,6 +161,12 @@ def heat_map_folders():
     txt_in = txt_in.astype(float)
     txt_in = np.round(txt_in, 2)
     print(txt_in)
+    # sort rows ascending
+    df = pd.DataFrame(txt_in)
+    sorted_rows = df.sum(axis=1).sort_values(ascending=False).index
+    df_sorted_rows = df.reindex(index=sorted_rows)
+    txt_in = df_sorted_rows.to_numpy()
+    # make plot
     fig, ax = plt.subplots(figsize=(8, 6))
     hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = avg_comparisons, annot = False, vmin = 0, vmax = 100)
     ax.set_aspect('equal') # Ensure square cells
