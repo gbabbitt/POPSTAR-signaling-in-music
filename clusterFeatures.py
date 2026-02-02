@@ -41,6 +41,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.mixture import GaussianMixture
 from mpl_toolkits.mplot3d import Axes3D
+import skfda
+from skfda.datasets import fetch_phoneme
+from skfda.ml.classification import KNeighborsClassifier
 
 ################################################################################
 # find number of cores
@@ -48,6 +51,8 @@ num_cores = multiprocessing.cpu_count()
 #num_cores = 1 # activate this line for identifying/removing files that stop script with errors
 if not os.path.exists('popstar_results'):
         os.mkdir('popstar_results')
+if not os.path.exists('popstar_results/FDA'):
+        os.mkdir('popstar_results/FDA')
 # read popstar ctl file
 infile = open("popstar-classify.ctl", "r")
 infile_lines = infile.readlines()
@@ -116,13 +121,15 @@ if(num_folders == 6):
     folder_list = [inp1,inp2,inp3,inp4,inp5,inp6]     
     
 ##############################################################
-def collectDF():
-    print("collecting dataframe")
-    writePath = "popstar_results/EM_features_%s.txt" % folder_list
-    txt_out = open(writePath, "w")
-    txt_out.write("folder\tenergy\tcontrol\tsurprise\n")
-    global correct_labels
-    correct_labels = []
+def findDIM():
+    print("finding proper dimension of square grid")
+    flengths = []
+    fname_cnts = []
+    
+    #global labels
+    labels = np.array([], dtype=int)
+    #global Cvals
+    Cvals = []
     for j in range(len(folder_list)):
         inp = folder_list[j]
         lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
@@ -131,12 +138,18 @@ def collectDF():
         print(number_files)
         dir_list = os.listdir("%s_analysis/intervals/" % (inp))
         print(dir_list)
+        if not os.path.exists('popstar_results/FDA/%s' % inp):
+            os.mkdir('popstar_results/FDA/%s' % inp)
+        fname_cnt = 0
         for fname in dir_list:
             print(fname)
+            fname_cnt = fname_cnt+1
             dirname = fname
             readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
+            
+            Cset = []
             for i in range(len(df)-1):
                 df_row = df.iloc[i,0]
                 df_row = df_row.split(",")
@@ -144,11 +157,392 @@ def collectDF():
                 energy = df_row[0]
                 control = df_row[1]
                 surprise = df_row[2]
-                print("%s\t%s\t%s\t%s" % (inp,energy,control,surprise))
-                txt_out.write("%s\t%s\t%s\t%s\n" % (inp,energy,control,surprise))
-                correct_labels.append(j)
+            flengths.append(i)
+        fname_cnts.append(fname_cnt)
+    print(flengths)
+    print(fname_cnts)
+    global min_fnames
+    global min_flengths
+    min_fnames = min(fname_cnts)
+    min_flengths = min(flengths)
+    print("min fnames = %s" % min_fnames)
+    print("min flengths = %s" % min_flengths)
+    
+def collectDF():
+    print("collecting dataframe")
+    writePath = "popstar_results/FDA_features_%s.txt" % folder_list
+    txt_out = open(writePath, "w")
+    txt_out.write("folder\tfile\tenergy\tcontrol\tsurprise\n")
+    global labels
+    labels = np.array([], dtype=int)
+    global Cvals
+    Cvals = []
+    global Evals
+    Evals = []
+    global Svals
+    Svals = []
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
+        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        print(dir_list)
+        if not os.path.exists('popstar_results/FDA/%s' % inp):
+            os.mkdir('popstar_results/FDA/%s' % inp)
+        fname_cnt = 0
+        for fname in dir_list:
+            print(fname)
+            fname_cnt = fname_cnt+1
+            dirname = fname
+            readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
+            df = pd.read_csv(readPath, sep = "\t")
+            #print(df)
+            writePath2 = "popstar_results/FDA/%s/FDA_features_%s.txt" % (inp,dirname)
+            txt_out2 = open(writePath2, "w")
+            txt_out2.write("folder\tfile\tenergy\tcontrol\tsurprise\n")
+            Cset = []
+            Eset = []
+            Sset = []
+            for i in range(len(df)-1):
+                df_row = df.iloc[i,0]
+                df_row = df_row.split(",")
+                #print(df_row)
+                energy = df_row[0]
+                control = df_row[1]
+                surprise = df_row[2]
+                cleaned_dirname = "".join(dirname.split()) # remove all whitespace
+                print("%s\t%s\t%s\t%s\t%s" % (inp,cleaned_dirname,energy,control,surprise))
+                txt_out.write("%s\t%s\t%s\t%s\t%s\n" % (inp,cleaned_dirname,energy,control,surprise))
+                txt_out2.write("%s\t%s\t%s\t%s\t%s\n" % (inp,cleaned_dirname,energy,control,surprise))
+                if(i<=min_flengths): # max number of sliding window frames
+                    Cset.append(control)
+                    Eset.append(energy)
+                    Sset.append(surprise)
+                #correct_labels.append(j)
+            if(fname_cnt<=min_fnames): # max number of songs
+                Cvals.append(Cset)
+                Evals.append(Eset)
+                Svals.append(Sset)
+                labels = np.append(labels, j)
+            txt_out2.close()        
     txt_out.close()
+
+def clusterFDA():       
+    print("functional data analysis (FDA)")
+    writePath = "popstar_results/FDA_classifier_results_%s.txt" % folder_list
+    global txt_out3
+    txt_out3 = open(writePath, "w")
+    txt_out3.write("FDA results\n\n")
+    
+    print(labels)
+    
+    #### control data ####
+    #print(Cvals)
+    np_Cvals = np.array(Cvals)
+    np_Cvals = np_Cvals.astype(float)
+    print(np_Cvals)
+    control_data = skfda.FDataGrid(data_matrix=np_Cvals)
+    print(control_data)
+    input_data = control_data
+    input_label = "control_data"
+    txt_out3.write("\n\nCONTROL\n")
+    FDA(input_data,input_label)
         
+    #### energy data ####
+    #print(Evals)
+    np_Evals = np.array(Evals)
+    np_Evals = np_Evals.astype(float)
+    print(np_Evals)
+    energy_data = skfda.FDataGrid(data_matrix=np_Evals)
+    print(energy_data)
+    input_data = energy_data
+    input_label = "energy_data"
+    txt_out3.write("\n\nENERGY\n")
+    FDA(input_data,input_label)
+    
+    #### surprise data ####
+    #print(Svals)
+    np_Svals = np.array(Svals)
+    np_Svals = np_Svals.astype(float)
+    print(np_Svals)
+    surprise_data = skfda.FDataGrid(data_matrix=np_Svals)
+    print(surprise_data)
+    input_data = surprise_data
+    input_label = "surprise_data"
+    txt_out3.write("\n\nSURPRISE\n")
+    FDA(input_data,input_label)
+    
+    #txt_out3.close()
+
+def FDA(input_data, input_label):    
+    
+    X = input_data
+    y = labels
+    
+        
+    # pick only first 2
+    #X = X[(y == 0) | (y == 1)]
+    #y = y[(y == 0) | (y == 1)]
+
+    n_points = min_flengths
+
+    new_points = X.grid_points[0][:n_points]
+    new_data = X.data_matrix[:, :n_points]
+
+    X = X.copy(
+        grid_points=new_points,
+        data_matrix=new_data,
+        domain_range=(float(np.min(new_points)), float(np.max(new_points))),
+    )
+    # show only 20 functions 
+    n_plot = num_folders*min_fnames
+    #X[:n_plot].plot(group=y)
+    X[:n_plot].plot()
+    plt.title("%s (input from each track)" % input_label, loc="left")
+    plt.savefig("popstar_results/FDA_input_tracks_%s_%s.png" % (folder_list, input_label))
+    plt.show()
+       
+    
+    print("FDA - spline smoothing")
+    from skfda.misc.hat_matrix import NadarayaWatsonHatMatrix
+    from skfda.misc.kernels import normal
+    from skfda.preprocessing.smoothing import KernelSmoother
+
+    smoother = KernelSmoother(
+        NadarayaWatsonHatMatrix(
+            bandwidth=0.1,
+            kernel=normal,
+        ),
+    )
+    X_smooth = smoother.fit_transform(X)
+    
+    fig = X_smooth[:n_plot].plot(group=y)
+    '''
+    if(num_folders==2):
+       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
+       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
+       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+    if(num_folders==3):   
+       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
+       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
+       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
+       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+    if(num_folders==4):   
+       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
+       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
+       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
+       X_smooth_grp4 = X_smooth[:n_plot][y[:n_plot] == 3]
+       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_smooth_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+    if(num_folders==5):   
+       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
+       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
+       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
+       X_smooth_grp4 = X_smooth[:n_plot][y[:n_plot] == 3]
+       X_smooth_grp5 = X_smooth[:n_plot][y[:n_plot] == 4]
+       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_smooth_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+       X_smooth_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
+    if(num_folders==6):   
+       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
+       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
+       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
+       X_smooth_grp4 = X_smooth[:n_plot][y[:n_plot] == 3]
+       X_smooth_grp5 = X_smooth[:n_plot][y[:n_plot] == 4]
+       X_smooth_grp6 = X_smooth[:n_plot][y[:n_plot] == 5]
+       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_smooth_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+       X_smooth_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
+       X_smooth_grp6.mean().plot(fig=fig, color="brown", linewidth=3)
+                
+    plt.show()
+    '''
+    print("FDA - registration (alignment)")
+    from skfda.preprocessing.registration import FisherRaoElasticRegistration
+
+    reg = FisherRaoElasticRegistration(
+        penalty=0.01,
+    )
+    
+    if(num_folders==2):
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+    if(num_folders==3):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+    if(num_folders==4):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+       #fig = X_reg_grp4.plot(color="C3")
+       X_reg_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+    if(num_folders==5):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+       #fig = X_reg_grp4.plot(color="C3")
+       X_reg_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+       X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+       #fig = X_reg_grp5.plot(color="C4")
+       X_reg_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
+    if(num_folders==6):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+       #fig = X_reg_grp4.plot(color="C3")
+       X_reg_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+       X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+       #fig = X_reg_grp5.plot(color="C4")
+       X_reg_grp5.mean().plot(fig=fig, color="red", linewidth=3)
+       X_reg_grp6 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 5])
+       #fig = X_reg_grp6.plot(color="C5")
+       X_reg_grp6.mean().plot(fig=fig, color="brown", linewidth=3)
+    
+    plt.title("%s (smoothed, averaged, and registered classes)" % input_label, loc="left")
+    plt.savefig("popstar_results/FDA_classes_%s_%s.png" % (folder_list, input_label))
+    plt.show()
+    
+    print("FDA - functional clustering")
+    
+    from sklearn.model_selection import train_test_split
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_smooth,
+        y,
+        test_size=0.25,
+        random_state=0,
+        stratify=y,
+    )
+    
+    from skfda.exploratory.depth import ModifiedBandDepth
+    from skfda.ml.classification import MaximumDepthClassifier
+
+    depth = MaximumDepthClassifier(depth_method=ModifiedBandDepth())
+    depth.fit(X_train, y_train)
+    depth_pred = depth.predict(X_test)
+    print(depth_pred)
+    print(
+        f"The score of Maximum Depth Classifier is "
+        f"{depth.score(X_test, y_test):2.2%}",
+    )
+    
+    from skfda.ml.classification import KNeighborsClassifier
+
+    knn = KNeighborsClassifier()
+    knn.fit(X_train, y_train)
+    knn_pred = knn.predict(X_test)
+    print(knn_pred)
+    print(f"The score of KNN is {knn.score(X_test, y_test):2.2%}")
+    
+    from skfda.ml.classification import NearestCentroid
+
+    centroid = NearestCentroid()
+    centroid.fit(X_train, y_train)
+    centroid_pred = centroid.predict(X_test)
+    print(centroid_pred)
+    print(
+        f"The score of Nearest Centroid Classifier is "
+        f"{centroid.score(X_test, y_test):2.2%}",
+    )
+    
+    from skfda.exploratory.stats.covariance import ParametricGaussianCovariance
+    from skfda.misc.covariances import Gaussian
+    from skfda.ml.classification import QuadraticDiscriminantAnalysis
+
+    qda = QuadraticDiscriminantAnalysis(
+        ParametricGaussianCovariance(
+            Gaussian(variance=6, length_scale=1),
+        ),
+        regularizer=0.05,
+    )
+    qda.fit(X_train, y_train)
+    qda_pred = qda.predict(X_test)
+    print(qda_pred)
+    print(f"The score of functional QDA is {qda.score(X_test, y_test):2.2%}")
+    print("FDA - plotting signature functions grouped by cluster")
+    accuracies = pd.DataFrame({
+        "Classification methods":
+            [
+                "Maximum Depth Classifier",
+                "K-Nearest-Neighbors",
+                "Nearest Centroid Classifier",
+                "Functional QDA",
+            ],
+        "Accuracy":
+            [
+                f"{depth.score(X_test, y_test):2.2%}",
+                f"{knn.score(X_test, y_test):2.2%}",
+                f"{centroid.score(X_test, y_test):2.2%}",
+                f"{qda.score(X_test, y_test):2.2%}",
+            ],
+    })
+    
+    str_accuracies = str(accuracies)
+    print(accuracies)
+    txt_out3.write(str_accuracies)
+    
+    fig, axs = plt.subplots(2, 2)
+    plt.subplots_adjust(hspace=0.45, bottom=0.06)
+
+    X_test.plot(group=centroid_pred, axes=axs[0][1])
+    axs[0][1].set_title("Nearest Centroid", loc="left")
+
+    X_test.plot(group=depth_pred, axes=axs[0][0])
+    axs[0][0].set_title("Maximum Depth", loc="left")
+
+    X_test.plot(group=knn_pred, axes=axs[1][0])
+    axs[1][0].set_title("K nearest neighbors", loc="left")
+
+    X_test.plot(group=qda_pred, axes=axs[1][1])
+    axs[1][1].set_title("Functional QDA", loc="left")
+    plt.suptitle("classifiers - %s" % input_label)
+    plt.savefig("popstar_results/FDA_classifiers_%s_%s.png" % (folder_list, input_label))
+    plt.show()
+    
+    
 def clusterEM():
     print("model-based clustering")    
     readPath = "popstar_results/EM_features_%s.txt" % folder_list
@@ -265,9 +659,11 @@ def clusterEM():
 ####################  main program      #########################################
 #################################################################################
 def main():
+    findDIM()
     collectDF()
-    clusterEM()
-    print("\nsignal clustering is complete\n")   
+    clusterFDA()
+    #clusterEM()
+    print("\nsignature clustering is complete\n")   
     
         
 ###############################################################

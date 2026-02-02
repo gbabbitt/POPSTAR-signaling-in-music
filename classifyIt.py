@@ -94,7 +94,7 @@ class Ui_Dialog(object):
         self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 4</span></p></body></html>"))
         self.label_7.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 5</span></p></body></html>"))
         self.label_8.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 6</span></p></body></html>"))
-        self.pushButton_5.setText(_translate("Dialog", "run 3D EM clustering"))
+        self.pushButton_5.setText(_translate("Dialog", "run FDA signature analysis"))
         self.pushButton_6.setText(_translate("Dialog", "heatmap CES"))
 
     
@@ -127,7 +127,7 @@ class Ui_Dialog(object):
         os.system(cmd)
     
     def clusterIt(self):
-        print("running EM clstering")
+        print("running FDA signature clustering analysis")
         filename1 = self.lineEdit.text()
         filename2 = self.lineEdit_2.text()
         filename3 = self.lineEdit_3.text()
