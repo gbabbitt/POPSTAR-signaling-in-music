@@ -145,7 +145,7 @@ def findDIM():
             print(fname)
             fname_cnt = fname_cnt+1
             dirname = fname
-            readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
+            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             
@@ -236,15 +236,15 @@ def clusterFDA():
     txt_out3 = open(writePath, "w")
     txt_out3.write("FDA results\n\n")
     
-    print(labels)
+    #print(labels)
     
     #### control data ####
     #print(Cvals)
     np_Cvals = np.array(Cvals)
     np_Cvals = np_Cvals.astype(float)
-    print(np_Cvals)
+    #print(np_Cvals)
     control_data = skfda.FDataGrid(data_matrix=np_Cvals)
-    print(control_data)
+    #print(control_data)
     input_data = control_data
     input_label = "control_data"
     txt_out3.write("\n\nCONTROL\n")
@@ -254,9 +254,9 @@ def clusterFDA():
     #print(Evals)
     np_Evals = np.array(Evals)
     np_Evals = np_Evals.astype(float)
-    print(np_Evals)
+    #print(np_Evals)
     energy_data = skfda.FDataGrid(data_matrix=np_Evals)
-    print(energy_data)
+    #print(energy_data)
     input_data = energy_data
     input_label = "energy_data"
     txt_out3.write("\n\nENERGY\n")
@@ -266,9 +266,9 @@ def clusterFDA():
     #print(Svals)
     np_Svals = np.array(Svals)
     np_Svals = np_Svals.astype(float)
-    print(np_Svals)
+    #print(np_Svals)
     surprise_data = skfda.FDataGrid(data_matrix=np_Svals)
-    print(surprise_data)
+    #print(surprise_data)
     input_data = surprise_data
     input_label = "surprise_data"
     txt_out3.write("\n\nSURPRISE\n")
@@ -307,67 +307,19 @@ def FDA(input_data, input_label):
     
     print("FDA - spline smoothing")
     from skfda.misc.hat_matrix import NadarayaWatsonHatMatrix
-    from skfda.misc.kernels import normal
+    from skfda.misc.kernels import normal, uniform, epanechnikov
     from skfda.preprocessing.smoothing import KernelSmoother
 
     smoother = KernelSmoother(
         NadarayaWatsonHatMatrix(
-            bandwidth=0.1,
+            bandwidth=0.05,
             kernel=normal,
         ),
     )
     X_smooth = smoother.fit_transform(X)
     
     fig = X_smooth[:n_plot].plot(group=y)
-    '''
-    if(num_folders==2):
-       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
-       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
-       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
-       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
-    if(num_folders==3):   
-       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
-       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
-       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
-       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
-       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
-       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
-    if(num_folders==4):   
-       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
-       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
-       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
-       X_smooth_grp4 = X_smooth[:n_plot][y[:n_plot] == 3]
-       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
-       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
-       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
-       X_smooth_grp4.mean().plot(fig=fig, color="red", linewidth=3)
-    if(num_folders==5):   
-       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
-       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
-       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
-       X_smooth_grp4 = X_smooth[:n_plot][y[:n_plot] == 3]
-       X_smooth_grp5 = X_smooth[:n_plot][y[:n_plot] == 4]
-       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
-       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
-       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
-       X_smooth_grp4.mean().plot(fig=fig, color="red", linewidth=3)
-       X_smooth_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
-    if(num_folders==6):   
-       X_smooth_grp1 = X_smooth[:n_plot][y[:n_plot] == 0]
-       X_smooth_grp2 = X_smooth[:n_plot][y[:n_plot] == 1]
-       X_smooth_grp3 = X_smooth[:n_plot][y[:n_plot] == 2]
-       X_smooth_grp4 = X_smooth[:n_plot][y[:n_plot] == 3]
-       X_smooth_grp5 = X_smooth[:n_plot][y[:n_plot] == 4]
-       X_smooth_grp6 = X_smooth[:n_plot][y[:n_plot] == 5]
-       X_smooth_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
-       X_smooth_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
-       X_smooth_grp3.mean().plot(fig=fig, color="green", linewidth=3)
-       X_smooth_grp4.mean().plot(fig=fig, color="red", linewidth=3)
-       X_smooth_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
-       X_smooth_grp6.mean().plot(fig=fig, color="brown", linewidth=3)
-                
-    plt.show()
-    '''
+    
     print("FDA - registration (alignment)")
     from skfda.preprocessing.registration import FisherRaoElasticRegistration
     reg = FisherRaoElasticRegistration(
@@ -533,12 +485,37 @@ def FDA(input_data, input_label):
     
     print("FDA - functional clustering")
     
+    # compile registered and smoothed functional data for train-test split
+    if(num_folders==2):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2)
+    if(num_folders==3):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3)
+    if(num_folders==4):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4)    
+    if(num_folders==5):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5) 
+    if(num_folders==6):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5, X_reg_grp6) 
+    
+    
+    '''
+    print("X_smooth)")
+    print(X_smooth)
+    print(len(X_smooth))
+    print("X_reg)")
+    print(X_reg)
+    print(len(X_reg))
+    print("y")
+    print(y)
+    print(len(y))
+    '''
+    
     from sklearn.model_selection import train_test_split
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X_smooth,
+        X_reg,
         y,
-        test_size=0.25,
+        test_size=0.3,
         random_state=0,
         stratify=y,
     )
