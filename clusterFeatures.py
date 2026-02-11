@@ -237,7 +237,7 @@ def clusterFDA():
     txt_out3.write("FDA results\n\n")
     
     #print(labels)
-    
+    differences = []
     #### control data ####
     #print(Cvals)
     np_Cvals = np.array(Cvals)
@@ -249,7 +249,7 @@ def clusterFDA():
     input_label = "control_data"
     txt_out3.write("\n\nCONTROL\n")
     FDA(input_data,input_label)
-        
+    differences.append(difference)    
     #### energy data ####
     #print(Evals)
     np_Evals = np.array(Evals)
@@ -261,7 +261,7 @@ def clusterFDA():
     input_label = "energy_data"
     txt_out3.write("\n\nENERGY\n")
     FDA(input_data,input_label)
-    
+    differences.append(difference) 
     #### surprise data ####
     #print(Svals)
     np_Svals = np.array(Svals)
@@ -273,9 +273,20 @@ def clusterFDA():
     input_label = "surprise_data"
     txt_out3.write("\n\nSURPRISE\n")
     FDA(input_data,input_label)
+    differences.append(difference) 
+    txt_out3.close()
+    print("abs differences are...")
+    print(differences)
+    # bar plot
+    categories = ['CONTROL', 'ENERGY', 'SURPRISE']
+    values = differences
+    df = pd.DataFrame({'attention_feature': categories, 'abs_distance': values})
+    sns.set_theme(style="whitegrid")
+    sns.barplot(data=df, x='attention_feature', y='abs_distance', palette='viridis')
+    plt.title("distances between group mean functional curves")
+    plt.savefig("popstar_results/FDA_distances_%s.png" % (folder_list))
+    plt.show()
     
-    #txt_out3.close()
-
 def FDA(input_data, input_label):    
     
     X = input_data
@@ -326,6 +337,7 @@ def FDA(input_data, input_label):
         penalty=0.01,
     )
     
+    global difference
     if(num_folders==2):
        X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
        #fig = X_reg_grp1.plot(color="C0")
@@ -341,6 +353,7 @@ def FDA(input_data, input_label):
        difference = np.sum(diff_array)
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
+       
     if(num_folders==3):   
        X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
        #fig = X_reg_grp1.plot(color="C0")
@@ -363,6 +376,7 @@ def FDA(input_data, input_label):
        difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3))/3
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
+       
     if(num_folders==4):   
        X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
        #fig = X_reg_grp1.plot(color="C0")
@@ -392,6 +406,7 @@ def FDA(input_data, input_label):
        difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3)+np.sum(diff_array4)+np.sum(diff_array5))/5
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
+       
     if(num_folders==5):   
        X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
        #fig = X_reg_grp1.plot(color="C0")
@@ -430,6 +445,7 @@ def FDA(input_data, input_label):
        difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3)+np.sum(diff_array4)+np.sum(diff_array5)+np.sum(diff_array6)+np.sum(diff_array7)+np.sum(diff_array8)+np.sum(diff_array9))/9
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
+       
     if(num_folders==6):   
        X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
        #fig = X_reg_grp1.plot(color="C0")
@@ -479,6 +495,7 @@ def FDA(input_data, input_label):
        difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3)+np.sum(diff_array4)+np.sum(diff_array5)+np.sum(diff_array6)+np.sum(diff_array7)+np.sum(diff_array8)+np.sum(diff_array9)+np.sum(diff_array10)+np.sum(diff_array11)+np.sum(diff_array12)+np.sum(diff_array13)+np.sum(diff_array14)+np.sum(diff_array15))/15
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
+       
     plt.title("%s (smoothed, averaged, and registered classes)" % input_label, loc="left")
     plt.savefig("popstar_results/FDA_classes_%s_%s.png" % (folder_list, input_label))
     plt.show()
@@ -586,21 +603,26 @@ def FDA(input_data, input_label):
     str_accuracies = str(accuracies)
     print(accuracies)
     txt_out3.write(str_accuracies)
-    
+    # accuracy scores
+    centroid_score = f"{centroid.score(X_test, y_test):2.2%}"
+    depth_score = f"{depth.score(X_test, y_test):2.2%}"
+    knn_score = f"{knn.score(X_test, y_test):2.2%}"
+    qda_score = f"{qda.score(X_test, y_test):2.2%}"
+    # grid plot
     fig, axs = plt.subplots(2, 2)
     plt.subplots_adjust(hspace=0.45, bottom=0.06)
 
     X_test.plot(group=centroid_pred, axes=axs[0][1])
-    axs[0][1].set_title("Nearest Centroid", loc="left")
+    axs[0][1].set_title("Nearest Centroid = %s" % centroid_score, loc="left")
 
     X_test.plot(group=depth_pred, axes=axs[0][0])
-    axs[0][0].set_title("Maximum Depth", loc="left")
+    axs[0][0].set_title("Maximum Depth = %s" % depth_score, loc="left")
 
     X_test.plot(group=knn_pred, axes=axs[1][0])
-    axs[1][0].set_title("K nearest neighbors", loc="left")
+    axs[1][0].set_title("K nearest neighbors = %s" % knn_score, loc="left")
 
     X_test.plot(group=qda_pred, axes=axs[1][1])
-    axs[1][1].set_title("Functional QDA", loc="left")
+    axs[1][1].set_title("Functional QDA = %s" % qda_score, loc="left")
     plt.suptitle("classifiers - %s" % input_label)
     plt.savefig("popstar_results/FDA_classifiers_%s_%s.png" % (folder_list, input_label))
     plt.show()
