@@ -514,7 +514,7 @@ def FDA(input_data, input_label):
        X_reg_grp4.mean().plot(fig=fig, color="red", linewidth=3)
        X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
        #fig = X_reg_grp5.plot(color="C4")
-       X_reg_grp5.mean().plot(fig=fig, color="red", linewidth=3)
+       X_reg_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
        X_reg_grp6 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 5])
        #fig = X_reg_grp6.plot(color="C5")
        X_reg_grp6.mean().plot(fig=fig, color="brown", linewidth=3)
