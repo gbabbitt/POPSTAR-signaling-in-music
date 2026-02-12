@@ -44,6 +44,17 @@ from mpl_toolkits.mplot3d import Axes3D
 import skfda
 from skfda.datasets import fetch_phoneme
 from skfda.ml.classification import KNeighborsClassifier
+from skfda.exploratory.depth import ModifiedBandDepth
+from skfda.ml.classification import MaximumDepthClassifier
+from skfda.ml.classification import NearestCentroid
+from skfda.exploratory.stats.covariance import ParametricGaussianCovariance
+from skfda.misc.covariances import Gaussian
+from skfda.ml.classification import QuadraticDiscriminantAnalysis
+from skfda.misc.hat_matrix import NadarayaWatsonHatMatrix
+from skfda.misc.kernels import normal, uniform, epanechnikov
+from skfda.preprocessing.smoothing import KernelSmoother
+from skfda.preprocessing.registration import FisherRaoElasticRegistration
+
 
 ################################################################################
 # find number of cores
@@ -293,10 +304,6 @@ def FDA(input_data, input_label):
     y = labels
     
         
-    # pick only first 2
-    #X = X[(y == 0) | (y == 1)]
-    #y = y[(y == 0) | (y == 1)]
-
     n_points = min_flengths
 
     new_points = X.grid_points[0][:n_points]
@@ -317,13 +324,60 @@ def FDA(input_data, input_label):
        
     
     print("FDA - spline smoothing")
-    from skfda.misc.hat_matrix import NadarayaWatsonHatMatrix
-    from skfda.misc.kernels import normal, uniform, epanechnikov
-    from skfda.preprocessing.smoothing import KernelSmoother
-
+    ##### find best bandwidth ####################
+    bw_options = [0.001,0.002,0.003,0.005,0.007,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05,0.055,0.06,0.065,0.07,0.075,0.08,0.085,0.09,0.095,0.1]
+    bw_best = 0.001
+    pf_options = []
+    for i in bw_options:
+        smoother = KernelSmoother(NadarayaWatsonHatMatrix(bandwidth=i,kernel=normal,),)
+        X_smooth = smoother.fit_transform(X)
+        reg = FisherRaoElasticRegistration(penalty=0.01,)
+        if(num_folders==2):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2)
+        if(num_folders==3):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3)    
+        if(num_folders==4):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4) 
+        if(num_folders==5):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+            X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5)
+        if(num_folders==5):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+            X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+            X_reg_grp6 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 5])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5, X_reg_grp6)
+        X_train, X_test, y_train, y_test = train_test_split(X_reg,y,test_size=0.3,random_state=0,stratify=y,)
+        knn = KNeighborsClassifier()
+        knn.fit(X_train, y_train)
+        knn_pred = knn.predict(X_test)
+        knn_score = knn.score(X_test, y_test)
+        pf_options.append(knn_score)
+        print("searching best bandwidth %s performance %s" % (i,knn_score))
+    max_pf = max(pf_options)
+    max_index = pf_options.index(max_pf)
+    bw_best = bw_options[max_index]
+    print("best bandwidth = %s" % str(bw_best))
+    ################################################
+    # smoothing function
     smoother = KernelSmoother(
         NadarayaWatsonHatMatrix(
-            bandwidth=0.05,
+            bandwidth=bw_best,
             kernel=normal,
         ),
     )
@@ -332,7 +386,6 @@ def FDA(input_data, input_label):
     fig = X_smooth[:n_plot].plot(group=y)
     
     print("FDA - registration (alignment)")
-    from skfda.preprocessing.registration import FisherRaoElasticRegistration
     reg = FisherRaoElasticRegistration(
         penalty=0.01,
     )
@@ -527,8 +580,6 @@ def FDA(input_data, input_label):
     print(len(y))
     '''
     
-    from sklearn.model_selection import train_test_split
-
     X_train, X_test, y_train, y_test = train_test_split(
         X_reg,
         y,
@@ -537,8 +588,7 @@ def FDA(input_data, input_label):
         stratify=y,
     )
     
-    from skfda.exploratory.depth import ModifiedBandDepth
-    from skfda.ml.classification import MaximumDepthClassifier
+    
 
     depth = MaximumDepthClassifier(depth_method=ModifiedBandDepth())
     depth.fit(X_train, y_train)
@@ -549,15 +599,14 @@ def FDA(input_data, input_label):
         f"{depth.score(X_test, y_test):2.2%}",
     )
     
-    from skfda.ml.classification import KNeighborsClassifier
-
+    
     knn = KNeighborsClassifier()
     knn.fit(X_train, y_train)
     knn_pred = knn.predict(X_test)
     print(knn_pred)
     print(f"The score of KNN is {knn.score(X_test, y_test):2.2%}")
     
-    from skfda.ml.classification import NearestCentroid
+    
 
     centroid = NearestCentroid()
     centroid.fit(X_train, y_train)
@@ -568,10 +617,7 @@ def FDA(input_data, input_label):
         f"{centroid.score(X_test, y_test):2.2%}",
     )
     
-    from skfda.exploratory.stats.covariance import ParametricGaussianCovariance
-    from skfda.misc.covariances import Gaussian
-    from skfda.ml.classification import QuadraticDiscriminantAnalysis
-
+    
     qda = QuadraticDiscriminantAnalysis(
         ParametricGaussianCovariance(
             Gaussian(variance=6, length_scale=1),
