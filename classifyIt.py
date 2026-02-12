@@ -86,7 +86,7 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "BabbittLab@RIT"))
         self.pushButton_2.setText(_translate("Dialog", "exit"))
-        self.pushButton_4.setText(_translate("Dialog", "run RF classifier"))
+        self.pushButton_4.setText(_translate("Dialog", "RF class - feature importance"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - Classify</span></p></body></html>"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 1</span></p></body></html>"))
         self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 2</span></p></body></html>"))
@@ -94,7 +94,7 @@ class Ui_Dialog(object):
         self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 4</span></p></body></html>"))
         self.label_7.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 5</span></p></body></html>"))
         self.label_8.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of folder 6</span></p></body></html>"))
-        self.pushButton_5.setText(_translate("Dialog", "run FDA signature analysis"))
+        self.pushButton_5.setText(_translate("Dialog", "FDA class - time series"))
         self.pushButton_6.setText(_translate("Dialog", "heatmap CES"))
 
     

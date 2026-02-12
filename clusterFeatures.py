@@ -250,6 +250,7 @@ def clusterFDA():
     #print(labels)
     differences = []
     #### control data ####
+    print("conducting FDA on CONTROL time series signatures")
     #print(Cvals)
     np_Cvals = np.array(Cvals)
     np_Cvals = np_Cvals.astype(float)
@@ -262,6 +263,7 @@ def clusterFDA():
     FDA(input_data,input_label)
     differences.append(difference)    
     #### energy data ####
+    print("conducting FDA on ENERGY time series signatures")
     #print(Evals)
     np_Evals = np.array(Evals)
     np_Evals = np_Evals.astype(float)
@@ -274,6 +276,7 @@ def clusterFDA():
     FDA(input_data,input_label)
     differences.append(difference) 
     #### surprise data ####
+    print("conducting FDA on SURPRISE time series signatures")
     #print(Svals)
     np_Svals = np.array(Svals)
     np_Svals = np_Svals.astype(float)
@@ -363,12 +366,12 @@ def FDA(input_data, input_label):
             X_reg_grp6 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 5])
             X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5, X_reg_grp6)
         X_train, X_test, y_train, y_test = train_test_split(X_reg,y,test_size=0.3,random_state=0,stratify=y,)
-        knn = KNeighborsClassifier()
-        knn.fit(X_train, y_train)
-        knn_pred = knn.predict(X_test)
-        knn_score = knn.score(X_test, y_test)
-        pf_options.append(knn_score)
-        print("searching best bandwidth %s performance %s" % (i,knn_score))
+        centroid = NearestCentroid()
+        centroid.fit(X_train, y_train)
+        centroid_pred = centroid.predict(X_test)
+        centroid_score = centroid.score(X_test, y_test)
+        pf_options.append(centroid_score)
+        print("searching best bandwidth %s performance %s" % (i,centroid_score))
     max_pf = max(pf_options)
     max_index = pf_options.index(max_pf)
     bw_best = bw_options[max_index]
@@ -671,7 +674,7 @@ def FDA(input_data, input_label):
     axs[1][1].set_title("Functional QDA = %s" % qda_score, loc="left")
     plt.suptitle("classifiers - %s" % input_label)
     plt.savefig("popstar_results/FDA_classifiers_%s_%s.png" % (folder_list, input_label))
-    #plt.show()
+    plt.show()
     
     
 def clusterEM():
