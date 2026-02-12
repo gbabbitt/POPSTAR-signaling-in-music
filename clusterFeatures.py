@@ -671,7 +671,7 @@ def FDA(input_data, input_label):
     axs[1][1].set_title("Functional QDA = %s" % qda_score, loc="left")
     plt.suptitle("classifiers - %s" % input_label)
     plt.savefig("popstar_results/FDA_classifiers_%s_%s.png" % (folder_list, input_label))
-    plt.show()
+    #plt.show()
     
     
 def clusterEM():
