@@ -52,6 +52,7 @@ from skfda.misc.covariances import Gaussian
 from skfda.ml.classification import QuadraticDiscriminantAnalysis
 from skfda.misc.hat_matrix import NadarayaWatsonHatMatrix
 from skfda.misc.kernels import normal, uniform, epanechnikov
+from skfda.misc.metrics import l2_distance
 from skfda.preprocessing.smoothing import KernelSmoother
 from skfda.preprocessing.registration import FisherRaoElasticRegistration
 
@@ -357,7 +358,7 @@ def FDA(input_data, input_label):
             X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
             X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
             X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5)
-        if(num_folders==5):
+        if(num_folders==6):
             X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
             X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
             X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
@@ -403,10 +404,8 @@ def FDA(input_data, input_label):
        X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
        fd1 = X_reg_grp1.mean()
        fd2 = X_reg_grp2.mean()
-       y1 = fd1.data_matrix.flatten()
-       y2 = fd2.data_matrix.flatten()
-       diff_array = np.abs(y1 - y2)
-       difference = np.sum(diff_array)
+       difference = l2_distance(fd1,fd2)
+       difference = difference[0]
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
        
@@ -423,13 +422,11 @@ def FDA(input_data, input_label):
        fd1 = X_reg_grp1.mean()
        fd2 = X_reg_grp2.mean()
        fd3 = X_reg_grp3.mean()
-       y1 = fd1.data_matrix.flatten()
-       y2 = fd2.data_matrix.flatten()
-       y3 = fd3.data_matrix.flatten()
-       diff_array1 = np.abs(y1-y2)
-       diff_array2 = np.abs(y2-y3)
-       diff_array3 = np.abs(y1-y3)
-       difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3))/3
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd1,fd3)
+       diff3 = l2_distance(fd2,fd3)
+       difference = (diff1 + diff2 + diff3)/3
+       difference = difference[0]
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
        
@@ -450,16 +447,14 @@ def FDA(input_data, input_label):
        fd2 = X_reg_grp2.mean()
        fd3 = X_reg_grp3.mean()
        fd4 = X_reg_grp4.mean()
-       y1 = fd1.data_matrix.flatten()
-       y2 = fd2.data_matrix.flatten()
-       y3 = fd3.data_matrix.flatten()
-       y4 = fd4.data_matrix.flatten()
-       diff_array1 = np.abs(y1-y2)
-       diff_array2 = np.abs(y2-y3)
-       diff_array3 = np.abs(y3-y4)
-       diff_array4 = np.abs(y1-y3)
-       diff_array5 = np.abs(y1-y4)
-       difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3)+np.sum(diff_array4)+np.sum(diff_array5))/5
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd3,fd4)
+       diff4 = l2_distance(fd1,fd3)
+       diff5 = l2_distance(fd2,fd4)
+       diff6 = l2_distance(fd1,fd4)
+       difference = (diff1 + diff2 + diff3 + diff4 + diff5 + diff6)/6
+       difference = difference[0]
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
        
@@ -484,21 +479,18 @@ def FDA(input_data, input_label):
        fd3 = X_reg_grp3.mean()
        fd4 = X_reg_grp4.mean()
        fd5 = X_reg_grp5.mean()
-       y1 = fd1.data_matrix.flatten()
-       y2 = fd2.data_matrix.flatten()
-       y3 = fd3.data_matrix.flatten()
-       y4 = fd4.data_matrix.flatten()
-       y5 = fd5.data_matrix.flatten()
-       diff_array1 = np.abs(y1-y2)
-       diff_array2 = np.abs(y2-y3)
-       diff_array3 = np.abs(y3-y4)
-       diff_array4 = np.abs(y4-y5)
-       diff_array5 = np.abs(y1-y3)
-       diff_array6 = np.abs(y2-y4)
-       diff_array7 = np.abs(y1-y4)
-       diff_array8 = np.abs(y1-y5)
-       diff_array9 = np.abs(y3-y5)
-       difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3)+np.sum(diff_array4)+np.sum(diff_array5)+np.sum(diff_array6)+np.sum(diff_array7)+np.sum(diff_array8)+np.sum(diff_array9))/9
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd3,fd4)
+       diff4 = l2_distance(fd4,fd5)
+       diff5 = l2_distance(fd1,fd3)
+       diff6 = l2_distance(fd2,fd4)
+       diff7 = l2_distance(fd3,fd5)
+       diff8 = l2_distance(fd1,fd4)
+       diff9 = l2_distance(fd2,fd5)
+       diff10 = l2_distance(fd1,fd5)
+       difference = (diff1 + diff2 + diff3 + diff4 + diff5 + diff6 + diff7 + diff8 + diff9 + diff10)/10
+       difference = difference[0]
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
        
@@ -527,28 +519,23 @@ def FDA(input_data, input_label):
        fd4 = X_reg_grp4.mean()
        fd5 = X_reg_grp5.mean()
        fd6 = X_reg_grp6.mean()
-       y1 = fd1.data_matrix.flatten()
-       y2 = fd2.data_matrix.flatten()
-       y3 = fd3.data_matrix.flatten()
-       y4 = fd4.data_matrix.flatten()
-       y5 = fd5.data_matrix.flatten()
-       y6 = fd6.data_matrix.flatten()
-       diff_array1 = np.abs(y1-y2)
-       diff_array2 = np.abs(y2-y3)
-       diff_array3 = np.abs(y3-y4)
-       diff_array4 = np.abs(y4-y5)
-       diff_array5 = np.abs(y5-y6)
-       diff_array6 = np.abs(y1-y3)
-       diff_array7 = np.abs(y2-y4)
-       diff_array8 = np.abs(y3-y5)
-       diff_array9 = np.abs(y4-y6)
-       diff_array10 = np.abs(y1-y4)
-       diff_array11 = np.abs(y2-y5)
-       diff_array12 = np.abs(y3-y6)
-       diff_array13 = np.abs(y1-y5)
-       diff_array14 = np.abs(y2-y6)
-       diff_array15 = np.abs(y1-y6)
-       difference = (np.sum(diff_array1)+np.sum(diff_array2)+np.sum(diff_array3)+np.sum(diff_array4)+np.sum(diff_array5)+np.sum(diff_array6)+np.sum(diff_array7)+np.sum(diff_array8)+np.sum(diff_array9)+np.sum(diff_array10)+np.sum(diff_array11)+np.sum(diff_array12)+np.sum(diff_array13)+np.sum(diff_array14)+np.sum(diff_array15))/15
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd3,fd4)
+       diff4 = l2_distance(fd4,fd5)
+       diff5 = l2_distance(fd5,fd6)
+       diff6 = l2_distance(fd1,fd3)
+       diff7 = l2_distance(fd2,fd4)
+       diff8 = l2_distance(fd3,fd5)
+       diff9 = l2_distance(fd4,fd6)
+       diff10 = l2_distance(fd1,fd4)
+       diff11 = l2_distance(fd2,fd5)
+       diff12 = l2_distance(fd3,fd6)
+       diff13 = l2_distance(fd1,fd5)
+       diff14 = l2_distance(fd2,fd6)
+       diff15 = l2_distance(fd1,fd6)
+       difference = (diff1 + diff2 + diff3 + diff4 + diff5 + diff6 + diff7 + diff8 + diff9 + diff10 + diff11 + diff12 + diff13 + diff14 + diff15)/15
+       difference = difference[0]
        print("abs functional difference = %s" % difference)
        txt_out3.write("abs functional difference = %s\n" % difference)
        
@@ -675,6 +662,8 @@ def FDA(input_data, input_label):
     plt.suptitle("classifiers - %s" % input_label)
     plt.savefig("popstar_results/FDA_classifiers_%s_%s.png" % (folder_list, input_label))
     plt.show()
+    
+    
     
     
 def clusterEM():
