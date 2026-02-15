@@ -13,12 +13,13 @@ import os
 import pandas as pd
 import numpy as np
 import scipy as sp
+from scipy.linalg import block_diag
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import seaborn as sns
 # for ggplot
 from plotnine import *
-
+import networkx as nx
 #######################
 import math
 import random
@@ -328,6 +329,7 @@ def FDA(input_data, input_label):
        
     
     print("FDA - spline smoothing")
+    
     ##### find best bandwidth ####################
     bw_options = [0.001,0.002,0.003,0.005,0.007,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05,0.055,0.06,0.065,0.07,0.075,0.08,0.085,0.09,0.095,0.1]
     bw_best = 0.001
@@ -378,6 +380,8 @@ def FDA(input_data, input_label):
     bw_best = bw_options[max_index]
     print("best bandwidth = %s" % str(bw_best))
     ################################################
+    
+    
     # smoothing function
     smoother = KernelSmoother(
         NadarayaWatsonHatMatrix(
@@ -423,8 +427,8 @@ def FDA(input_data, input_label):
        fd2 = X_reg_grp2.mean()
        fd3 = X_reg_grp3.mean()
        diff1 = l2_distance(fd1,fd2)
-       diff2 = l2_distance(fd1,fd3)
-       diff3 = l2_distance(fd2,fd3)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd1,fd3)
        difference = (diff1 + diff2 + diff3)/3
        difference = difference[0]
        print("abs functional difference = %s" % difference)
@@ -663,121 +667,336 @@ def FDA(input_data, input_label):
     plt.savefig("popstar_results/FDA_classifiers_%s_%s.png" % (folder_list, input_label))
     plt.show()
     
+    ############## create networx grapghs  #########################
+    if(num_folders >= 2):
+        fd1 = X_reg_grp1
+        fd2 = X_reg_grp2
+    if(num_folders >= 3):
+        fd3 = X_reg_grp3
+    if(num_folders >= 4):
+        fd4 = X_reg_grp4
+    if(num_folders >= 5):
+        fd5 = X_reg_grp5
+    if(num_folders >= 6):
+        fd6 = X_reg_grp6    
+    #Compute Distance Matrix (L2 Distance)
+    # distance_matrix[i, j] is the distance between curve i and curve j
+    if(num_folders >= 2):
+        distance_matrix1 = np.zeros((fd1.n_samples, fd1.n_samples))
+        for i in range(fd1.n_samples):
+            for j in range(fd1.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix1[i, j] = l2_distance(fd1[i], fd1[j])
     
+        distance_matrix2 = np.zeros((fd2.n_samples, fd2.n_samples))
+        for i in range(fd2.n_samples):
+            for j in range(fd2.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix2[i, j] = l2_distance(fd2[i], fd2[j])
+    if(num_folders >= 3):
+        distance_matrix3 = np.zeros((fd3.n_samples, fd3.n_samples))
+        for i in range(fd3.n_samples):
+            for j in range(fd3.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix3[i, j] = l2_distance(fd3[i], fd3[j])
+    if(num_folders >= 4):
+        distance_matrix4 = np.zeros((fd4.n_samples, fd4.n_samples))
+        for i in range(fd4.n_samples):
+            for j in range(fd4.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix4[i, j] = l2_distance(fd4[i], fd4[j])
+    if(num_folders >= 5):
+        distance_matrix5 = np.zeros((fd5.n_samples, fd5.n_samples))
+        for i in range(fd5.n_samples):
+            for j in range(fd5.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix5[i, j] = l2_distance(fd5[i], fd5[j])
+    if(num_folders >= 6):
+        distance_matrix6 = np.zeros((fd6.n_samples, fd6.n_samples))
+        for i in range(fd6.n_samples):
+            for j in range(fd6.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix6[i, j] = l2_distance(fd6[i], fd6[j])
     
+    if(num_folders == 2):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+         #combine graphs    
+        G = nx.compose(G1, G2)   
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+         #Add the edges between centroids
+        for i in centroid1:
+            G.add_edge(centroid1[i], centroid2[i])       
     
-def clusterEM():
-    print("model-based clustering")    
-    readPath = "popstar_results/EM_features_%s.txt" % folder_list
-    writePath = "popstar_results/stats_EMclustering_%s.txt" % folder_list
-    #readPath = "data_boxplots.dat"
-    #writePath = "stats_classifiers.dat"
-    outfile = open(writePath, "w")
-    df = pd.read_csv(readPath, delimiter='\t',header=0)
-    print(df)
+    if(num_folders == 3):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+         #Add the edges between centroids
+        for i in centroid1:
+            G.add_edge(centroid1[i], centroid2[i])
+        for j in centroid1:
+            G.add_edge(centroid2[j], centroid3[j])
+        for k in centroid1:
+            G.add_edge(centroid1[k], centroid3[k])
     
-    
-    # Generate sample data (replace with your data loading)
-    #np.random.seed(0)
-    #data = np.random.rand(100, 3)
-    #df = pd.DataFrame(data, columns=['Axis1', 'Axis2', 'Axis3'])
-    df = pd.read_csv(readPath, delimiter='\t',header=0)
-    data = pd.read_csv(readPath, delimiter='\t',header=0)
-    df = pd.DataFrame(data, columns=['energy', 'control', 'surprise'])
-    # EM clustering
-    n_clusters = num_folders
-    gmm = GaussianMixture(n_components=n_clusters, random_state=0)
-    gmm.fit(df)
-    cluster_labels = gmm.predict(df)
-    #df['folder'] = cluster_labels
-    #print(len(cluster_labels))
-    correct_labels_array = np.array(correct_labels)
-    #print(len(correct_labels_array))
-    print(cluster_labels)
-    print(correct_labels_array)
-    
-    # sort groups by ascending size
-    unique_labels, inverse_indices = np.unique(cluster_labels, return_inverse=True)
-    group_counts = np.bincount(inverse_indices)
-    sorted_indices = np.argsort(group_counts)
-    sorted_cluster_labels = unique_labels[sorted_indices]
-    print(sorted_cluster_labels)
-    unique_labels, inverse_indices = np.unique(correct_labels_array, return_inverse=True)
-    group_counts = np.bincount(inverse_indices)
-    sorted_indices = np.argsort(group_counts)
-    sorted_correct_labels = unique_labels[sorted_indices]
-    print(sorted_correct_labels)
-    folder_list_sort = []
-    for i in range(len(folder_list)):
-        myIndex = sorted_correct_labels[i]
-        myFolder = folder_list[myIndex]
-        folder_list_sort.append(myFolder)
-    print(folder_list_sort)
-    # calculate % match
-    percent_matches = []
-    match = 0
-    total = 0
-    for i in range(len(sorted_correct_labels)):
-        test = sorted_cluster_labels[i]
-        truth = sorted_correct_labels[i]
-        match = 0
-        total = 0
-        for j in range(len(cluster_labels)-1):
-            mytest = cluster_labels[j]
-            mytruth = correct_labels[j]
-            if(test == mytest and truth == mytruth):
-                match = match+1
-                total = total+1
-            if(test != mytest or truth != mytruth):
-                total = total+1
-            percent_match = match/total
-        percent_matches.append(percent_match)
-    print(percent_matches)
-    
-    
-    # 3D Scatter plot
-    df['folder'] = cluster_labels
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
-    for i in range(n_clusters):
-        clusterID = i
-        folderID = folder_list_sort[i]
-        percentID = round(percent_matches[i]*100,2)
-        cluster_data = df[df['folder'] == i]
-        ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
-                   c=colors[i % len(colors)], s=4, label=f'{"cluster %s most probable match %s percent to %s" % (clusterID,percentID,folderID)}')
-        # just group number
-        #ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
-        #           c=colors[i % len(colors)], s=4, label=f'{"cluster %s" % (clusterID)}')
-    
-    ax.set_xlabel('energy')
-    ax.set_ylabel('control')
-    ax.set_zlabel('surprise')
-    ax.legend()
-    plt.title('EM Clustering of sound fragments on mean Energy,Control,Surprise values')
+    if(num_folders == 4):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        G4 = nx.from_numpy_array(distance_matrix4)
+        G4 = nx.relabel_nodes(G4, {n: n + 3000 for n in G4.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        centroid4 = nx.center(G4)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+        for node in G4.nodes():
+            G4.nodes[node]['graph_id'] = 'G4'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        G = nx.compose(G, G4)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+            if G.nodes[node].get('graph_id') == 'G4':
+                node_colors.append('red')   
+         #Add the edges between centroids
+        for i in centroid1:
+            G.add_edge(centroid1[i], centroid2[i])
+        for j in centroid1:
+            G.add_edge(centroid2[j], centroid3[j])
+        for k in centroid1:
+            G.add_edge(centroid3[k], centroid4[k])
+        for l in centroid1:
+            G.add_edge(centroid1[l], centroid3[l])
+        for m in centroid1:
+            G.add_edge(centroid2[m], centroid4[m])
+        for n in centroid1:
+            G.add_edge(centroid1[n], centroid4[n])
+ 
+  
+    if(num_folders == 5):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        G4 = nx.from_numpy_array(distance_matrix4)
+        G4 = nx.relabel_nodes(G4, {n: n + 3000 for n in G4.nodes()})
+        G5 = nx.from_numpy_array(distance_matrix5)
+        G5 = nx.relabel_nodes(G5, {n: n + 4000 for n in G5.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        centroid4 = nx.center(G4)
+        centroid5 = nx.center(G5)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+        for node in G4.nodes():
+            G4.nodes[node]['graph_id'] = 'G4'
+        for node in G5.nodes():
+            G5.nodes[node]['graph_id'] = 'G5'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        G = nx.compose(G, G4)
+        G = nx.compose(G, G5)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+            if G.nodes[node].get('graph_id') == 'G4':
+                node_colors.append('red')
+            if G.nodes[node].get('graph_id') == 'G5':
+                node_colors.append('purple')   
+         #Add the edges between centroids
+        for i in centroid1:
+            G.add_edge(centroid1[i], centroid2[i])
+        for j in centroid1:
+            G.add_edge(centroid2[j], centroid3[j])
+        for k in centroid1:
+            G.add_edge(centroid3[k], centroid4[k])
+        for l in centroid1:
+            G.add_edge(centroid4[l], centroid5[l])
+        for m in centroid1:
+            G.add_edge(centroid1[m], centroid3[m])
+        for n in centroid1:
+            G.add_edge(centroid2[n], centroid4[n])
+        for o in centroid1:
+            G.add_edge(centroid3[o], centroid5[o])
+        for p in centroid1:
+            G.add_edge(centroid1[p], centroid4[p])
+        for q in centroid1:
+            G.add_edge(centroid2[q], centroid5[q])
+        for r in centroid1:
+            G.add_edge(centroid1[r], centroid5[r])
+ 
+ 
+    if(num_folders == 6):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        G4 = nx.from_numpy_array(distance_matrix4)
+        G4 = nx.relabel_nodes(G4, {n: n + 3000 for n in G4.nodes()})
+        G5 = nx.from_numpy_array(distance_matrix5)
+        G5 = nx.relabel_nodes(G5, {n: n + 4000 for n in G5.nodes()})
+        G6 = nx.from_numpy_array(distance_matrix6)
+        G6 = nx.relabel_nodes(G6, {n: n + 5000 for n in G6.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        centroid4 = nx.center(G4)
+        centroid5 = nx.center(G5)
+        centroid6 = nx.center(G6)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+        for node in G4.nodes():
+            G4.nodes[node]['graph_id'] = 'G4'
+        for node in G5.nodes():
+            G5.nodes[node]['graph_id'] = 'G5'
+        for node in G6.nodes():
+            G6.nodes[node]['graph_id'] = 'G6'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        G = nx.compose(G, G4)
+        G = nx.compose(G, G5)
+        G = nx.compose(G, G6)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+            if G.nodes[node].get('graph_id') == 'G4':
+                node_colors.append('red')
+            if G.nodes[node].get('graph_id') == 'G5':
+                node_colors.append('purple')
+            if G.nodes[node].get('graph_id') == 'G6':
+                node_colors.append('brown')     
+         #Add the edges between centroids
+        for i in centroid1:
+            G.add_edge(centroid1[i], centroid2[i])
+        for j in centroid1:
+            G.add_edge(centroid2[j], centroid3[j])
+        for k in centroid1:
+            G.add_edge(centroid3[k], centroid4[k])
+        for l in centroid1:
+            G.add_edge(centroid4[l], centroid5[l])
+        for m in centroid1:
+            G.add_edge(centroid5[m], centroid6[m])
+        for n in centroid1:
+            G.add_edge(centroid1[n], centroid3[n])
+        for o in centroid1:
+            G.add_edge(centroid2[o], centroid4[o])
+        for p in centroid1:
+            G.add_edge(centroid3[p], centroid5[p])
+        for q in centroid1:
+            G.add_edge(centroid4[q], centroid6[q])
+        for r in centroid1:
+            G.add_edge(centroid1[r], centroid4[r])
+        for s in centroid1:
+            G.add_edge(centroid2[s], centroid5[s])
+        for t in centroid1:
+            G.add_edge(centroid3[t], centroid6[t])
+        for u in centroid1:
+            G.add_edge(centroid1[u], centroid5[u])
+        for v in centroid1:
+            G.add_edge(centroid2[v], centroid6[v])
+        for w in centroid1:
+            G.add_edge(centroid1[w], centroid6[w])
+         
+            
+    # plot graph network
+    pos = nx.spring_layout(G)
+    plt.title("%s (network-l2 distances between spline functions)" % input_label, loc="left")
+    nx.draw(G, pos, with_labels=False, node_color=node_colors, edge_color='gray')
+    plt.savefig("popstar_results/FDA_network_graph_%s_%s.png" % (folder_list, input_label))
     plt.show()
-    # 3D Scatter plot
-    df['folder'] = correct_labels_array
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
-    for i in range(n_clusters):
-        #clusterID = i
-        folderID = folder_list[i]
-        #percentID = round(percent_matches[i]*100,2)
-        cluster_data = df[df['folder'] == i]
-        #ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
-        #           c=colors[i % len(colors)], s=4, label=f'{"cluster %s match %s percent to %s" % (clusterID,percentID,folderID)}')
-        ax.scatter(cluster_data['energy'], cluster_data['control'], cluster_data['surprise'],
-                   c=colors[i % len(colors)], s=4, label=f'{"folder = %s" % (folderID)}')
     
-    ax.set_xlabel('energy')
-    ax.set_ylabel('control')
-    ax.set_zlabel('surprise')
-    ax.legend()
-    plt.title('correct labels of sound fragments on mean Energy,Control,Surprise values')
-    plt.show()
+    
+    
+    
+
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
@@ -785,7 +1004,6 @@ def main():
     findDIM()
     collectDF()
     clusterFDA()
-    #clusterEM()
     print("\nsignature clustering is complete\n")   
     
         
