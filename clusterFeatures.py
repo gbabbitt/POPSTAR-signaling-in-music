@@ -381,7 +381,7 @@ def FDA(input_data, input_label):
     print("best bandwidth = %s" % str(bw_best))
     ################################################
     
-    
+    bw_best = 0.04
     # smoothing function
     smoother = KernelSmoother(
         NadarayaWatsonHatMatrix(
@@ -988,7 +988,18 @@ def FDA(input_data, input_label):
             
     # plot graph network
     pos = nx.spring_layout(G)
-    plt.title("%s (network-l2 distances between spline functions)" % input_label, loc="left")
+    if(num_folders==2):
+        plt.title("%s=blue|%s=orange" % (folder_list[0],folder_list[1]))
+    if(num_folders==3):
+        plt.title("%s=blue|%s=orange|%s=green" % (folder_list[0],folder_list[1],folder_list[2]))
+    if(num_folders==4):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3]))
+    if(num_folders==5):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4]))
+    if(num_folders==6):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple|%s=brown" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4],folder_list[5]))
+    plt.suptitle("%s (network-l2 distances between spline functions)" % input_label)
+    plt.suptitle("%s (network-l2 distances between spline functions)" % input_label)
     nx.draw(G, pos, with_labels=False, node_color=node_colors, edge_color='gray')
     plt.savefig("popstar_results/FDA_network_graph_%s_%s.png" % (folder_list, input_label))
     plt.show()
