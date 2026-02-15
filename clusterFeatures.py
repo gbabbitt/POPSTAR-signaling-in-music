@@ -381,7 +381,6 @@ def FDA(input_data, input_label):
     print("best bandwidth = %s" % str(bw_best))
     ################################################
     
-    bw_best = 0.04
     # smoothing function
     smoother = KernelSmoother(
         NadarayaWatsonHatMatrix(
