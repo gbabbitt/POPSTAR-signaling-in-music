@@ -260,8 +260,8 @@ def time_sample_batch():
         y, sr = librosa.load(file_path)
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
         #print("tempo = %s" % str(tempo))
-        if(tempo == 0):
-            continue
+        #if(tempo == 0):
+        #    continue
         tempo = tempo[0]
         total_beats = (dur/60*tempo)
         beat_int = dur/total_beats

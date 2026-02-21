@@ -999,7 +999,7 @@ def FDA(input_data, input_label):
         plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple|%s=brown" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4],folder_list[5]))
     plt.suptitle("%s (network-l2 distances between spline functions)" % input_label)
     plt.suptitle("%s (network-l2 distances between spline functions)" % input_label)
-    nx.draw(G, pos, with_labels=False, node_color=node_colors, edge_color='gray')
+    nx.draw(G, pos, with_labels=False, node_color=node_colors, node_size=150, width=0.1, edge_color='gray')
     plt.savefig("popstar_results/FDA_network_graph_%s_%s.png" % (folder_list, input_label))
     plt.show()
     
