@@ -127,7 +127,7 @@ class Ui_Dialog(object):
         os.system(cmd)
     
     def clusterIt(self):
-        print("running FDA signature clustering analysis")
+        print("running FDA signature classification analysis")
         filename1 = self.lineEdit.text()
         filename2 = self.lineEdit_2.text()
         filename3 = self.lineEdit_3.text()

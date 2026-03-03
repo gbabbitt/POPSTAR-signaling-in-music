@@ -621,7 +621,7 @@ def FDA(input_data, input_label):
     qda_pred = qda.predict(X_test)
     print(qda_pred)
     print(f"The score of functional QDA is {qda.score(X_test, y_test):2.2%}")
-    print("FDA - plotting signature functions grouped by cluster")
+    print("FDA - plotting signature functions grouped by class")
     accuracies = pd.DataFrame({
         "Classification methods":
             [
@@ -668,7 +668,8 @@ def FDA(input_data, input_label):
     
     ############## create networx grapghs  #########################
     if(num_folders >= 2):
-        fd1 = X_reg_grp1
+        fd0 = X_reg  # for overall distances
+        fd1 = X_reg_grp1 # for within group distances
         fd2 = X_reg_grp2
     if(num_folders >= 3):
         fd3 = X_reg_grp3
@@ -678,44 +679,64 @@ def FDA(input_data, input_label):
         fd5 = X_reg_grp5
     if(num_folders >= 6):
         fd6 = X_reg_grp6    
+    
     #Compute Distance Matrix (L2 Distance)
     # distance_matrix[i, j] is the distance between curve i and curve j
+    distance_matrix = np.zeros((fd0.n_samples, fd0.n_samples))
+    for i in range(fd0.n_samples):
+        for j in range(fd0.n_samples):
+            # Calculate l2_distance between pairs
+            distance_matrix[i, j] = l2_distance(fd0[i], fd0[j])
+    
+    
+    ###################################
+    
     if(num_folders >= 2):
         distance_matrix1 = np.zeros((fd1.n_samples, fd1.n_samples))
         for i in range(fd1.n_samples):
             for j in range(fd1.n_samples):
                 # Calculate l2_distance between pairs
                 distance_matrix1[i, j] = l2_distance(fd1[i], fd1[j])
-    
+                
+                
         distance_matrix2 = np.zeros((fd2.n_samples, fd2.n_samples))
         for i in range(fd2.n_samples):
             for j in range(fd2.n_samples):
                 # Calculate l2_distance between pairs
                 distance_matrix2[i, j] = l2_distance(fd2[i], fd2[j])
+                
+                
     if(num_folders >= 3):
         distance_matrix3 = np.zeros((fd3.n_samples, fd3.n_samples))
         for i in range(fd3.n_samples):
             for j in range(fd3.n_samples):
                 # Calculate l2_distance between pairs
                 distance_matrix3[i, j] = l2_distance(fd3[i], fd3[j])
+                
+                
     if(num_folders >= 4):
         distance_matrix4 = np.zeros((fd4.n_samples, fd4.n_samples))
         for i in range(fd4.n_samples):
             for j in range(fd4.n_samples):
                 # Calculate l2_distance between pairs
                 distance_matrix4[i, j] = l2_distance(fd4[i], fd4[j])
+                
+                
     if(num_folders >= 5):
         distance_matrix5 = np.zeros((fd5.n_samples, fd5.n_samples))
         for i in range(fd5.n_samples):
             for j in range(fd5.n_samples):
                 # Calculate l2_distance between pairs
                 distance_matrix5[i, j] = l2_distance(fd5[i], fd5[j])
+                
+                
     if(num_folders >= 6):
         distance_matrix6 = np.zeros((fd6.n_samples, fd6.n_samples))
         for i in range(fd6.n_samples):
             for j in range(fd6.n_samples):
                 # Calculate l2_distance between pairs
                 distance_matrix6[i, j] = l2_distance(fd6[i], fd6[j])
+                
     
     if(num_folders == 2):
         # get centroids
@@ -985,8 +1006,10 @@ def FDA(input_data, input_label):
             G.add_edge(centroid1[w], centroid6[w])
          
             
-    # plot graph network
+    # plot centroid linked subgraph network
     pos = nx.spring_layout(G)
+    #print(pos)
+    print(G)
     if(num_folders==2):
         plt.title("%s=blue|%s=orange" % (folder_list[0],folder_list[1]))
     if(num_folders==3):
@@ -997,12 +1020,30 @@ def FDA(input_data, input_label):
         plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4]))
     if(num_folders==6):
         plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple|%s=brown" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4],folder_list[5]))
-    plt.suptitle("%s (network-l2 distances between spline functions)" % input_label)
-    plt.suptitle("%s (network-l2 distances between spline functions)" % input_label)
-    nx.draw(G, pos, with_labels=False, node_color=node_colors, node_size=150, width=0.1, edge_color='gray')
-    plt.savefig("popstar_results/FDA_network_graph_%s_%s.png" % (folder_list, input_label))
+    plt.suptitle("%s (centroid linked subgraph network-l2 distances between spline functions)" % input_label)
+    nx.draw(G, pos, with_labels=False, node_color=node_colors, node_size=100, width=0.1, edge_color='gray')
+    plt.savefig("popstar_results/FDA_centroid_linked_subgraphs_%s_%s.png" % (folder_list, input_label))
     plt.show()
-    
+    # plot Kamada-Kawai graph network
+    G0 = nx.from_numpy_array(distance_matrix)
+    pos = nx.kamada_kawai_layout(G0)
+    #print(pos)
+    print(G0)
+    if(num_folders==2):
+        plt.title("%s=blue|%s=orange" % (folder_list[0],folder_list[1]))
+    if(num_folders==3):
+        plt.title("%s=blue|%s=orange|%s=green" % (folder_list[0],folder_list[1],folder_list[2]))
+    if(num_folders==4):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3]))
+    if(num_folders==5):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4]))
+    if(num_folders==6):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple|%s=brown" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4],folder_list[5]))
+    plt.suptitle("%s (Kamada Kawai network-l2 distances between spline functions)" % input_label)
+    nx.draw(G0, pos, with_labels=False, node_color=node_colors, node_size=100, width=0.1, edge_color='gray')
+    plt.savefig("popstar_results/FDA_kamada_kawai_network_%s_%s.png" % (folder_list, input_label))
+    plt.show()
+    ####
     
     
     
@@ -1014,7 +1055,7 @@ def main():
     findDIM()
     collectDF()
     clusterFDA()
-    print("\nsignature clustering is complete\n")   
+    print("\nFDA signature classification is complete\n")   
     
         
 ###############################################################
