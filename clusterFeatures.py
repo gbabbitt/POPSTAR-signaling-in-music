@@ -381,6 +381,7 @@ def FDA(input_data, input_label):
     print("best bandwidth = %s" % str(bw_best))
     ################################################
     
+    
     # smoothing function
     smoother = KernelSmoother(
         NadarayaWatsonHatMatrix(
@@ -687,8 +688,18 @@ def FDA(input_data, input_label):
         for j in range(fd0.n_samples):
             # Calculate l2_distance between pairs
             distance_matrix[i, j] = l2_distance(fd0[i], fd0[j])
+    print(distance_matrix)
     
-    
+    from sklearn.preprocessing import normalize
+    distance_matrix = normalize(distance_matrix, axis=1, norm='l1')
+    # Define a tolerance threshold (adjust as needed)
+    tolerance = np.median(distance_matrix) # drop edges for largest 50% l2 distances in Kamada Kawai network
+    # Create a boolean mask for values whose absolute value is less than the tolerance
+    mask = np.abs(distance_matrix) > tolerance
+    # Use the mask to replace the selected values with 0
+    distance_matrix[mask] = 0
+    print(distance_matrix)
+        
     ###################################
     
     if(num_folders >= 2):
@@ -1029,6 +1040,79 @@ def FDA(input_data, input_label):
     pos = nx.kamada_kawai_layout(G0)
     #print(pos)
     print(G0)
+    edges_to_remove = [(u, v) for u, v, data in G0.edges(data=True) if data['weight'] == 0]
+    #Remove the identified edges
+    G0.remove_edges_from(edges_to_remove)
+    #print(f"Edges after removal: {list(G.edges(data=True))}")
+    
+    from networkx.algorithms.community.quality import modularity
+    from networkx.algorithms.community import label_propagation_communities
+    from itertools import islice
+    G1_n = G1.number_of_nodes()
+    G2_n = G2.number_of_nodes()
+    G1_start = 0
+    G1_stop = G1_n
+    G2_start = G1_n
+    G2_stop = G1_n+G2_n
+    G1_nodes = list(islice(G0.nodes(),G1_start,G1_stop))
+    G2_nodes = list(islice(G0.nodes(),G2_start,G2_stop))
+    if(num_folders==2):
+        communities = [G1_nodes,G2_nodes]
+    if(num_folders==3):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes]
+    if(num_folders==4):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        G4_n = G4.number_of_nodes()
+        G4_start = G1_n+G2_n+G3_n
+        G4_stop = G1_n+G2_n+G3_n+G4_n
+        G4_nodes = list(islice(G0.nodes(),G4_start,G4_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes,G4_nodes]
+    if(num_folders==5):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        G4_n = G4.number_of_nodes()
+        G4_start = G1_n+G2_n+G3_n
+        G4_stop = G1_n+G2_n+G3_n+G4_n
+        G4_nodes = list(islice(G0.nodes(),G4_start,G4_stop))
+        G5_n = G5.number_of_nodes()
+        G5_start = G1_n+G2_n+G3_n+G4_n
+        G5_stop = G1_n+G2_n+G3_n+G4_n+G5_n
+        G5_nodes = list(islice(G0.nodes(),G5_start,G5_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes,G4_nodes,G5_nodes]
+    if(num_folders==6):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        G4_n = G4.number_of_nodes()
+        G4_start = G1_n+G2_n+G3_n
+        G4_stop = G1_n+G2_n+G3_n+G4_n
+        G4_nodes = list(islice(G0.nodes(),G4_start,G4_stop))
+        G5_n = G5.number_of_nodes()
+        G5_start = G1_n+G2_n+G3_n+G4_n
+        G5_stop = G1_n+G2_n+G3_n+G4_n+G5_n
+        G5_nodes = list(islice(G0.nodes(),G5_start,G5_stop))
+        G6_n = G6.number_of_nodes()
+        G6_start = G1_n+G2_n+G3_n+G4_n+G5_n
+        G6_stop = G1_n+G2_n+G3_n+G4_n+G5_n+G6_n
+        G6_nodes = list(islice(G0.nodes(),G6_start,G6_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes,G4_nodes,G5_nodes,G6_nodes]
+    #communities = nx.community.label_propagation_communities(G0)
+    #print(communities)
+    # Calculate the modularity (ranges -0.5 to 1.0 with 0 indicating random modularity, and 0.3 - 0.7 as strong modularity)
+    Q = modularity(G0, communities)
+    Q = round(Q,5)
+    
+    print(f"The modularity of the classes is: {Q}")
     if(num_folders==2):
         plt.title("%s=blue|%s=orange" % (folder_list[0],folder_list[1]))
     if(num_folders==3):
@@ -1039,7 +1123,7 @@ def FDA(input_data, input_label):
         plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4]))
     if(num_folders==6):
         plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple|%s=brown" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4],folder_list[5]))
-    plt.suptitle("%s (Kamada Kawai network-l2 distances between spline functions)" % input_label)
+    plt.suptitle("%s (Kamada Kawai network-l2 distances | modularity = %s)" % (input_label,Q))
     nx.draw(G0, pos, with_labels=False, node_color=node_colors, node_size=100, width=0.1, edge_color='gray')
     plt.savefig("popstar_results/FDA_kamada_kawai_network_%s_%s.png" % (folder_list, input_label))
     plt.show()
