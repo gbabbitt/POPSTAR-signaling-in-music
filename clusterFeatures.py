@@ -56,7 +56,10 @@ from skfda.misc.kernels import normal, uniform, epanechnikov
 from skfda.misc.metrics import l2_distance
 from skfda.preprocessing.smoothing import KernelSmoother
 from skfda.preprocessing.registration import FisherRaoElasticRegistration
-
+from sklearn.preprocessing import normalize
+from networkx.algorithms.community.quality import modularity
+from networkx.algorithms.community import label_propagation_communities
+from itertools import islice
 
 ################################################################################
 # find number of cores
@@ -331,8 +334,8 @@ def FDA(input_data, input_label):
     print("FDA - spline smoothing")
     
     ##### find best bandwidth ####################
-    bw_options = [0.001,0.002,0.003,0.005,0.007,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05,0.055,0.06,0.065,0.07,0.075,0.08,0.085,0.09,0.095,0.1]
-    bw_best = 0.001
+    bw_options = [0.05, 0.04,0.03,0.02,0.01,0.007,0.005,0.002,0.001]
+    bw_best = 0.05
     pf_options = []
     for i in bw_options:
         smoother = KernelSmoother(NadarayaWatsonHatMatrix(bandwidth=i,kernel=normal,),)
@@ -380,6 +383,7 @@ def FDA(input_data, input_label):
     bw_best = bw_options[max_index]
     print("best bandwidth = %s" % str(bw_best))
     ################################################
+   
     
     
     # smoothing function
@@ -562,17 +566,6 @@ def FDA(input_data, input_label):
         X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5, X_reg_grp6) 
     
     
-    '''
-    print("X_smooth)")
-    print(X_smooth)
-    print(len(X_smooth))
-    print("X_reg)")
-    print(X_reg)
-    print(len(X_reg))
-    print("y")
-    print(y)
-    print(len(y))
-    '''
     
     X_train, X_test, y_train, y_test = train_test_split(
         X_reg,
@@ -689,19 +682,8 @@ def FDA(input_data, input_label):
             # Calculate l2_distance between pairs
             distance_matrix[i, j] = l2_distance(fd0[i], fd0[j])
     print(distance_matrix)
-    
-    from sklearn.preprocessing import normalize
-    distance_matrix = normalize(distance_matrix, axis=1, norm='l1')
-    # Define a tolerance threshold (adjust as needed)
-    tolerance = np.median(distance_matrix) # drop edges for largest 50% l2 distances in Kamada Kawai network
-    # Create a boolean mask for values whose absolute value is less than the tolerance
-    mask = np.abs(distance_matrix) > tolerance
-    # Use the mask to replace the selected values with 0
-    distance_matrix[mask] = 0
-    print(distance_matrix)
-        
-    ###################################
-    
+           
+    # get color labels
     if(num_folders >= 2):
         distance_matrix1 = np.zeros((fd1.n_samples, fd1.n_samples))
         for i in range(fd1.n_samples):
@@ -770,10 +752,7 @@ def FDA(input_data, input_label):
                 node_colors.append('blue')
             if G.nodes[node].get('graph_id') == 'G2':
                 node_colors.append('orange')
-         #Add the edges between centroids
-        for i in centroid1:
-            G.add_edge(centroid1[i], centroid2[i])       
-    
+            
     if(num_folders == 3):
         # get centroids
         G1 = nx.from_numpy_array(distance_matrix1)
@@ -803,14 +782,7 @@ def FDA(input_data, input_label):
                 node_colors.append('orange')
             if G.nodes[node].get('graph_id') == 'G3':
                 node_colors.append('green')
-         #Add the edges between centroids
-        for i in centroid1:
-            G.add_edge(centroid1[i], centroid2[i])
-        for j in centroid1:
-            G.add_edge(centroid2[j], centroid3[j])
-        for k in centroid1:
-            G.add_edge(centroid1[k], centroid3[k])
-    
+            
     if(num_folders == 4):
         # get centroids
         G1 = nx.from_numpy_array(distance_matrix1)
@@ -848,21 +820,7 @@ def FDA(input_data, input_label):
                 node_colors.append('green')
             if G.nodes[node].get('graph_id') == 'G4':
                 node_colors.append('red')   
-         #Add the edges between centroids
-        for i in centroid1:
-            G.add_edge(centroid1[i], centroid2[i])
-        for j in centroid1:
-            G.add_edge(centroid2[j], centroid3[j])
-        for k in centroid1:
-            G.add_edge(centroid3[k], centroid4[k])
-        for l in centroid1:
-            G.add_edge(centroid1[l], centroid3[l])
-        for m in centroid1:
-            G.add_edge(centroid2[m], centroid4[m])
-        for n in centroid1:
-            G.add_edge(centroid1[n], centroid4[n])
- 
-  
+          
     if(num_folders == 5):
         # get centroids
         G1 = nx.from_numpy_array(distance_matrix1)
@@ -908,29 +866,7 @@ def FDA(input_data, input_label):
                 node_colors.append('red')
             if G.nodes[node].get('graph_id') == 'G5':
                 node_colors.append('purple')   
-         #Add the edges between centroids
-        for i in centroid1:
-            G.add_edge(centroid1[i], centroid2[i])
-        for j in centroid1:
-            G.add_edge(centroid2[j], centroid3[j])
-        for k in centroid1:
-            G.add_edge(centroid3[k], centroid4[k])
-        for l in centroid1:
-            G.add_edge(centroid4[l], centroid5[l])
-        for m in centroid1:
-            G.add_edge(centroid1[m], centroid3[m])
-        for n in centroid1:
-            G.add_edge(centroid2[n], centroid4[n])
-        for o in centroid1:
-            G.add_edge(centroid3[o], centroid5[o])
-        for p in centroid1:
-            G.add_edge(centroid1[p], centroid4[p])
-        for q in centroid1:
-            G.add_edge(centroid2[q], centroid5[q])
-        for r in centroid1:
-            G.add_edge(centroid1[r], centroid5[r])
- 
- 
+         
     if(num_folders == 6):
         # get centroids
         G1 = nx.from_numpy_array(distance_matrix1)
@@ -984,58 +920,26 @@ def FDA(input_data, input_label):
                 node_colors.append('purple')
             if G.nodes[node].get('graph_id') == 'G6':
                 node_colors.append('brown')     
-         #Add the edges between centroids
-        for i in centroid1:
-            G.add_edge(centroid1[i], centroid2[i])
-        for j in centroid1:
-            G.add_edge(centroid2[j], centroid3[j])
-        for k in centroid1:
-            G.add_edge(centroid3[k], centroid4[k])
-        for l in centroid1:
-            G.add_edge(centroid4[l], centroid5[l])
-        for m in centroid1:
-            G.add_edge(centroid5[m], centroid6[m])
-        for n in centroid1:
-            G.add_edge(centroid1[n], centroid3[n])
-        for o in centroid1:
-            G.add_edge(centroid2[o], centroid4[o])
-        for p in centroid1:
-            G.add_edge(centroid3[p], centroid5[p])
-        for q in centroid1:
-            G.add_edge(centroid4[q], centroid6[q])
-        for r in centroid1:
-            G.add_edge(centroid1[r], centroid4[r])
-        for s in centroid1:
-            G.add_edge(centroid2[s], centroid5[s])
-        for t in centroid1:
-            G.add_edge(centroid3[t], centroid6[t])
-        for u in centroid1:
-            G.add_edge(centroid1[u], centroid5[u])
-        for v in centroid1:
-            G.add_edge(centroid2[v], centroid6[v])
-        for w in centroid1:
-            G.add_edge(centroid1[w], centroid6[w])
-         
-            
-    # plot centroid linked subgraph network
-    pos = nx.spring_layout(G)
-    #print(pos)
-    print(G)
-    if(num_folders==2):
-        plt.title("%s=blue|%s=orange" % (folder_list[0],folder_list[1]))
-    if(num_folders==3):
-        plt.title("%s=blue|%s=orange|%s=green" % (folder_list[0],folder_list[1],folder_list[2]))
-    if(num_folders==4):
-        plt.title("%s=blue|%s=orange|%s=green|%s=red" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3]))
-    if(num_folders==5):
-        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4]))
-    if(num_folders==6):
-        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple|%s=brown" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4],folder_list[5]))
-    plt.suptitle("%s (centroid linked subgraph network-l2 distances between spline functions)" % input_label)
-    nx.draw(G, pos, with_labels=False, node_color=node_colors, node_size=100, width=0.1, edge_color='gray')
-    plt.savefig("popstar_results/FDA_centroid_linked_subgraphs_%s_%s.png" % (folder_list, input_label))
-    plt.show()
+                 
     # plot Kamada-Kawai graph network
+    distance_matrix = normalize(distance_matrix, axis=1, norm='l1')
+    # Define a tolerance threshold (adjust as needed)
+    tolerance = np.quantile(distance_matrix, 0.5) # drop edges for best largest 50% l2 distances in Kamada Kawai network
+    # Create a boolean mask for values whose absolute value is less than the tolerance
+    mask = np.abs(distance_matrix) > tolerance
+    # Use the mask to replace the selected values with 0
+    distance_matrix[mask] = 0
+    print(distance_matrix)
+    G0 = nx.from_numpy_array(distance_matrix)
+    pos = nx.kamada_kawai_layout(G0)
+    #print(pos)
+    print(G0)
+    edges_to_remove = [(u, v) for u, v, data in G0.edges(data=True) if data['weight'] == 0]
+    #Remove the identified edges
+    G0.remove_edges_from(edges_to_remove)
+    #print(f"Edges after removal: {list(G0.edges(data=True))}")
+    
+    
     G0 = nx.from_numpy_array(distance_matrix)
     pos = nx.kamada_kawai_layout(G0)
     #print(pos)
