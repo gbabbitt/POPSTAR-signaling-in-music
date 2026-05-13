@@ -45,8 +45,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import skfda
 from skfda.datasets import fetch_phoneme
 from skfda.ml.classification import KNeighborsClassifier
-from skfda.exploratory.depth import ModifiedBandDepth
-from skfda.ml.classification import MaximumDepthClassifier
+#from skfda.exploratory.depth import ModifiedBandDepth
+#from skfda.ml.classification import MaximumDepthClassifier
 from skfda.ml.classification import NearestCentroid
 from skfda.exploratory.stats.covariance import ParametricGaussianCovariance
 from skfda.misc.covariances import Gaussian
@@ -322,6 +322,7 @@ def FDA(input_data, input_label):
         data_matrix=new_data,
         domain_range=(float(np.min(new_points)), float(np.max(new_points))),
     )
+    
     # show only 20 functions 
     n_plot = num_folders*min_fnames
     #X[:n_plot].plot(group=y)
@@ -334,6 +335,7 @@ def FDA(input_data, input_label):
     print("FDA - spline smoothing")
     
     ##### find best bandwidth ####################
+    
     bw_options = [0.05, 0.04,0.03,0.02,0.01,0.007,0.005,0.002,0.001]
     bw_best = 0.05
     pf_options = []
@@ -383,7 +385,6 @@ def FDA(input_data, input_label):
     bw_best = bw_options[max_index]
     print("best bandwidth = %s" % str(bw_best))
     ################################################
-   
     
     
     # smoothing function
@@ -394,7 +395,7 @@ def FDA(input_data, input_label):
         ),
     )
     X_smooth = smoother.fit_transform(X)
-    
+    #print(X_smooth)
     fig = X_smooth[:n_plot].plot(group=y)
     
     print("FDA - registration (alignment)")
@@ -575,9 +576,17 @@ def FDA(input_data, input_label):
         stratify=y,
     )
     
+    neigh = KNeighborsClassifier(n_neighbors = 5)
+    neigh.fit(X_train, y_train)
+    neigh_pred = neigh.predict(X_test)
+    print(neigh_pred)
+    print(
+        f"The score of Fixed K=5 KNN Classifier is "
+        f"{neigh.score(X_test, y_test):2.2%}",
+    )
     
-
-    depth = MaximumDepthClassifier(depth_method=ModifiedBandDepth())
+    '''
+    depth = MaximumDepthClassifier()
     depth.fit(X_train, y_train)
     depth_pred = depth.predict(X_test)
     print(depth_pred)
@@ -585,13 +594,13 @@ def FDA(input_data, input_label):
         f"The score of Maximum Depth Classifier is "
         f"{depth.score(X_test, y_test):2.2%}",
     )
-    
+    '''
     
     knn = KNeighborsClassifier()
     knn.fit(X_train, y_train)
     knn_pred = knn.predict(X_test)
     print(knn_pred)
-    print(f"The score of KNN is {knn.score(X_test, y_test):2.2%}")
+    print(f"The score of L2 norm KNN is {knn.score(X_test, y_test):2.2%}")
     
     
 
@@ -619,14 +628,14 @@ def FDA(input_data, input_label):
     accuracies = pd.DataFrame({
         "Classification methods":
             [
-                "Maximum Depth Classifier",
-                "K-Nearest-Neighbors",
+                "fixed K-Nearest-Neighbors",
+                "tuned K-Nearest-Neighbors",
                 "Nearest Centroid Classifier",
                 "Functional QDA",
             ],
         "Accuracy":
             [
-                f"{depth.score(X_test, y_test):2.2%}",
+                f"{neigh.score(X_test, y_test):2.2%}",
                 f"{knn.score(X_test, y_test):2.2%}",
                 f"{centroid.score(X_test, y_test):2.2%}",
                 f"{qda.score(X_test, y_test):2.2%}",
@@ -638,7 +647,7 @@ def FDA(input_data, input_label):
     txt_out3.write(str_accuracies)
     # accuracy scores
     centroid_score = f"{centroid.score(X_test, y_test):2.2%}"
-    depth_score = f"{depth.score(X_test, y_test):2.2%}"
+    neigh_score = f"{neigh.score(X_test, y_test):2.2%}"
     knn_score = f"{knn.score(X_test, y_test):2.2%}"
     qda_score = f"{qda.score(X_test, y_test):2.2%}"
     # grid plot
@@ -648,11 +657,11 @@ def FDA(input_data, input_label):
     X_test.plot(group=centroid_pred, axes=axs[0][1])
     axs[0][1].set_title("Nearest Centroid = %s" % centroid_score, loc="left")
 
-    X_test.plot(group=depth_pred, axes=axs[0][0])
-    axs[0][0].set_title("Maximum Depth = %s" % depth_score, loc="left")
+    X_test.plot(group=neigh_pred, axes=axs[0][0])
+    axs[0][0].set_title("fixed KNN (K = 5) = %s" % neigh_score, loc="left")
 
     X_test.plot(group=knn_pred, axes=axs[1][0])
-    axs[1][0].set_title("K nearest neighbors = %s" % knn_score, loc="left")
+    axs[1][0].set_title("tuned KNN = %s" % knn_score, loc="left")
 
     X_test.plot(group=qda_pred, axes=axs[1][1])
     axs[1][1].set_title("Functional QDA = %s" % qda_score, loc="left")
