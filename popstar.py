@@ -14,7 +14,7 @@
 ######   Offered freely without guarantee.  License under GPL v3.0
 #############################################################################
 
-
+from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 import time
 
@@ -237,9 +237,21 @@ class Ui_Dialog(object):
             print("user input is a file")
             fileORfolder = "file"
             filename = filename[:-4]
+            # get file extension
+            fileExt = Path(self.lineEdit_2.text()).suffix
+            print("file name is %s" % filename)
+            print("file extension is %s" % fileExt)
+            time.sleep(2)
         if os.path.isdir(filename):
             print("user input is a folder")
             fileORfolder = "folder"
+            # get file extension
+            files = Path(self.lineEdit_2.text()).iterdir()
+            first_file = next((f for f in files if f.is_file()), None)
+            fileExt = first_file.suffix if first_file else "Folder is empty"
+            print("folder name is %s" % filename)
+            print("file extension is %s" % fileExt)
+            time.sleep(2)
         if self.checkBox.isChecked() == True:
             metroOption = "yes" 
         elif self.checkBox.isChecked() == False:
@@ -277,16 +289,21 @@ class Ui_Dialog(object):
         f.write("spch,%s,#normalize to human speech average\n" % spchOption)
         f.write("musi,%s,#normalize to human music average\n" % musiOption)
         f.write("self,%s,#self normalize to the song center value\n" % selfOption)
+        f.write("fileExt,%s,#file extension\n" % fileExt)
         f.close()
         print("pre-processing sound file(s)")
-        # setting for loop to set value of progress bar 
         cmd = "python3 processSound.py"
         os.system(cmd)
+        if(fileExt == ".mp4"):
+            print("processing videofile(s)")
+            cmd = "python3 processVideo.py"
+            os.system(cmd)
+        # setting for loop to set value of progress bar 
         for i in range(26): 
             time.sleep(0.01) 
             # setting value to progress bar 
             self.progressBar.setValue(i)
-            
+           
     def makeMovie(self):
         print("rendering movie file")
         cmd = "python3 makeMovie.py"

@@ -49,7 +49,6 @@ from pydub import AudioSegment
 import soundfile
 import librosa 
 import multiprocessing
-
 # IMPORTANT NOTE - run in base conda env, not in atomdance conda env   
 ################################################################################
 '''
@@ -86,12 +85,17 @@ for x in range(len(infile_lines)):
         print("my time interval is",tm)
     if(header == "metro"):
         met = value
-        print("my metronome option is",met)    
+        print("my metronome option is",met)
+    if(header == "fileExt"):
+        ext = value
+        print("my file extension(s) are",ext)   
 infile.close()
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 met = ""+met+""
+ext = ""+ext+""
+
 
 if os.path.exists('%s_analysis' % inp):
     print("folder already exists...was this run already done?")
@@ -109,6 +113,7 @@ if not os.path.exists('%s_analysis/intervals' % inp):
 
 input1 = "%s.wav" % inp
 input1alt = "%s.mp3" % inp
+input1alt2 = "%s.mp4" % inp
 input2 = "%s.png" % inp
 input3 = "%s.dat" % inp
 input4 = "%s.txt" % inp
@@ -130,6 +135,12 @@ elif os.path.isfile(input1alt):
     song.export(input1, format="wav")
     fileORfolder = "file"
     #inp2 = input("Do you want to activate bootstrapping? (y or n)\n")
+elif os.path.isfile(input1alt2):
+    print("user input is a .mp4 file")
+    print("converting to .wav format for %s" % inp) 
+    song = AudioSegment.from_file(input1alt2, format="mp4") 
+    song.export(input1, format="wav")
+    fileORfolder = "file"
 elif os.path.isdir(inp):
     print("user input is a folder")
     fileORfolder = "folder"
@@ -157,7 +168,8 @@ def trim_wav():
     # save file 
     ftrim.export("%s_analysis/trimmed_%s" % (inp, input1), format="wav") 
     print("trimmed %s file is created and saved" % input1)
-
+       
+    
 def trim_wav_batch(): 
     print("converting to .wav format for %s folder" % inp)
     print("trimming %s" % inp)
