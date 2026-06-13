@@ -70,17 +70,21 @@ for x in range(len(infile_lines)):
         print("beat interval is",btInt)
     if(header == "ttlBeats"):
         ttlBts = value
-        print("total beats is",ttlBts)    
+        print("total beats is",ttlBts)
+    if(header == "fileExt"):
+        ext = value
+        print("my file extension(s) are",ext)    
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
 met = ""+met+""
+ext = ""+ext+""
 
-lyr = "no"
+#lyr = "no"
 
 if(fof=="file"):
-    tmp = float(tmp)
+    tm = float(tm)
     btInt = float(btInt)
     ttlBts = float(ttlBts)
     dur = float(dur)
@@ -255,7 +259,7 @@ def renderTplotMovie():
     vid_writer.release()
     
     ############################
-    if(lyr == "yes"):  
+    if(ext == ".mp4"):  
         print("rendering movie 2")
         folder = "%s_analysis/tplots2" % inp
         video_filename = "%s_analysis/myMovie_tplots2.mp4" % inp
@@ -334,7 +338,7 @@ def renderTplotMovie_batch():
         trk1 = trk1 + 1
     ############################
     
-    if(lyr == "yes"):  
+    if(ext == ".mp4"):  
         print("rendering movie 2")
         lst = os.listdir(inp) # your directory path
         number_files = len(lst)
@@ -412,7 +416,7 @@ def tplotMovie_audio_video():
     final_clip.write_videofile("%s_analysis/myMovieSound_tplots1.mp4" % inp)
     #####################
     
-    if(lyr == "yes"):  
+    if(ext == ".mp4"):  
         print("combining audio and video for movie 2 for %s" % inp)
         audio_file = "%s_analysis/trimmed_%s.wav" % (inp,inp)
         video_file = "%s_analysis/myMovie_tplots2.mp4" % inp
@@ -472,7 +476,7 @@ def tplotMovie_audio_video_batch():
         final_clip.write_videofile("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname))
     #####################
     
-    if(lyr == "yes"):  
+    if(ext == ".mp4"):  
         print("rendering movie")
         lst = os.listdir(inp) # your directory path
         number_files = len(lst)
@@ -511,7 +515,7 @@ def combine_side_by_side():
     # Load the two video clips
     clip0 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
     clip1 = VideoFileClip("%s_analysis/myMovie_faces.mp4" % inp)
-    if(lyr == "yes"):  
+    if(ext == ".mp4"):  
         clip2 = VideoFileClip("%s_analysis/myMovie_tplots2.mp4" % inp)
     else:
         clip2 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
@@ -520,7 +524,7 @@ def combine_side_by_side():
     clip2 = clip2.resize(height=clip0.h)
 
     # Concatenate the clips side by side
-    if(lyr == "yes"): 
+    if(ext == ".mp4"): 
         final_clip = clips_array([[clip0, clip1, clip2]])
     else:
         final_clip = clips_array([[clip0, clip1]])
@@ -549,7 +553,7 @@ def combine_side_by_side_batch():
         clip2 = clip2.resize(height=clip0.h)
 
         # Concatenate the clips side by side
-        if(lyr == "yes"): 
+        if(ext == ".mp4"): 
             final_clip = clips_array([[clip0, clip1, clip2]])
         else:
             final_clip = clips_array([[clip0, clip1]])
@@ -618,7 +622,7 @@ def copyMovie():
     print("loading movie")
     shutil.copy2("%s_analysis/myMovieSound_faces.mp4" % inp, "popstar_results/myMovie_faces_%s.mp4" % inp)
     shutil.copy2("%s_analysis/myMovieSound_tplots1.mp4" % inp, "popstar_results/myMovie_tplots1_%s.mp4" % inp)
-    if(lyr == "yes"): 
+    if(ext == ".mp4"): 
         shutil.copy2("%s_analysis/myMovieSound_tplots2.mp4" % inp, "popstar_results/myMovie_tplots2_%s.mp4" % inp)
     shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "popstar_results/myMovie_combo_%s.mp4" % inp)
 
@@ -635,7 +639,7 @@ def copyMovie_batch():
         dirname = fname[:-4]
         shutil.copy2("%s_analysis/myMovieSound_faces_%s.mp4" % (inp,dirname), "popstar_results/myMovie_faces_%s.mp4" % (dirname))
         shutil.copy2("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname), "popstar_results/myMovie_tplots1_%s.mp4" % (dirname))
-        if(lyr == "yes"): 
+        if(ext == ".mp4"): 
             shutil.copy2("%s_analysis/myMovieSound_tplots2_%s.mp4" % (inp,dirname), "popstar_results/myMovie_tplots2_%s.mp4" % (dirname))
         shutil.copy2("%s_analysis/myMovieSound_combined_%s.mp4" % (inp,dirname), "popstar_results/myMovie_combo_%s.mp4" % (dirname))
 

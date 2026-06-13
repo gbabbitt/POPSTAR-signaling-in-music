@@ -583,7 +583,7 @@ def CESmap():
     vals_energy = []
     vals_surprise = []
     f = open("%s_analysis/ternary_video_raw.txt" % (inp), "w")
-    f.write("control\tenergy\tsurprise\n")
+    f.write("energy,control,surprise\n")
     for i in range(len(lines_f1)):
         if(i==0):
             continue
@@ -596,7 +596,7 @@ def CESmap():
         vals_energy.append(float(energy))
         vals_surprise.append(float(surprise))
         print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
-        f.write("%s\t%s\t%s\n" % (control, energy, surprise))
+        f.write("%s,%s,%s\n" % (energy, control, surprise))
     f.close()
     # normalize each feature column
     vals_control = np.array(vals_control)
@@ -606,7 +606,7 @@ def CESmap():
     norm_energy = (vals_energy - np.min(vals_energy)) / (np.max(vals_energy) - np.min(vals_energy))
     norm_surprise = (vals_surprise- np.min(vals_surprise)) / (np.max(vals_surprise) - np.min(vals_surprise))
     f = open("%s_analysis/ternary_video_norm.txt" % (inp), "w")
-    f.write("control\tenergy\tsurprise\n")
+    f.write("energy,control,surprise\n")
     for i in range(len(norm_control)):
         if(i==0):
             continue
@@ -618,7 +618,7 @@ def CESmap():
         t_energy = energy/(control+energy+surprise)
         t_surprise = surprise/(control+energy+surprise)
         print("%s\t%s\t%s\t%s" % (i,t_control, t_energy, t_surprise))
-        f.write("%s\t%s\t%s\n" % (t_control, t_energy, t_surprise))
+        f.write("%s,%s,%s\n" % (t_energy, t_control, t_surprise))
     f.close()
 
 
@@ -642,7 +642,7 @@ def CESmap_batch():
         vals_energy = []
         vals_surprise = []
         f = open("%s_analysis/ternary_video_raw_%s.txt" % (inp,filename), "w")
-        f.write("control\tenergy\tsurprise\n")
+        f.write("energy,control,surprise\n")
         for i in range(len(lines_f1)):
             array_f1 = lines_f1[i].split()
             control = array_f1[0]
@@ -655,7 +655,7 @@ def CESmap_batch():
             if(i==0):
                 continue
             print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
-            f.write("%s\t%s\t%s\n" % (control, energy, surprise))
+            f.write("%s,%s,%s\n" % (energy, control, surprise))
         f.close()
         # normalize each feature column
         vals_control = np.array(vals_control)
@@ -665,7 +665,7 @@ def CESmap_batch():
         norm_energy = (vals_energy - np.min(vals_energy)) / (np.max(vals_energy) - np.min(vals_energy))
         norm_surprise = (vals_surprise- np.min(vals_surprise)) / (np.max(vals_surprise) - np.min(vals_surprise))
         f = open("%s_analysis/ternary_video_norm.txt" % (inp), "w")
-        f.write("control\tenergy\tsurprise\n")
+        f.write("energy,control,surprise\n")
         for i in range(len(norm_control)):
             if(i==0):
                 continue
@@ -677,7 +677,7 @@ def CESmap_batch():
             t_energy = energy/(control+energy+surprise)
             t_surprise = surprise/(control+energy+surprise)
             print("%s\t%s\t%s\t%s" % (i,t_control, t_energy, t_surprise))
-            f.write("%s\t%s\t%s\n" % (t_control, t_energy, t_surprise))
+            f.write("%s,%s,%s\n" % (t_energy, t_control, t_surprise))
         f.close()
         
         

@@ -63,7 +63,7 @@ spchOpt = ""+spchOpt+""
 selfOpt = ""+selfOpt+""
 musiOpt = ""+musiOpt+""
 
-lyr = "no"
+#lyr = "no"
 
 if(fof=="file"):
     # calculate number of faces for single file
@@ -333,10 +333,10 @@ def main():
     ###########################    
     # make each ternary plot 2
     ###########################
-    if(lyr == "yes"):   
+    if(ext == ".mp4"):   
         if(signalType == "real"): # real signal    
             print("importing computed data")
-            readPath = "%s_analysis/ternary_norm.txt" % (inp)
+            readPath = "%s_analysis/ternary_video_norm.txt" % (inp)
             df = pd.read_csv(readPath, delimiter=',',header=1)
             data = df.values  # convert dataframe to matrix
             print(data)
@@ -567,7 +567,7 @@ def main_batch_tplots2(item):
     ###########################
     if(signalType == "real"): # real signal    
         print("importing computed data")
-        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
+        readPath = "%s_analysis/ternary_video_norm_%s.txt" % (inp,foldername)
         df = pd.read_csv(readPath, delimiter=',',header=1)
         data = df.values  # convert dataframe to matrix
         print(data)
