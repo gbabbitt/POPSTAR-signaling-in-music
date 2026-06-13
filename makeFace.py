@@ -50,10 +50,15 @@ for x in range(len(infile_lines)):
     if(header == "self"):
         selfOpt = value
         print("self-normalize",selfOpt)   
- ###### variable assignments ######
+    if(header == "fileExt"):
+        ext = value
+        print("my file extension(s) are",ext) 
+
+###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
 fof = ""+fof+""
+ext = ""+ext+""
 spchOpt = ""+spchOpt+""
 selfOpt = ""+selfOpt+""
 musiOpt = ""+musiOpt+""
@@ -216,13 +221,13 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
     if(selfOpt == "yes"):
-       tax.set_title("Audio Fitness Signal - distance from song center", fontsize=14, y=-0.15)
+       tax.set_title("Video Fitness Signal - distance from song center", fontsize=14, y=-0.15)
     if(selfOpt == "no"):
-       tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
+       tax.set_title("Video Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
     if(spchOpt == "yes"):
-       tax.set_title("Audio Fitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
+       tax.set_title("VideoFitness Signal - distance from avg human speech", fontsize=14, y=-0.15)
     if(musiOpt == "yes"):
-       tax.set_title("Audio Fitness Signal - distance from avg human music", fontsize=14, y=-0.15)
+       tax.set_title("Video Fitness Signal - distance from avg human music", fontsize=14, y=-0.15)
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
 
@@ -616,6 +621,6 @@ if __name__ == '__main__':
             pool.map(main_batch_faces, folder_paths1)
         with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
             pool.map(main_batch_tplots1, folder_paths2)
-        if(lyr == "yes"):
+        if(ext == ".mp4"):
             with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
                 pool.map(main_batch_tplots2, folder_paths3)
