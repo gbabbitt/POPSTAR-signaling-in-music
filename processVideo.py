@@ -627,6 +627,21 @@ def CESmap_batch():
             print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
             f.write("%s\t%s\t%s\n" % (control, energy, surprise))
         f.close()
+
+def createSoundFiles_batch():
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    for i in range(number_files):    
+        # Open an mp3 file 
+        filename = dir_list[i]
+        print("converting to .wav format for %s" % inp) 
+        song = AudioSegment.from_file(filename, format="mp4") 
+        my_path = "%s_analysis/trimmed_%s.wav" % (inp,filename[:-4])
+        song.export(my_path, format="wav")
         
 #################################################################################
 ####################  main program      #########################################
@@ -639,6 +654,7 @@ def main():
         print("\nvideo processing is complete\n")
         
     if(fileORfolder == "folder"):
+        createSoundFiles_batch()
         GlobOptContrast_batch()
         OptFlow_batch()
         CESmap_batch()

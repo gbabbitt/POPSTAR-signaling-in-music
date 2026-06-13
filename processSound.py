@@ -144,7 +144,21 @@ elif os.path.isfile(input1alt2):
 elif os.path.isdir(inp):
     print("user input is a folder")
     fileORfolder = "folder"
-  
+    # need conditional here if folder contains mp4 and loop converting copying to .wav as in Video prosessing script
+    if(ext == ".mp4"):
+        lst = os.listdir(inp) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir(inp)
+        print(dir_list)
+        for i in range(number_files):    
+            # Open an mp3 file 
+            filename = dir_list[i]
+            print("converting to .wav format for %s" % inp) 
+            song = AudioSegment.from_file(filename, format="mp4") 
+            my_path = "%s_analysis/trimmed_%s.wav" % (inp,filename[:-4])
+            song.export(my_path, format="wav")
 else:
     print("Invalid Path")
     exit()
@@ -185,6 +199,8 @@ def trim_wav_batch():
         #print(filename)
         if os.path.isfile("%s/%s.mp3" % (inp,filename[:-4])):  # if .mp3
             song = AudioSegment.from_file("%s/%s" % (inp,filename), format="mp3") 
+        elif os.path.isfile("%s/%s.mp4" % (inp,filename[:-4])):  # if .mp3
+            song = AudioSegment.from_file("%s/%s" % (inp,filename), format="mp4") 
         else:  # else if .wav
             song = AudioSegment.from_file("%s/%s" % (inp,filename), format="wav") 
         # start and end time 
@@ -264,6 +280,8 @@ def time_sample_batch():
         #tm = 20 # interval length in seconds
         if os.path.isfile("%s/%s.mp3" % (inp,filename[:-4])):  # if .mp3
             song = AudioSegment.from_file("%s/%s" % (inp,filename), format="mp3") 
+        elif os.path.isfile("%s/%s.mp4" % (inp,filename[:-4])):  # if .mp3
+            song = AudioSegment.from_file("%s/%s" % (inp,filename), format="mp4") 
         else:  # else if .wav
             song = AudioSegment.from_file("%s/%s" % (inp,filename), format="wav")
         print(song.duration_seconds)
