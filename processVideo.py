@@ -571,11 +571,6 @@ def OptFlow_batch():
             f.write("%s\t%s\n" % (opt_flow_windows[i], dlt_flow_windows[i]))
         f.close()
         cap.release()
-
-
-
-
-
         
 def CESmap():
     print("collecting CES data for %s" % inp)
@@ -584,19 +579,48 @@ def CESmap():
     lines_f1 = f1.readlines()
     lines_f2 = f2.readlines()
     # write file
-    f = open("%s_analysis/CESvalues_%s.txt" % (inp,inp), "w")
+    vals_control = []
+    vals_energy = []
+    vals_surprise = []
+    f = open("%s_analysis/ternary_video_raw.txt" % (inp), "w")
     f.write("control\tenergy\tsurprise\n")
     for i in range(len(lines_f1)):
+        if(i==0):
+            continue
         array_f1 = lines_f1[i].split()
         control = array_f1[0]
         array_f2 = lines_f2[i].split()
         energy = array_f2[0]
         surprise = array_f2[1]
-        if(i==0):
-            continue
+        vals_control.append(float(control))
+        vals_energy.append(float(energy))
+        vals_surprise.append(float(surprise))
         print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
         f.write("%s\t%s\t%s\n" % (control, energy, surprise))
     f.close()
+    # normalize each feature column
+    vals_control = np.array(vals_control)
+    vals_energy = np.array(vals_energy)
+    vals_surprise = np.array(vals_surprise)
+    norm_control = (vals_control - np.min(vals_control)) / (np.max(vals_control) - np.min(vals_control))
+    norm_energy = (vals_energy - np.min(vals_energy)) / (np.max(vals_energy) - np.min(vals_energy))
+    norm_surprise = (vals_surprise- np.min(vals_surprise)) / (np.max(vals_surprise) - np.min(vals_surprise))
+    f = open("%s_analysis/ternary_video_norm.txt" % (inp), "w")
+    f.write("control\tenergy\tsurprise\n")
+    for i in range(len(norm_control)):
+        if(i==0):
+            continue
+        control = norm_control[i]
+        energy = norm_energy[i]
+        surprise = norm_surprise[i]
+        # normalize each row for ternary plot
+        t_control = control/(control+energy+surprise)
+        t_energy = energy/(control+energy+surprise)
+        t_surprise = surprise/(control+energy+surprise)
+        print("%s\t%s\t%s\t%s" % (i,t_control, t_energy, t_surprise))
+        f.write("%s\t%s\t%s\n" % (t_control, t_energy, t_surprise))
+    f.close()
+
 
 def CESmap_batch():
     lst = os.listdir(inp) # your directory path
@@ -614,7 +638,10 @@ def CESmap_batch():
         lines_f1 = f1.readlines()
         lines_f2 = f2.readlines()
         # write file
-        f = open("%s_analysis/CESvalues_%s.txt" % (inp,filename[:-4]), "w")
+        vals_control = []
+        vals_energy = []
+        vals_surprise = []
+        f = open("%s_analysis/ternary_video_raw_%s.txt" % (inp,filename), "w")
         f.write("control\tenergy\tsurprise\n")
         for i in range(len(lines_f1)):
             array_f1 = lines_f1[i].split()
@@ -622,12 +649,38 @@ def CESmap_batch():
             array_f2 = lines_f2[i].split()
             energy = array_f2[0]
             surprise = array_f2[1]
+            vals_control.append(control)
+            vals_energy.append(energy)
+            vals_surprise.append(surprise)
             if(i==0):
                 continue
             print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
             f.write("%s\t%s\t%s\n" % (control, energy, surprise))
         f.close()
-
+        # normalize each feature column
+        vals_control = np.array(vals_control)
+        vals_energy = np.array(vals_energy)
+        vals_surprise = np.array(vals_surprise)
+        norm_control = (vals_control - np.min(vals_control)) / (np.max(vals_control) - np.min(vals_control))
+        norm_energy = (vals_energy - np.min(vals_energy)) / (np.max(vals_energy) - np.min(vals_energy))
+        norm_surprise = (vals_surprise- np.min(vals_surprise)) / (np.max(vals_surprise) - np.min(vals_surprise))
+        f = open("%s_analysis/ternary_video_norm.txt" % (inp), "w")
+        f.write("control\tenergy\tsurprise\n")
+        for i in range(len(norm_control)):
+            if(i==0):
+                continue
+            control = norm_control[i]
+            energy = norm_energy[i]
+            surprise = norm_surprise[i]
+            # normalize each row for ternary plot
+            t_control = control/(control+energy+surprise)
+            t_energy = energy/(control+energy+surprise)
+            t_surprise = surprise/(control+energy+surprise)
+            print("%s\t%s\t%s\t%s" % (i,t_control, t_energy, t_surprise))
+            f.write("%s\t%s\t%s\n" % (t_control, t_energy, t_surprise))
+        f.close()
+        
+        
 def createSoundFiles_batch():
     lst = os.listdir(inp) # your directory path
     number_files = len(lst)
