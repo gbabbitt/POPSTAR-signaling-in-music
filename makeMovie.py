@@ -151,7 +151,7 @@ def renderFaceMovie_batch():
             if(header == "duration_%s" % trk):
                 dur = float(value)
                 print("my duration is",dur)
-        lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,fname)) # your directory path
+        lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,dirname)) # your directory path
         frame_num = int(len(lstINT)/4)  # note folder has 4 types of files
         print("number of movie frames is %s" % frame_num)
         frameSec = (frame_num/dur)
@@ -315,7 +315,7 @@ def renderTplotMovie_batch():
             if(header == "duration_%s" % trk1):
                 dur = float(value)
                 print("my duration is",dur)
-        lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,fname)) # your directory path
+        lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,dirname)) # your directory path
         frame_num = int(len(lstINT)/4)  # note folder has 4 types of files
         print("number of movie frames is %s" % frame_num)
         frameSec = (frame_num/dur)
@@ -369,7 +369,7 @@ def renderTplotMovie_batch():
                 if(header == "duration_%s" % trk2):
                     dur = float(value)
                     print("my duration is",dur)
-            lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,fname)) # your directory path
+            lstINT = os.listdir("%s_analysis/intervals/%s" % (inp,dirname)) # your directory path
             frame_num = int(len(lstINT)/4)  # note folder has 4 types of files
             print("number of movie frames is %s" % frame_num)
             frameSec = (frame_num/dur)
@@ -544,7 +544,7 @@ def combine_side_by_side_batch():
         # Load the two video clips
         clip0 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
         clip1 = VideoFileClip("%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname))
-        if(lyr == "yes"):  
+        if(ext == ".mp4"):  
             clip2 = VideoFileClip("%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname))
         else:
             clip2 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))

@@ -275,8 +275,8 @@ def time_sample_batch():
         filename = dir_list[i]
         file_path = "%s/%s" % (inp,filename)
         #print(filename)
-        if not os.path.exists('%s_analysis/intervals/%s' % (inp,filename)):
-            os.mkdir('%s_analysis/intervals/%s' % (inp,filename))
+        if not os.path.exists('%s_analysis/intervals/%s' % (inp,filename[:-4])):
+            os.mkdir('%s_analysis/intervals/%s' % (inp,filename[:-4]))
         #tm = 20 # interval length in seconds
         if os.path.isfile("%s/%s.mp3" % (inp,filename[:-4])):  # if .mp3
             song = AudioSegment.from_file("%s/%s" % (inp,filename), format="mp3") 
@@ -321,7 +321,7 @@ def time_sample_batch():
             # song interval 
             finterval = song[start: end] 
             # save file 
-            finterval.export("%s_analysis/intervals/%s/%s_%s.wav" % (inp, filename, j, inp), format="wav") 
+            finterval.export("%s_analysis/intervals/%s/%s_%s.wav" % (inp, filename[:-4], j, inp), format="wav") 
             print("interval %s for %s file is created and saved" % (j, filename))   
             
 def create_sonogram_list():   

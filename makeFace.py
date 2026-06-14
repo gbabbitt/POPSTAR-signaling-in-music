@@ -401,7 +401,7 @@ def create_list():
         os.mkdir('%s_analysis/faces' % (inp))
     if not os.path.exists('%s_analysis/tplots1' % (inp)):
         os.mkdir('%s_analysis/tplots1' % (inp))
-    if(lyr == "yes"):
+    if(ext == ".mp4"):
         if not os.path.exists('%s_analysis/tplots2' % (inp)):
             os.mkdir('%s_analysis/tplots2' % (inp))
     for i in range(number_files):    
@@ -412,19 +412,19 @@ def create_list():
             os.mkdir('%s_analysis/faces/%s' % (inp,dirname))
         if not os.path.exists('%s_analysis/tplots1/%s' % (inp,dirname)):
             os.mkdir('%s_analysis/tplots1/%s' % (inp,dirname))
-        if(lyr == "yes"):
+        if(ext == ".mp4"):
             if not os.path.exists('%s_analysis/tplots2/%s' % (inp,dirname)):
                 os.mkdir('%s_analysis/tplots2/%s' % (inp,dirname))
         
         folder_path1 = "%s_analysis/faces/%s" % (inp,dirname)
         folder_path2 = "%s_analysis/tplots1/%s" % (inp,dirname)
-        if(lyr == "yes"):
+        if(ext == ".mp4"):
             folder_path3 = "%s_analysis/tplots2/%s" % (inp,dirname)
         #print(filename)
         print("generating faces and tplots for %s" % (dirname))
         folder_paths1.append(folder_path1)
         folder_paths2.append(folder_path2)
-        if(lyr == "yes"):     
+        if(ext == ".mp4"):     
              folder_paths3.append(folder_path3)
     print(folder_paths1)
     print(folder_paths2)
@@ -439,10 +439,12 @@ def main_batch_faces(item):
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
-    foldername = "%s.wav" % (folder_path_array[2])
+    foldername = "%s" % (folder_path_array[2])
+    #foldername = "%s.wav" % (folder_path_array[2])
     print(foldername)
     if not os.path.exists("%s_analysis/intervals/%s" % (inp,foldername)):
-        foldername = "%s.mp3" % (folder_path_array[2])
+        #foldername = "%s.mp3" % (folder_path_array[2])
+        foldername = "%s" % (folder_path_array[2])
         print(foldername)
     # calculate number of faces for single file
     lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
@@ -494,10 +496,12 @@ def main_batch_tplots1(item):
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
-    foldername = "%s.wav" % (folder_path_array[2])
+    foldername = "%s" % (folder_path_array[2])
+    #foldername = "%s.wav" % (folder_path_array[2])
     print(foldername)
     if not os.path.exists("%s_analysis/intervals/%s" % (inp,foldername)):
-        foldername = "%s.mp3" % (folder_path_array[2])
+        #foldername = "%s.mp3" % (folder_path_array[2])
+        foldername = "%s" % (folder_path_array[2])
         print(foldername)
     # calculate number of faces for single file
     lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
@@ -556,10 +560,12 @@ def main_batch_tplots2(item):
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
-    foldername = "%s.wav" % (folder_path_array[2])
+    foldername = "%s" % (folder_path_array[2])
+    #foldername = "%s.wav" % (folder_path_array[2])
     print(foldername)
     if not os.path.exists("%s_analysis/intervals/%s" % (inp,foldername)):
-        foldername = "%s.mp3" % (folder_path_array[2])
+        #foldername = "%s.mp3" % (folder_path_array[2])
+        foldername = "%s" % (folder_path_array[2])
         print(foldername)
     # calculate number of faces for single file
     lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path

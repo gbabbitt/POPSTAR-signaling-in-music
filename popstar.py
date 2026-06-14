@@ -154,7 +154,7 @@ class Ui_Dialog(object):
         self.pushButton.setText(_translate("Dialog", "3. calculate faces"))
         self.pushButton_2.setText(_translate("Dialog", "exit"))
         self.pushButton_3.setText(_translate("Dialog", "2. analyze signal"))
-        self.pushButton_4.setText(_translate("Dialog", "1. process sounds"))
+        self.pushButton_4.setText(_translate("Dialog", "1. process audio/video"))
         self.pushButton_6.setText(_translate("Dialog", "6. play faces"))
         self.pushButton_7.setText(_translate("Dialog", "5. play trajectory"))
         self.pushButton_8.setText(_translate("Dialog", "see DOC"))

@@ -641,7 +641,7 @@ def CESmap_batch():
         vals_control = []
         vals_energy = []
         vals_surprise = []
-        f = open("%s_analysis/ternary_video_raw_%s.txt" % (inp,filename), "w")
+        f = open("%s_analysis/ternary_video_raw_%s.txt" % (inp,filename[:-4]), "w")
         f.write("energy,control,surprise\n")
         for i in range(len(lines_f1)):
             if(i==0):
@@ -664,7 +664,7 @@ def CESmap_batch():
         norm_control = (vals_control - np.min(vals_control)) / (np.max(vals_control) - np.min(vals_control))
         norm_energy = (vals_energy - np.min(vals_energy)) / (np.max(vals_energy) - np.min(vals_energy))
         norm_surprise = (vals_surprise- np.min(vals_surprise)) / (np.max(vals_surprise) - np.min(vals_surprise))
-        f = open("%s_analysis/ternary_video_norm.txt" % (inp), "w")
+        f = open("%s_analysis/ternary_video_norm_%s.txt" % (inp,filename[:-4]), "w")
         f.write("energy,control,surprise\n")
         for i in range(len(norm_control)):
             if(i==0):

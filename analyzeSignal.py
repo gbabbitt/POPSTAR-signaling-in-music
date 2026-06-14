@@ -91,7 +91,10 @@ for x in range(len(infile_lines)):
         print("music-normalize",musiOpt)
     if(header == "metro"):
         met = value
-        print("my metronome option is",met)    
+        print("my metronome option is",met)
+    if(header == "fileExt"):
+        ext = value
+        print("my file extension(s) are",ext)   
 infile.close()
  ###### variable assignments ######
 inp = ""+name+""
@@ -102,6 +105,7 @@ selfOpt = ""+selfOpt+""
 musiOpt = ""+musiOpt+""
 fileORfolder = fof
 met = ""+met+""
+ext = ""+ext+""
 
 if(fof=="file"):
     # calculate number of faces for single file
