@@ -644,6 +644,8 @@ def CESmap_batch():
         f = open("%s_analysis/ternary_video_raw_%s.txt" % (inp,filename), "w")
         f.write("energy,control,surprise\n")
         for i in range(len(lines_f1)):
+            if(i==0):
+                continue
             array_f1 = lines_f1[i].split()
             control = array_f1[0]
             array_f2 = lines_f2[i].split()
@@ -652,8 +654,6 @@ def CESmap_batch():
             vals_control.append(float(control))
             vals_energy.append(float(energy))
             vals_surprise.append(float(surprise))
-            if(i==0):
-                continue
             print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
             f.write("%s,%s,%s\n" % (energy, control, surprise))
         f.close()
