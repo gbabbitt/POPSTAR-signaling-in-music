@@ -649,9 +649,9 @@ def CESmap_batch():
             array_f2 = lines_f2[i].split()
             energy = array_f2[0]
             surprise = array_f2[1]
-            vals_control.append(control)
-            vals_energy.append(energy)
-            vals_surprise.append(surprise)
+            vals_control.append(float(control))
+            vals_energy.append(float(energy))
+            vals_surprise.append(float(surprise))
             if(i==0):
                 continue
             print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
