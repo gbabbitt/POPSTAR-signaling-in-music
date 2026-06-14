@@ -514,9 +514,12 @@ def tplotMovie_audio_video_batch():
 def combine_side_by_side():
     # Load the two video clips
     clip0 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
-    clip1 = VideoFileClip("%s_analysis/myMovie_faces.mp4" % inp)
+    if(ext == ".mp3" or ext == ".wav" ): 
+        clip1 = VideoFileClip("%s_analysis/myMovie_faces.mp4" % inp)
     if(ext == ".mp4"):  
-        clip2 = VideoFileClip("%s_analysis/myMovie_tplots2.mp4" % inp)
+        shutil.copy("%s.mp4" % (inp), "%s_analysis/%s.mp4" % (inp,inp))
+        clip1 = VideoFileClip("%s_analysis/%s.mp4" % (inp,inp))
+        clip2 = VideoFileClip("%s_analysis/myMovie_tplots2.mp4" % (inp))
     else:
         clip2 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
     # Ensure both clips have the same height for side-by-side alignment
@@ -543,8 +546,11 @@ def combine_side_by_side_batch():
         dirname = fname[:-4]
         # Load the two video clips
         clip0 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
-        clip1 = VideoFileClip("%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname))
+        if(ext == ".mp3" or ext == ".wav" ): 
+            clip1 = VideoFileClip("%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname))
         if(ext == ".mp4"):  
+            shutil.copy("%s.mp4" % (inp), "%s_analysis/%s.mp4" % (inp,inp))
+            clip1 = VideoFileClip("%s_analysis/%s.mp4" % (inp,inp))
             clip2 = VideoFileClip("%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname))
         else:
             clip2 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
