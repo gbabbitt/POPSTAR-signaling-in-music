@@ -281,7 +281,7 @@ def main():
         ax_single.set_ylim(-1, 1)
         ax_single.set_aspect('equal', adjustable='box')
         ax_single.axis('off')
-        ax_single.set_title('Chernoff face - fitness signal', fontsize=18,)
+        ax_single.set_title('Chernoff face - 9 feature audio signal', fontsize=18,)
         # Save the new figure
         fig_single.savefig(f'%s_analysis/faces/face_{i+1}.png' % inp)
         # Close the new figure to release memory
@@ -484,7 +484,7 @@ def main_batch_faces(item):
         ax_single.set_ylim(-1, 1)
         ax_single.set_aspect('equal', adjustable='box')
         ax_single.axis('off')
-        ax_single.set_title('Chernoff face - fitness signal', fontsize=18,)
+        ax_single.set_title('Chernoff face - 9 feature audio signal', fontsize=18,)
         # Save the new figure
         fig_single.savefig(f'%s/face_{i+1}.png' % (folder_path))
         # Close the new figure to release memory
