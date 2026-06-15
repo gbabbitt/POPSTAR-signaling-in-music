@@ -492,7 +492,7 @@ def OptFlow_batch():
     
         avg_flow_magnitude = np.mean(opt_flow_values)
         #diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
-        std_flow_angle = np.std(dlt_flow_angles)
+        std_flow_angle = np.std(dlt_flow_values)
         #print(opt_flow_values)
         #print(dlt_flow_values)
         print("avg_flow_magnitude")
