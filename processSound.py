@@ -10,6 +10,7 @@
 
 import getopt, sys # Allows for command line arguments
 import os
+import shutil
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -155,13 +156,17 @@ elif os.path.isdir(inp):
         for i in range(number_files):    
             # Open an mp3 file 
             filename = dir_list[i]
+            print("copying .mp4 file")
+            shutil.copy("%s/%s" % (inp,filename), "%s_analysis/%s" % (inp,filename))
             print("converting to .wav format for %s" % inp) 
             song = AudioSegment.from_file(filename, format="mp4") 
-            my_path = "%s_analysis/trimmed_%s.wav" % (inp,filename[:-4])
+            my_path = "%s_analysis/%s.wav" % (inp,filename[:-4])
             song.export(my_path, format="wav")
+             
 else:
     print("Invalid Path")
     exit()
+    
 #################################################################################
 ####################  preprocessing     #########################################
 #################################################################################

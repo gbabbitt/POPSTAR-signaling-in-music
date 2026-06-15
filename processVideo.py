@@ -273,8 +273,8 @@ def GlobOptContrast_batch():
         print("segmenting %s" % filename)
         print("length of file (seconds)")
         #tm = 20 # interval length in seconds
-        file_path = "%s_analysis/trimmed_%s.wav" % (inp,filename[:-4])
-        song = AudioSegment.from_file("%s_analysis/trimmed_%s.wav" % (inp,filename[:-4]), format="wav") 
+        file_path = "%s_analysis/%s.wav" % (inp,filename[:-4])
+        song = AudioSegment.from_file("%s_analysis/%s.wav" % (inp,filename[:-4]), format="wav") 
         print(song.duration_seconds)
         dur = song.duration_seconds
         # Estimate the tempo (BPM)
@@ -506,8 +506,8 @@ def OptFlow_batch():
         print("segmenting %s" % filename)
         print("length of file (seconds)")
         #tm = 20 # interval length in seconds
-        file_path = "%s_analysis/trimmed_%s.wav" % (inp,filename[:-4])
-        song = AudioSegment.from_file("%s_analysis/trimmed_%s.wav" % (inp,filename[:-4]), format="wav") 
+        file_path = "%s_analysis/%s.wav" % (inp,filename[:-4])
+        song = AudioSegment.from_file("%s_analysis/%s.wav" % (inp,filename[:-4]), format="wav") 
         print(song.duration_seconds)
         dur = song.duration_seconds
         # Estimate the tempo (BPM)
@@ -693,7 +693,7 @@ def createSoundFiles_batch():
         filename = dir_list[i]
         print("converting to .wav format for %s" % inp) 
         song = AudioSegment.from_file(filename, format="mp4") 
-        my_path = "%s_analysis/trimmed_%s.wav" % (inp,filename[:-4])
+        my_path = "%s_analysis/%s.wav" % (inp,filename[:-4])
         song.export(my_path, format="wav")
         
 #################################################################################
@@ -707,7 +707,7 @@ def main():
         print("\nvideo processing is complete\n")
         
     if(fileORfolder == "folder"):
-        createSoundFiles_batch()
+        #createSoundFiles_batch()
         GlobOptContrast_batch()
         OptFlow_batch()
         CESmap_batch()

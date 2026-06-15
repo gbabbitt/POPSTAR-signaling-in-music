@@ -517,7 +517,7 @@ def combine_side_by_side():
     if(ext == ".mp3" or ext == ".wav" ): 
         clip1 = VideoFileClip("%s_analysis/myMovie_faces.mp4" % inp)
     if(ext == ".mp4"):  
-        shutil.copy("%s.mp4" % (inp), "%s_analysis/%s.mp4" % (inp,inp))
+        shutil.copy("%s.mp4" % inp, "%s_analysis/%s.mp4" % (inp,inp))
         clip1 = VideoFileClip("%s_analysis/%s.mp4" % (inp,inp))
         clip2 = VideoFileClip("%s_analysis/myMovie_tplots2.mp4" % (inp))
     else:
@@ -549,8 +549,8 @@ def combine_side_by_side_batch():
         if(ext == ".mp3" or ext == ".wav" ): 
             clip1 = VideoFileClip("%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname))
         if(ext == ".mp4"):  
-            shutil.copy("%s.mp4" % (inp), "%s_analysis/%s.mp4" % (inp,inp))
-            clip1 = VideoFileClip("%s_analysis/%s.mp4" % (inp,inp))
+            #clip1 = VideoFileClip("%s_analysis/%s.mp4" % (inp,inp))
+            clip1 = VideoFileClip("%s/%s.mp4" % (inp,dirname))
             clip2 = VideoFileClip("%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname))
         else:
             clip2 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
