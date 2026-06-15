@@ -368,14 +368,13 @@ def OptFlow():
         gray_frame = gray_frame_next
     
     avg_flow_magnitude = np.mean(opt_flow_values)
-    diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
-    avg_flow_angle = np.mean(diff_flow_angles)
-    #print(opt_flow_values)
-    #print(dlt_flow_values)
+    #diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
+    std_flow_angle = np.std(dlt_flow_values)
     print("avg_flow_magnitude")
     print(avg_flow_magnitude)
-    print("avg_flow_angle")
-    print(avg_flow_angle)
+    print("std_flow_angle")
+    print(std_flow_angle)
+    
     ################################################
     ###  collect optical flow over windows
     ################################################
@@ -431,7 +430,7 @@ def OptFlow():
         window1 = opt_flow_values[start_frames:end_frames]
         window2 = dlt_flow_values[start_frames:end_frames]
         opt_flow_window = np.mean(window1)
-        dlt_flow_window = np.mean(window2)
+        dlt_flow_window = np.std(window2)
         print("opt_flow: %s" % opt_flow_window)
         print("dlt_flow: %s" % dlt_flow_window)
         opt_flow_windows.append(float(opt_flow_window))
@@ -492,14 +491,14 @@ def OptFlow_batch():
             gray_frame = gray_frame_next
     
         avg_flow_magnitude = np.mean(opt_flow_values)
-        diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
-        avg_flow_angle = np.mean(diff_flow_angles)
+        #diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
+        std_flow_angle = np.std(dlt_flow_angles)
         #print(opt_flow_values)
         #print(dlt_flow_values)
         print("avg_flow_magnitude")
         print(avg_flow_magnitude)
-        print("avg_flow_angle")
-        print(avg_flow_angle)
+        print("std_flow_angle")
+        print(std_flow_angle)
         ################################################
         ###  collect optical flow over windows
         ################################################
@@ -555,7 +554,7 @@ def OptFlow_batch():
             window1 = opt_flow_values[start_frames:end_frames]
             window2 = dlt_flow_values[start_frames:end_frames]
             opt_flow_window = np.mean(window1)
-            dlt_flow_window = np.mean(window2)
+            dlt_flow_window = np.std(window2)
             print("opt_flow: %s" % opt_flow_window)
             print("dlt_flow: %s" % dlt_flow_window)
             opt_flow_windows.append(float(opt_flow_window))
