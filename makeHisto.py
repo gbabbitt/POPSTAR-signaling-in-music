@@ -345,7 +345,7 @@ def mm_inf(df_order0, df_order1,dirname):
 ################################################################################################
 ################################################################################################
    
-def main():
+def main_audio():
     if(fof=="file"):
         if not os.path.exists('%s_analysis/permutation_test' % (inp)):
             os.mkdir('%s_analysis/permutation_test' % (inp))
@@ -378,7 +378,7 @@ def main():
         #print(df_bic_best)
         df_bic_best = df_bic_best.split(" ")
         bestLABEL_order0 = str(df_bic_best[3])
-        plt.title("best model %s|1st order =%s|0th order =%s" % (inp,bestLABEL_order1,bestLABEL_order0))
+        plt.title("audio file=%s|1st order =%s|0th order =%s" % (inp,bestLABEL_order1,bestLABEL_order0))
         plt.savefig("%s_analysis/permutation_test/histogram.png" % (inp))
         plt.savefig("popstar_results/histogram_%s.png" % (inp))
         plt.show()
@@ -437,7 +437,7 @@ def main():
         txt_out2.close
         sns.histplot(df, x="distance", hue="order", kde=True)
         p_value = round(p_value,4)
-        plt.title("stability in CES (control, energy, surprise) = %s for %s\n" % (p_value,inp))
+        plt.title("stability in audio CES = %s for %s\n" % (p_value,inp))
         plt.savefig("%s_analysis/permutation_test/histogram_CES_stability.png" % (inp))
         plt.savefig("popstar_results/histogram-CES_stability_%s.png" % (inp))
         plt.show()
@@ -486,7 +486,7 @@ def main():
             #print(df_bic_best)
             df_bic_best = df_bic_best.split(" ")
             bestLABEL_order0 = str(df_bic_best[3])
-            plt.title("best model %s|1st order =%s|0th order =%s" % (dirname,bestLABEL_order1,bestLABEL_order0))
+            plt.title("audio file=%s|1st order =%s|0th order =%s" % (dirname,bestLABEL_order1,bestLABEL_order0))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram_%s_%s.png" % (inp,dirname))
             #plt.show()
@@ -545,13 +545,221 @@ def main():
             txt_out2.close
             sns.histplot(df, x="distance", hue="order", kde=True)
             p_value = round(p_value,4)
-            plt.title("stability in CES (control, energy, surprise) = %s for %s\n" % (p_value,dirname))
+            plt.title("stability in audio CES = %s for %s\n" % (p_value,dirname))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram-CES_stability_%s_%s.png" % (inp,dirname))
             #plt.show()
+ 
+def main_video():
+    if(fof=="file"):
+        if not os.path.exists('%s_analysis/permutation_test' % (inp)):
+            os.mkdir('%s_analysis/permutation_test' % (inp))
+        print("make histogram")    
+        readPath = "%s_analysis/distances_video.txt" % (inp)
+        df = pd.read_csv(readPath, sep = "\t")
+        #print(df)
+        readPath2 = "%s_analysis/distances_video_order1.txt" % (inp)
+        df_order1 = pd.read_csv(readPath2, sep = "\t")
+        readPath3 = "%s_analysis/distances_video_order0.txt" % (inp)
+        df_order0 = pd.read_csv(readPath3, sep = "\t")
+        dirname = "none"
+        mm_inf(df_order0,df_order1,dirname)
+        sns.histplot(df, x="distance", hue="order", kde=True)
+        readPath4 = "%s_analysis/mm_inference_order1.txt" % (inp)
+        df_bic = pd.read_csv(readPath4, sep = "\t", header = None)
+        #print(df_bic)
+        df_bic_best = df_bic[df_bic[0].str.contains('BEST')]
+        df_bic_best = df_bic_best.values
+        df_bic_best = str(df_bic_best[0])
+        #print(df_bic_best)
+        df_bic_best = df_bic_best.split(" ")
+        bestLABEL_order1 = str(df_bic_best[3])
+        readPath5 = "%s_analysis/mm_inference_order0.txt" % (inp)
+        df_bic = pd.read_csv(readPath5, sep = "\t", header = None)
+        #print(df_bic)
+        df_bic_best = df_bic[df_bic[0].str.contains('BEST')]
+        df_bic_best = df_bic_best.values
+        df_bic_best = str(df_bic_best[0])
+        #print(df_bic_best)
+        df_bic_best = df_bic_best.split(" ")
+        bestLABEL_order0 = str(df_bic_best[3])
+        plt.title("video file=%s|1st order =%s|0th order =%s" % (inp,bestLABEL_order1,bestLABEL_order0))
+        plt.savefig("%s_analysis/permutation_test/histogram_video.png" % (inp))
+        plt.savefig("popstar_results/histogram_video_%s.png" % (inp))
+        plt.show()
+        ############## permutation test ################
+        print("running permutations test on %s" % (inp))
+        readPath = "%s_analysis/ternary_video_norm.txt" % (inp)
+        df_obs = pd.read_csv(readPath, delimiter=',',header=0)
+        cnt_above = 0
+        cnt_below = 0
+        p_value = 0.5
+        for x in range(n_permutations):
+            df_shuffled = df_obs.sample(frac=1)
+            #print(df_obs)
+            #print(df_shuffled)
+            df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
+            #print(df_shuffled)
+            for i in range(len(df_shuffled)-1):
+                # obs steps
+                x2 = df_obs.iloc[i+1,0]
+                x1 = df_obs.iloc[i,0]
+                y2 = df_obs.iloc[i+1,1]
+                y1 = df_obs.iloc[i,1]
+                z2 = df_obs.iloc[i+1,2]
+                z1 = df_obs.iloc[i,2]
+                dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+                # shuffled steps
+                x2r = df_shuffled.iloc[i+1,0]
+                x1r = df_shuffled.iloc[i,0]
+                y2r = df_shuffled.iloc[i+1,1]
+                y1r = df_shuffled.iloc[i,1]
+                z2r = df_shuffled.iloc[i+1,2]
+                z1r = df_shuffled.iloc[i,2]
+                dist_rand = np.sqrt((x2r-x1r)**2 + (y2r-y1r)**2 +(z2r-z1r)**2)
+                #print("%s obs_dist=%s | shuffled_dist=%s" % (x,dist_obs, dist_rand))
+                if(dist_obs >= dist_rand):
+                    cnt_above = cnt_above + 1
+                if(dist_obs < dist_rand):
+                    cnt_below = cnt_below + 1    
+                cnt_ttl = cnt_above + cnt_below
+                p_value = cnt_below/(cnt_ttl+0.00001)
+                if(p_value < 0.5):
+                    p_value = 0.5
+                percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+        print("permutation test completed")
+        print("empirical p-value = %s" % p_value)
+        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        writePath = "%s_analysis/permutation_test/permutation_test_video.txt" % (inp)
+        txt_out = open(writePath, "w")
+        txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
+        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out.close
+        writePath2 = "popstar_results/permutation_test_%s.txt" % (inp)
+        txt_out2 = open(writePath2, "w")
+        txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
+        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out2.close
+        sns.histplot(df, x="distance", hue="order", kde=True)
+        p_value = round(p_value,4)
+        plt.title("stability in video CES = %s for %s\n" % (p_value,inp))
+        plt.savefig("%s_analysis/permutation_test/histogram_CES_stability_video.png" % (inp))
+        plt.savefig("popstar_results/histogram-CES_stability_video_%s.png" % (inp))
+        plt.show()
+        
+        
+        
+    if(fof=="folder"):
+        if not os.path.exists('%s_analysis/permutation_test' % (inp)):
+            os.mkdir('%s_analysis/permutation_test' % (inp))
+        print("make histograms")    
+        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        print(dir_list)
+        for fname in dir_list:
+            print(fname)
+            dirname = fname
+            if not os.path.exists('%s_analysis/permutation_test/%s' % (inp,dirname)):
+                os.mkdir('%s_analysis/permutation_test/%s' % (inp,dirname))
+            readPath = "%s_analysis/distances_video_%s.txt" % (inp,dirname)
+            df = pd.read_csv(readPath, sep = "\t")
+            print(df)
+            readPath2 = "%s_analysis/distances_order1_video_%s.txt" % (inp,dirname)
+            df_order1 = pd.read_csv(readPath2, sep = "\t")
+            readPath3 = "%s_analysis/distances_order0_video_%s.txt" % (inp,dirname)
+            df_order0 = pd.read_csv(readPath3, sep = "\t")
+            mm_inf(df_order0,df_order1,dirname)
+            sns.histplot(df, x="distance", hue="order", kde=True)
+            readPath4 = "%s_analysis/mm_inference_order1_%s.txt" % (inp,dirname)
+            df_bic = pd.read_csv(readPath4, sep = "\t", header = None)
+            #print(df_bic)
+            df_bic_best = df_bic[df_bic[0].str.contains('BEST')]
+            df_bic_best = df_bic_best.values
+            df_bic_best = str(df_bic_best[0])
+            #print(df_bic_best)
+            df_bic_best = df_bic_best.split(" ")
+            bestLABEL_order1 = str(df_bic_best[3])
+            readPath5 = "%s_analysis/mm_inference_order0_%s.txt" % (inp,dirname)
+            df_bic = pd.read_csv(readPath5, sep = "\t", header = None)
+            #print(df_bic)
+            df_bic_best = df_bic[df_bic[0].str.contains('BEST')]
+            df_bic_best = df_bic_best.values
+            df_bic_best = str(df_bic_best[0])
+            #print(df_bic_best)
+            df_bic_best = df_bic_best.split(" ")
+            bestLABEL_order0 = str(df_bic_best[3])
+            plt.title("video file=%s|1st order =%s|0th order =%s" % (dirname,bestLABEL_order1,bestLABEL_order0))
+            plt.savefig("%s_analysis/permutation_test/%s/histogram_video_%s.png" % (inp,dirname,dirname))
+            plt.savefig("popstar_results/histogram_video_%s_%s.png" % (inp,dirname))
+            #plt.show()
+            ############## permutation test ################
+            print("running permutations test on %s %s" % (inp,dirname))
+            readPath = "%s_analysis/ternary_norm_video_%s.txt" % (inp,dirname)
+            df_obs = pd.read_csv(readPath, delimiter=',',header=0)
+            cnt_above = 0
+            cnt_below = 0
+            p_value = 0.5
+            for x in range(n_permutations):
+                df_shuffled = df_obs.sample(frac=1)
+                #print(df_obs)
+                #print(df_shuffled)
+                df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
+                #print(df_shuffled)
+                for i in range(len(df_shuffled)-1):
+                    # obs steps
+                    x2 = df_obs.iloc[i+1,0]
+                    x1 = df_obs.iloc[i,0]
+                    y2 = df_obs.iloc[i+1,1]
+                    y1 = df_obs.iloc[i,1]
+                    z2 = df_obs.iloc[i+1,2]
+                    z1 = df_obs.iloc[i,2]
+                    dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+                    # shuffled steps
+                    x2r = df_shuffled.iloc[i+1,0]
+                    x1r = df_shuffled.iloc[i,0]
+                    y2r = df_shuffled.iloc[i+1,1]
+                    y1r = df_shuffled.iloc[i,1]
+                    z2r = df_shuffled.iloc[i+1,2]
+                    z1r = df_shuffled.iloc[i,2]
+                    dist_rand = np.sqrt((x2r-x1r)**2 + (y2r-y1r)**2 +(z2r-z1r)**2)
+                    #print("%s %s obs_dist=%s | shuffled_dist=%s" % (dirname,x,dist_obs, dist_rand))
+                    if(dist_obs >= dist_rand):
+                        cnt_above = cnt_above + 1
+                    if(dist_obs < dist_rand):
+                        cnt_below = cnt_below + 1    
+                    cnt_ttl = cnt_above + cnt_below
+                    p_value = cnt_below/(cnt_ttl+0.00001)
+                    if(p_value < 0.5):
+                        p_value = 0.5
+                    percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+            print("permutation test completed")
+            print("empirical p-value = %s" % p_value)
+            print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+            writePath = "%s_analysis/permutation_test/%s/permutation_test_video.txt" % (inp,dirname)
+            txt_out = open(writePath, "w")
+            txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
+            txt_out.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+            txt_out.close
+            writePath2 = "popstar_results/permutation_test_%s.txt" % (dirname)
+            txt_out2 = open(writePath2, "w")
+            txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
+            txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+            txt_out2.close
+            sns.histplot(df, x="distance", hue="order", kde=True)
+            p_value = round(p_value,4)
+            plt.title("stability in CES (control, energy, surprise) = %s for %s\n" % (p_value,dirname))
+            plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_video_%s.png" % (inp,dirname,dirname))
+            plt.savefig("popstar_results/histogram-CES_stability_video_%s_%s.png" % (inp,dirname))
+            #plt.show()
+
+ 
             
 ###############################################################
 if __name__ == '__main__':
-    main()
+    main_audio()
+    main_video()
     
         

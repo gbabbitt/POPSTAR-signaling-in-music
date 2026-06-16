@@ -651,7 +651,7 @@ def copyMovie_batch():
 
 def distances():
     print("calc distances")
-    readPath = "%s_analysis/ternary.txt" % (inp)
+    readPath = "%s_analysis/ternary_norm.txt" % (inp)
     writePath = "%s_analysis/distances.txt" % (inp)
     writePath2 = "%s_analysis/distances_order1.txt" % (inp)
     writePath3 = "%s_analysis/distances_order0.txt" % (inp)
@@ -706,7 +706,7 @@ def distances_batch():
     for fname in dir_list:
         print(fname)
         dirname = fname
-        readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
+        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
         writePath = "%s_analysis/distances_%s.txt" % (inp,dirname)
         writePath2 = "%s_analysis/distances_order1_%s.txt" % (inp,dirname)
         writePath3 = "%s_analysis/distances_order0_%s.txt" % (inp,dirname)
@@ -749,6 +749,110 @@ def distances_batch():
         txt_out2.close
         txt_out3.close
         
+def distances_video():
+    print("calc distances")
+    readPath = "%s_analysis/ternary_video_norm.txt" % (inp)
+    writePath = "%s_analysis/distances_video.txt" % (inp)
+    writePath2 = "%s_analysis/distances_video_order1.txt" % (inp)
+    writePath3 = "%s_analysis/distances_video_order0.txt" % (inp)
+    txt_out = open(writePath, "w")
+    txt_out2 = open(writePath2, "w")
+    txt_out3 = open(writePath3, "w")
+    txt_out.write("order\tdistance\n")
+    txt_out2.write("distance\n")
+    txt_out3.write("distance\n")
+    df = pd.read_csv(readPath)
+    print(df)
+    #df_array = np.array(df)
+    df_bootstrap = df.sample(n = len(df), axis='index', replace=True)
+    distances = []
+    for i in range(len(df)-1):
+        x2 = df.iloc[i+1,0]
+        x1 = df.iloc[i,0]
+        y2 = df.iloc[i+1,1]
+        y1 = df.iloc[i,1]
+        z2 = df.iloc[i+1,2]
+        z1 = df.iloc[i,2]
+        dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+        txt_out.write("first_order\t%s\n" % str(dist))
+        txt_out2.write("%s\n" % str(dist))
+        distances.append(dist)
+    #print(distances)
+    for i in range(len(df_bootstrap)-1):
+        x2 = df_bootstrap.iloc[i+1,0]
+        x1 = df_bootstrap.iloc[i,0]
+        y2 = df_bootstrap.iloc[i+1,1]
+        y1 = df_bootstrap.iloc[i,1]
+        z2 = df_bootstrap.iloc[i+1,2]
+        z1 = df_bootstrap.iloc[i,2]
+        dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+        txt_out.write("zero_order\t%s\n" % str(dist))
+        txt_out3.write("%s\n" % str(dist))
+        distances.append(dist)
+    #print(distances)
+    txt_out.close
+    txt_out2.close
+    txt_out3.close
+    
+def distances_video_batch():
+    print("calc distances")
+    lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+    #lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+    print(dir_list)
+    for fname in dir_list:
+        print(fname)
+        dirname = fname
+        readPath = "%s_analysis/ternary_video_norm_%s.txt" % (inp,dirname)
+        writePath = "%s_analysis/distances_video_%s.txt" % (inp,dirname)
+        writePath2 = "%s_analysis/distances_video_order1_%s.txt" % (inp,dirname)
+        writePath3 = "%s_analysis/distances_video_order0_%s.txt" % (inp,dirname)
+        txt_out = open(writePath, "w")
+        txt_out2 = open(writePath2, "w")
+        txt_out3 = open(writePath3, "w")
+        txt_out.write("order\tdistance\n")
+        txt_out2.write("distance\n")
+        txt_out3.write("distance\n")
+        df = pd.read_csv(readPath)
+        print(df)
+         #df_array = np.array(df)
+        df_bootstrap = df.sample(n = len(df), axis='index', replace=True)
+        distances = []
+        for i in range(len(df)-1):
+            x2 = df.iloc[i+1,0]
+            x1 = df.iloc[i,0]
+            y2 = df.iloc[i+1,1]
+            y1 = df.iloc[i,1]
+            z2 = df.iloc[i+1,2]
+            z1 = df.iloc[i,2]
+            dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+            txt_out.write("first_order\t%s\n" % str(dist))
+            txt_out2.write("%s\n" % str(dist))
+            distances.append(dist)
+        #print(distances)
+        for i in range(len(df_bootstrap)-1):
+            x2 = df_bootstrap.iloc[i+1,0]
+            x1 = df_bootstrap.iloc[i,0]
+            y2 = df_bootstrap.iloc[i+1,1]
+            y1 = df_bootstrap.iloc[i,1]
+            z2 = df_bootstrap.iloc[i+1,2]
+            z1 = df_bootstrap.iloc[i,2]
+            dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+            txt_out.write("zero_order\t%s\n" % str(dist))
+            txt_out3.write("%s\n" % str(dist))
+            distances.append(dist)
+        #print(distances)
+        txt_out.close
+        txt_out2.close
+        txt_out3.close
+        
+
+ 
+ 
+ 
         
 ##############################################################    
 def main():
@@ -761,6 +865,7 @@ def main():
         combinedMovie_audio_video()
         copyMovie()
         distances()
+        distances_video()
         
     if(fof == "folder"):
         renderFaceMovie_batch()
@@ -771,6 +876,7 @@ def main():
         combinedMovie_audio_video_batch()
         copyMovie_batch()
         distances_batch()
+        distances_video_batch()
 ###############################################################
 if __name__ == '__main__':
     main()
