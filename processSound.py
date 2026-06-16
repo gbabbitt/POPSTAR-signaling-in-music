@@ -159,7 +159,7 @@ elif os.path.isdir(inp):
             print("copying .mp4 file")
             shutil.copy("%s/%s" % (inp,filename), "%s_analysis/%s" % (inp,filename))
             print("converting to .wav format for %s" % inp) 
-            song = AudioSegment.from_file(filename, format="mp4") 
+            song = AudioSegment.from_file("%s/%s" % (inp,filename), format="mp4") 
             my_path = "%s_analysis/%s.wav" % (inp,filename[:-4])
             song.export(my_path, format="wav")
              
