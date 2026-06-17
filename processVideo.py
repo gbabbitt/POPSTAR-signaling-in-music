@@ -10,6 +10,7 @@
 
 import getopt, sys # Allows for command line arguments
 import os
+import gc
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -366,6 +367,7 @@ def OptFlow():
         opt_flow_values.append(magnitude)
         dlt_flow_values.append(angle)
         gray_frame = gray_frame_next
+        gc.collect()
     
     avg_flow_magnitude = np.mean(opt_flow_values)
     #diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
@@ -446,7 +448,7 @@ def OptFlow():
         f.write("%s\t%s\n" % (opt_flow_windows[i], dlt_flow_windows[i]))
     f.close()
     cap.release()
-
+    cv2.destroyAllWindows()
 
 
 def OptFlow_batch():
@@ -489,7 +491,8 @@ def OptFlow_batch():
             opt_flow_values.append(magnitude)
             dlt_flow_values.append(angle)
             gray_frame = gray_frame_next
-    
+            gc.collect()
+            
         avg_flow_magnitude = np.mean(opt_flow_values)
         #diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
         std_flow_angle = np.std(dlt_flow_values)
@@ -570,6 +573,7 @@ def OptFlow_batch():
             f.write("%s\t%s\n" % (opt_flow_windows[i], dlt_flow_windows[i]))
         f.close()
         cap.release()
+        cv2.destroyAllWindows()
         
 def CESmap():
     print("collecting CES data for %s" % inp)
