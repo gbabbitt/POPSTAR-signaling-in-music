@@ -437,6 +437,7 @@ def OptFlow():
         print("dlt_flow: %s" % dlt_flow_window)
         opt_flow_windows.append(float(opt_flow_window))
         dlt_flow_windows.append(float(dlt_flow_window))
+        gc.collect()
     #print(opt_flow_windows)
     #print(dlt_flow_windows)
     # write to file
@@ -562,6 +563,7 @@ def OptFlow_batch():
             print("dlt_flow: %s" % dlt_flow_window)
             opt_flow_windows.append(float(opt_flow_window))
             dlt_flow_windows.append(float(dlt_flow_window))
+            gc.collect()
         #print(opt_flow_windows)
         #print(dlt_flow_windows)
         # write to file
