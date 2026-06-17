@@ -1011,9 +1011,9 @@ def main():
         print(f"File Size: {file_size_mb:.2f} MB")
         time.sleep(2)
         GlobOptContrast()
-        if(file_size_mb <= 10):
+        if(file_size_mb <= 5):
             OptFlow()
-        if(file_size_mb > 10):                
+        if(file_size_mb > 5):                
             OptFlow2()
         CESmap()
         print("\nvideo processing is complete\n")
