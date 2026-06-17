@@ -19,6 +19,7 @@ import math
 import random as rnd
 import re
 import cv2
+import time
 from pydub import AudioSegment
 import soundfile
 import librosa 
@@ -81,6 +82,7 @@ if not os.path.exists('%s_analysis' % inp):
         os.mkdir('%s_analysis' % inp)
 if not os.path.exists('%s_analysis/intervals' % inp):
         os.mkdir('%s_analysis/intervals' % inp)        
+
 ################################################################################
 #########################   sonogram generator  ################################
 ################################################################################
@@ -104,6 +106,7 @@ elif os.path.isdir(inp):
 else:
     print("Invalid Path")
     exit()
+    
 #################################################################################
 ####################  preprocessing     #########################################
 #################################################################################
@@ -335,27 +338,169 @@ def GlobOptContrast_batch():
         f.close()
         cap.release()
 
-    
-def OptFlow():
-    print("\ncalculating sparse optical flow on %s\n" % input1)
-    cap = cv2.VideoCapture(input1)
-    fps = cap.get(cv2.CAP_PROP_FPS) # frames per second
+
+def OptFlow2():
+    print("\ncalculating dense optical flow (Farneback) on %s\n" % input1)
+    cap0 = cv2.VideoCapture(input1)
+    fps = cap0.get(cv2.CAP_PROP_FPS) # frames per second
     print(f"Video FPS: {fps}")
     fpw= tm*fps # frames per window
     print(f"Video FPW: {fpw}")
     fpw= tm*fps # frames per window
     print(f"Video FPW: {fpw}")
-    tfs = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))  # total frames
+    tfs = int(cap0.get(cv2.CAP_PROP_FRAME_COUNT))  # total frames
     print(f"Total Frames: {tfs}")
-    if not cap.isOpened():
+    if not cap0.isOpened():
+        print("Error: Could not open video.")
+        return []
+    cap0.release()
+    cv2.destroyAllWindows()
+    ################################################
+    ###  collect optical flow over windows
+    ################################################
+    print("segmenting %s" % input1)
+    print("length of file (seconds)")
+    #tm = 20 # interval length in seconds
+    file_path = "%s_analysis/trimmed_%s" % (inp,input0)
+    song = AudioSegment.from_file("%s_analysis/trimmed_%s" % (inp,input0), format="wav") 
+    print(song.duration_seconds)
+    dur = song.duration_seconds
+    # Estimate the tempo (BPM)
+    y, sr = librosa.load(file_path)
+    tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+    tempo = tempo[0]
+    total_beats = (dur/60*tempo)
+    beat_int = dur/total_beats
+    print("tempo = %s bpm" % tempo)
+    print("beat interval = %s sec" % beat_int)
+    print("total beats = %s" % total_beats)
+    #f = open("./popstar.ctl", "a")
+    #f.write("duration,%s,#song duration (seconds)\n" % dur)
+    #f.write("tempo,%s,#tempo (bpm)\n" % tempo)
+    #f.write("beatInt,%s,#beat interval (seconds)\n" % beat_int)
+    #f.write("ttlBeats,%s,#total number beats in song\n" % total_beats)
+    #f.close()
+    #print(myStop)
+    if(met == "no"):
+        ints = int(dur*8)-tm  # analyze in 1/8 second fixed sliding window
+    #ints = int(dur*4*beat_int)-tm  # analyze fixed sliding window attempting matching beat intervals
+    if(met == "yes"):   
+        ints = int(total_beats)
+    # start and end time 
+    opt_flow_windows = []
+    dlt_flow_windows = []
+    for i in range(ints): 
+        print("\nanalyzing time slice %s/%s\n" % (i,ints))
+        time.sleep(1)
+        # delete time-slice.mp4 to prevent ffmpeg overwrite prompts
+        removal_path = "time_slice.mp4"
+        if os.path.exists(removal_path):
+            os.remove(removal_path)
+        if(met == "no"):
+            start = i*125  # note 250 = 0.125 second fixed window
+            end = i*125+tm*1000
+            start_video = start
+            end_video = end/1000
+        if(met == "yes"):
+            start = i*beat_int*1000  # attempt to match beat intervals
+            end = i*beat_int*1000+tm*1000
+            start_video = start/1000
+            end_video = end/1000
+        #print("audio start: %s end: %s" % (start,end))
+        start_frames = int(start_video*fps)
+        end_frames = int(end_video*fps)
+        if(end_frames >= tfs):
+            end_frames = tfs
+        print("video start: %s end: %s (secs)" % (start_video,end_video))
+        print("frames start: %s end: %s (count)" % (start_frames,end_frames))
+        hours, remainder = divmod(start_video, 3600)
+        minutes, secs = divmod(remainder, 60)
+        hours = str(int(hours)).zfill(2)
+        minutes = str(int(minutes)).zfill(2)
+        secs = str(int(secs)).zfill(2)
+        start_time_str = f"{hours}:{minutes}:{secs}"
+        start_time_str = str(start_video)
+        #print(start_time_str)
+        hours, remainder = divmod(end_video, 3600)
+        minutes, secs = divmod(remainder, 60)
+        hours = str(int(hours)).zfill(2)
+        minutes = str(int(minutes)).zfill(2)
+        secs = str(int(secs)).zfill(2)
+        end_time_str = f"{hours}:{minutes}:{secs}"
+        end_time_str = str(end_video)
+        #print(end_time_str)
+        # extract video for sliding window
+        cmd = "ffmpeg -ss %s -to %s -i %s -c copy time_slice.mp4" % (start_time_str,end_time_str,input1)
+        os.system(cmd)
+        cap = cv2.VideoCapture("time_slice.mp4")
+        if not cap.isOpened():
+            print("Error: Could not open video.")
+            return []
+        opt_flow_values = []
+        dlt_flow_values = []
+        # first frame
+        ret, frame = cap.read()
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            #print(frame)
+            # Convert the frame to grayscale for intensity calculation
+            gray_frame_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+            magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1],angleInDegrees=True)
+            opt_flow_values.append(magnitude)
+            dlt_flow_values.append(angle)
+            gray_frame = gray_frame_next
+                
+        avg_flow_magnitude = np.mean(opt_flow_values)
+        std_flow_angle = np.std(dlt_flow_values)
+        print("opt_flow: %s" % avg_flow_magnitude)
+        print("dlt_flow: %s" % std_flow_angle)
+        opt_flow_windows.append(float(avg_flow_magnitude))
+        dlt_flow_windows.append(float(std_flow_angle))
+        cap.release()
+        cv2.destroyAllWindows()
+        gc.collect()
+        removal_path = "time_slice.mp4"
+        if os.path.exists(removal_path):
+            os.remove(removal_path)
+    #print(opt_flow_windows)
+    #print(dlt_flow_windows)
+    # write to file
+    print("\nwriting flow values\n")
+    f = open("%s_analysis/FLOWvalues_%s.txt" % (inp,inp), "w")
+    f.write("optical_flow\tdelta_flow\n")
+    for i in range(len(opt_flow_windows)):
+        print("%s\t%s\t%s" % (i,opt_flow_windows[i], dlt_flow_windows[i]))
+        f.write("%s\t%s\n" % (opt_flow_windows[i], dlt_flow_windows[i]))
+    f.close()
+      
+    print("\ncompleted dense optical flow (Farneback) on %s\n" % input1)
+
+    
+def OptFlow():
+    print("\ncalculating dense optical flow (Farneback) on %s\n" % input1)
+    cap0 = cv2.VideoCapture(input1)
+    fps = cap0.get(cv2.CAP_PROP_FPS) # frames per second
+    print(f"Video FPS: {fps}")
+    fpw= tm*fps # frames per window
+    print(f"Video FPW: {fpw}")
+    fpw= tm*fps # frames per window
+    print(f"Video FPW: {fpw}")
+    tfs = int(cap0.get(cv2.CAP_PROP_FRAME_COUNT))  # total frames
+    print(f"Total Frames: {tfs}")
+    if not cap0.isOpened():
         print("Error: Could not open video.")
         return []
     opt_flow_values = []
     dlt_flow_values = []
     # first frame
-    ret, frame = cap.read()
+    ret, frame = cap0.read()
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     while True:
+        cap = cv2.VideoCapture(input1)
         ret, frame = cap.read()
         if not ret:
             break
@@ -367,6 +512,7 @@ def OptFlow():
         opt_flow_values.append(magnitude)
         dlt_flow_values.append(angle)
         gray_frame = gray_frame_next
+        cap.release()
         gc.collect()
     
     avg_flow_magnitude = np.mean(opt_flow_values)
@@ -448,9 +594,8 @@ def OptFlow():
         print("%s\t%s\t%s" % (i,opt_flow_windows[i], dlt_flow_windows[i]))
         f.write("%s\t%s\n" % (opt_flow_windows[i], dlt_flow_windows[i]))
     f.close()
-    cap.release()
+    cap0.release()
     cv2.destroyAllWindows()
-
 
 def OptFlow_batch():
     lst = os.listdir(inp) # your directory path
@@ -462,7 +607,160 @@ def OptFlow_batch():
     for i in range(number_files):    
         # Open an mp3 file 
         filename = dir_list[i] 
-        print("\ncalculating sparse optical flow on %s\n" % filename )
+    
+    
+    print("\ncalculating dense optical flow (Farneback) on %s\n" % filename)
+    cap0 = cv2.VideoCapture(filename)
+    fps = cap0.get(cv2.CAP_PROP_FPS) # frames per second
+    print(f"Video FPS: {fps}")
+    fpw= tm*fps # frames per window
+    print(f"Video FPW: {fpw}")
+    fpw= tm*fps # frames per window
+    print(f"Video FPW: {fpw}")
+    tfs = int(cap0.get(cv2.CAP_PROP_FRAME_COUNT))  # total frames
+    print(f"Total Frames: {tfs}")
+    if not cap0.isOpened():
+        print("Error: Could not open video.")
+        return []
+    cap0.release()
+    cv2.destroyAllWindows()
+    ################################################
+    ###  collect optical flow over windows
+    ################################################
+    print("segmenting %s" % filename)
+    print("length of file (seconds)")
+    #tm = 20 # interval length in seconds
+    file_path = "%s_analysis/trimmed_%s" % (inp,filename[:-4])
+    song = AudioSegment.from_file("%s_analysis/trimmed_%s" % (inp,filename[:-4]), format="wav") 
+    print(song.duration_seconds)
+    dur = song.duration_seconds
+    # Estimate the tempo (BPM)
+    y, sr = librosa.load(file_path)
+    tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+    tempo = tempo[0]
+    total_beats = (dur/60*tempo)
+    beat_int = dur/total_beats
+    print("tempo = %s bpm" % tempo)
+    print("beat interval = %s sec" % beat_int)
+    print("total beats = %s" % total_beats)
+    #f = open("./popstar.ctl", "a")
+    #f.write("duration,%s,#song duration (seconds)\n" % dur)
+    #f.write("tempo,%s,#tempo (bpm)\n" % tempo)
+    #f.write("beatInt,%s,#beat interval (seconds)\n" % beat_int)
+    #f.write("ttlBeats,%s,#total number beats in song\n" % total_beats)
+    #f.close()
+    #print(myStop)
+    if(met == "no"):
+        ints = int(dur*8)-tm  # analyze in 1/8 second fixed sliding window
+    #ints = int(dur*4*beat_int)-tm  # analyze fixed sliding window attempting matching beat intervals
+    if(met == "yes"):   
+        ints = int(total_beats)
+    # start and end time 
+    opt_flow_windows = []
+    dlt_flow_windows = []
+    for i in range(ints): 
+        print("\nanalyzing time slice %s/%s\n" % (i,ints))
+        time.sleep(1)
+        # delete time-slice.mp4 to prevent ffmpeg overwrite prompts
+        removal_path = "time_slice.mp4"
+        if os.path.exists(removal_path):
+            os.remove(removal_path)
+        if(met == "no"):
+            start = i*125  # note 250 = 0.125 second fixed window
+            end = i*125+tm*1000
+            start_video = start
+            end_video = end/1000
+        if(met == "yes"):
+            start = i*beat_int*1000  # attempt to match beat intervals
+            end = i*beat_int*1000+tm*1000
+            start_video = start/1000
+            end_video = end/1000
+        #print("audio start: %s end: %s" % (start,end))
+        start_frames = int(start_video*fps)
+        end_frames = int(end_video*fps)
+        if(end_frames >= tfs):
+            end_frames = tfs
+        print("video start: %s end: %s (secs)" % (start_video,end_video))
+        print("frames start: %s end: %s (count)" % (start_frames,end_frames))
+        hours, remainder = divmod(start_video, 3600)
+        minutes, secs = divmod(remainder, 60)
+        hours = str(int(hours)).zfill(2)
+        minutes = str(int(minutes)).zfill(2)
+        secs = str(int(secs)).zfill(2)
+        start_time_str = f"{hours}:{minutes}:{secs}"
+        start_time_str = str(start_video)
+        #print(start_time_str)
+        hours, remainder = divmod(end_video, 3600)
+        minutes, secs = divmod(remainder, 60)
+        hours = str(int(hours)).zfill(2)
+        minutes = str(int(minutes)).zfill(2)
+        secs = str(int(secs)).zfill(2)
+        end_time_str = f"{hours}:{minutes}:{secs}"
+        end_time_str = str(end_video)
+        #print(end_time_str)
+        # extract video for sliding window
+        cmd = "ffmpeg -ss %s -to %s -i %s -c copy time_slice.mp4" % (start_time_str,end_time_str,input1)
+        os.system(cmd)
+        cap = cv2.VideoCapture("time_slice.mp4")
+        if not cap.isOpened():
+            print("Error: Could not open video.")
+            return []
+        opt_flow_values = []
+        dlt_flow_values = []
+        # first frame
+        ret, frame = cap.read()
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            #print(frame)
+            # Convert the frame to grayscale for intensity calculation
+            gray_frame_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+            magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1],angleInDegrees=True)
+            opt_flow_values.append(magnitude)
+            dlt_flow_values.append(angle)
+            gray_frame = gray_frame_next
+                
+        avg_flow_magnitude = np.mean(opt_flow_values)
+        std_flow_angle = np.std(dlt_flow_values)
+        print("opt_flow: %s" % avg_flow_magnitude)
+        print("dlt_flow: %s" % std_flow_angle)
+        opt_flow_windows.append(float(avg_flow_magnitude))
+        dlt_flow_windows.append(float(std_flow_angle))
+        cap.release()
+        cv2.destroyAllWindows()
+        gc.collect()
+        removal_path = "time_slice.mp4"
+        if os.path.exists(removal_path):
+            os.remove(removal_path)
+    #print(opt_flow_windows)
+    #print(dlt_flow_windows)
+    # write to file
+    print("\nwriting flow values\n")
+    f = open("%s_analysis/FLOWvalues_%s.txt" % (inp,filename[:-4]), "w")
+    f.write("optical_flow\tdelta_flow\n")
+    for i in range(len(opt_flow_windows)):
+        print("%s\t%s\t%s" % (i,opt_flow_windows[i], dlt_flow_windows[i]))
+        f.write("%s\t%s\n" % (opt_flow_windows[i], dlt_flow_windows[i]))
+    f.close()
+      
+    print("\ncompleted dense optical flow (Farneback) on %s\n" % filename)
+
+
+
+def OptFlow_batch_orig():
+    lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir(inp)
+    print(dir_list)
+    for i in range(number_files):    
+        # Open an mp3 file 
+        filename = dir_list[i] 
+        print("\ncalculating dense optical flow on %s\n" % filename )
         cap = cv2.VideoCapture(filename)
         fps = cap.get(cv2.CAP_PROP_FPS) # frames per second
         print(f"Video FPS: {fps}")
@@ -706,8 +1004,17 @@ def createSoundFiles_batch():
 #################################################################################
 def main():
     if(fileORfolder == "file"):
+        # Path to your MP4 file
+        fpath = "%s" % input1
+        file_size_bytes = os.path.getsize(fpath) # Get size in bytes
+        file_size_mb = file_size_bytes / (1024 * 1024)# Convert to Megabytes (MB)
+        print(f"File Size: {file_size_mb:.2f} MB")
+        time.sleep(2)
         GlobOptContrast()
-        OptFlow()
+        if(file_size_mb <= 10):
+            OptFlow()
+        if(file_size_mb > 10):                
+            OptFlow2()
         CESmap()
         print("\nvideo processing is complete\n")
         
