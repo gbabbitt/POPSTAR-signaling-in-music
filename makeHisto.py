@@ -667,9 +667,9 @@ def main_video():
             readPath = "%s_analysis/distances_video_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             print(df)
-            readPath2 = "%s_analysis/distances_order1_video_%s.txt" % (inp,dirname)
+            readPath2 = "%s_analysis/distances_video_order1_%s.txt" % (inp,dirname)
             df_order1 = pd.read_csv(readPath2, sep = "\t")
-            readPath3 = "%s_analysis/distances_order0_video_%s.txt" % (inp,dirname)
+            readPath3 = "%s_analysis/distances_video_order0_%s.txt" % (inp,dirname)
             df_order0 = pd.read_csv(readPath3, sep = "\t")
             mm_inf(df_order0,df_order1,dirname)
             sns.histplot(df, x="distance", hue="order", kde=True)
@@ -697,7 +697,7 @@ def main_video():
             #plt.show()
             ############## permutation test ################
             print("running permutations test on %s %s" % (inp,dirname))
-            readPath = "%s_analysis/ternary_norm_video_%s.txt" % (inp,dirname)
+            readPath = "%s_analysis/ternary_video_norm_%s.txt" % (inp,dirname)
             df_obs = pd.read_csv(readPath, delimiter=',',header=0)
             cnt_above = 0
             cnt_below = 0
