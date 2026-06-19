@@ -696,7 +696,7 @@ def OptFlow_batch():
             end_time_str = str(end_video)
             #print(end_time_str)
             # extract video for sliding window
-            cmd = "ffmpeg -ss %s -to %s -i %s -c copy time_slice.mp4" % (start_time_str,end_time_str,filename)
+            cmd = "ffmpeg -ss %s -to %s -i %s/%s -c copy time_slice.mp4" % (start_time_str,end_time_str,inp,filename)
             os.system(cmd)
             cap = cv2.VideoCapture("time_slice.mp4")
             if not cap.isOpened():
