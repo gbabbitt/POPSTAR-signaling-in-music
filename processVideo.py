@@ -229,9 +229,8 @@ def GlobOptContrast_batch():
     for i in range(number_files):    
         # Open an mp3 file 
         filename = dir_list[i]
-    
         print("\ncalculating global optical contrast on %s\n" % filename)
-        cap = cv2.VideoCapture(filename)
+        cap = cv2.VideoCapture("%s/%s" % (inp,filename))
         fps = cap.get(cv2.CAP_PROP_FPS) # frames per second
         print(f"Video FPS: {fps}")
         fpw= tm*fps # frames per window
@@ -337,7 +336,7 @@ def GlobOptContrast_batch():
             f.write("%s\n" % (opt_contrast_windows[i]))
         f.close()
         cap.release()
-
+        cv2.destroyAllWindows()
 
 def OptFlow2():
     print("\ncalculating dense optical flow (Farneback) on %s\n" % input1)
@@ -608,7 +607,7 @@ def OptFlow_batch():
         # Open an mp3 file 
         filename = dir_list[i] 
         print("\ncalculating dense optical flow (Farneback) on %s\n" % filename)
-        cap0 = cv2.VideoCapture(filename)
+        cap0 = cv2.VideoCapture("%s/%s" % (inp,filename))
         fps = cap0.get(cv2.CAP_PROP_FPS) # frames per second
         print(f"Video FPS: {fps}")
         fpw= tm*fps # frames per window
@@ -748,131 +747,6 @@ def OptFlow_batch():
 
 
 
-def OptFlow_batch_orig():
-    lst = os.listdir(inp) # your directory path
-    number_files = len(lst)
-    print("number of files")
-    print(number_files)
-    dir_list = os.listdir(inp)
-    print(dir_list)
-    for i in range(number_files):    
-        # Open an mp3 file 
-        filename = dir_list[i] 
-        print("\ncalculating dense optical flow on %s\n" % filename )
-        cap = cv2.VideoCapture(filename)
-        fps = cap.get(cv2.CAP_PROP_FPS) # frames per second
-        print(f"Video FPS: {fps}")
-        fpw= tm*fps # frames per window
-        print(f"Video FPW: {fpw}")
-        fpw= tm*fps # frames per window
-        print(f"Video FPW: {fpw}")
-        tfs = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))  # total frames
-        print(f"Total Frames: {tfs}")
-        if not cap.isOpened():
-            print("Error: Could not open video.")
-            return []
-        opt_flow_values = []
-        dlt_flow_values = []
-        # first frame
-        ret, frame = cap.read()
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            #print(frame)
-            # Convert the frame to grayscale for intensity calculation
-            gray_frame_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-            magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1],angleInDegrees=True)
-            opt_flow_values.append(magnitude)
-            dlt_flow_values.append(angle)
-            gray_frame = gray_frame_next
-            gc.collect()
-            
-        avg_flow_magnitude = np.mean(opt_flow_values)
-        #diff_flow_angles = np.diff(dlt_flow_values, prepend = 0)
-        std_flow_angle = np.std(dlt_flow_values)
-        #print(opt_flow_values)
-        #print(dlt_flow_values)
-        print("avg_flow_magnitude")
-        print(avg_flow_magnitude)
-        print("std_flow_angle")
-        print(std_flow_angle)
-        ################################################
-        ###  collect optical flow over windows
-        ################################################
-        print("segmenting %s" % filename)
-        print("length of file (seconds)")
-        #tm = 20 # interval length in seconds
-        file_path = "%s_analysis/%s.wav" % (inp,filename[:-4])
-        song = AudioSegment.from_file("%s_analysis/%s.wav" % (inp,filename[:-4]), format="wav") 
-        print(song.duration_seconds)
-        dur = song.duration_seconds
-        # Estimate the tempo (BPM)
-        y, sr = librosa.load(file_path)
-        tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
-        tempo = tempo[0]
-        total_beats = (dur/60*tempo)
-        beat_int = dur/total_beats
-        print("tempo = %s bpm" % tempo)
-        print("beat interval = %s sec" % beat_int)
-        print("total beats = %s" % total_beats)
-        #f = open("./popstar.ctl", "a")
-        #f.write("duration,%s,#song duration (seconds)\n" % dur)
-        #f.write("tempo,%s,#tempo (bpm)\n" % tempo)
-        #f.write("beatInt,%s,#beat interval (seconds)\n" % beat_int)
-        #f.write("ttlBeats,%s,#total number beats in song\n" % total_beats)
-        #f.close()
-        #print(myStop)
-        if(met == "no"):
-            ints = int(dur*8)-tm  # analyze in 1/8 second fixed sliding window
-        #ints = int(dur*4*beat_int)-tm  # analyze fixed sliding window attempting matching beat intervals
-        if(met == "yes"):   
-            ints = int(total_beats)
-        # start and end time 
-        opt_flow_windows = []
-        dlt_flow_windows = []
-        for i in range(ints): 
-            if(met == "no"):
-                start = i*125  # note 250 = 0.125 second fixed window
-                end = i*125+tm*1000
-                start_video = start
-                end_video = end/1000
-            if(met == "yes"):
-                start = i*beat_int*1000  # attempt to match beat intervals
-                end = i*beat_int*1000+tm*1000
-                start_video = start/1000
-                end_video = end/1000
-            #print("audio start: %s end: %s" % (start,end))
-            start_frames = int(start_video*fps)
-            end_frames = int(end_video*fps)
-            if(end_frames >= tfs):
-                end_frames = tfs
-            print("video start: %s end: %s (secs)" % (start_video,end_video))
-            print("frames start: %s end: %s (count)" % (start_frames,end_frames))
-            window1 = opt_flow_values[start_frames:end_frames]
-            window2 = dlt_flow_values[start_frames:end_frames]
-            opt_flow_window = np.mean(window1)
-            dlt_flow_window = np.std(window2)
-            print("opt_flow: %s" % opt_flow_window)
-            print("dlt_flow: %s" % dlt_flow_window)
-            opt_flow_windows.append(float(opt_flow_window))
-            dlt_flow_windows.append(float(dlt_flow_window))
-            gc.collect()
-        #print(opt_flow_windows)
-        #print(dlt_flow_windows)
-        # write to file
-        print("\nwriting flow values\n")
-        f = open("%s_analysis/FLOWvalues_%s.txt" % (inp,filename[:-4]), "w")
-        f.write("optical_flow\tdelta_flow\n")
-        for i in range(len(opt_flow_windows)):
-            print("%s\t%s\t%s" % (i,opt_flow_windows[i], dlt_flow_windows[i]))
-            f.write("%s\t%s\n" % (opt_flow_windows[i], dlt_flow_windows[i]))
-        f.close()
-        cap.release()
-        cv2.destroyAllWindows()
-        
 def CESmap():
     print("collecting CES data for %s" % inp)
     f1 = open("%s_analysis/CONTRASTvalues_%s.txt" % (inp,inp), "r")
