@@ -635,7 +635,7 @@ def main_video():
         txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
         txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         txt_out.close
-        writePath2 = "popstar_results/permutation_test_%s.txt" % (inp)
+        writePath2 = "popstar_results/permutation_test_video_%s.txt" % (inp)
         txt_out2 = open(writePath2, "w")
         txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
         txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
@@ -743,7 +743,7 @@ def main_video():
             txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
             txt_out.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
             txt_out.close
-            writePath2 = "popstar_results/permutation_test_%s.txt" % (dirname)
+            writePath2 = "popstar_results/permutation_test_video_%s.txt" % (dirname)
             txt_out2 = open(writePath2, "w")
             txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
             txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
