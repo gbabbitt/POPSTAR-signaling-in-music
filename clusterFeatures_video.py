@@ -1,0 +1,1092 @@
+#!/usr/bin/env python
+
+#############################################################################
+######   POPSTAR software for detecting fitness signaling in music
+######   produced by Dr. Gregory A. Babbitt
+######   and students at the Rochester Instituteof Technology in 2025.
+######   Offered freely without guarantee.  License under GPL v3.0
+#############################################################################
+
+
+import getopt, sys # Allows for command line arguments
+import os
+import pandas as pd
+import numpy as np
+import scipy as sp
+from scipy.linalg import block_diag
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+import seaborn as sns
+# for ggplot
+from plotnine import *
+import networkx as nx
+#######################
+import math
+import random
+bootstp = 50
+import random as rnd
+#import pytraj as pt
+#import nglview as nv
+from scipy.spatial import distance
+from scipy.stats import entropy
+from scipy.stats import ks_2samp, kruskal, f_oneway
+from sklearn.metrics.cluster import normalized_mutual_info_score
+from sklearn.decomposition import TruncatedSVD
+from sklearn import metrics
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
+import multiprocessing
+# machine learning Random Forest classifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.mixture import GaussianMixture
+from mpl_toolkits.mplot3d import Axes3D
+import skfda
+from skfda.datasets import fetch_phoneme
+from skfda.ml.classification import KNeighborsClassifier
+#from skfda.exploratory.depth import ModifiedBandDepth
+#from skfda.ml.classification import MaximumDepthClassifier
+from skfda.ml.classification import NearestCentroid
+from skfda.exploratory.stats.covariance import ParametricGaussianCovariance
+from skfda.misc.covariances import Gaussian
+from skfda.ml.classification import QuadraticDiscriminantAnalysis
+from skfda.misc.hat_matrix import NadarayaWatsonHatMatrix
+from skfda.misc.kernels import normal, uniform, epanechnikov
+from skfda.misc.metrics import l2_distance
+from skfda.preprocessing.smoothing import KernelSmoother
+from skfda.preprocessing.registration import FisherRaoElasticRegistration
+from sklearn.preprocessing import normalize
+from networkx.algorithms.community.quality import modularity
+from networkx.algorithms.community import label_propagation_communities
+from itertools import islice
+
+################################################################################
+# read popstar ctl file
+infile = open("popstar.ctl", "r")
+infile_lines = infile.readlines()
+for x in range(len(infile_lines)):
+    infile_line = infile_lines[x]
+    #print(infile_line)
+    infile_line_array = str.split(infile_line, ",")
+    header = infile_line_array[0]
+    value = infile_line_array[1]
+    #print(header)
+    #print(value)
+    if(header == "name"):
+        name = value
+        print("my file/folder name is",name)
+    if(header == "fileExt"):
+        ext = value
+        print("my file extension(s) are",ext)   
+infile.close()
+ ###### variable assignments ######
+inp = ""+name+""
+ext = ""+ext+""
+
+if(ext != ".mp4"):
+    print("\nThere is/are no video file(s) to analyze for %s...skipping video processing...\n" % inp)
+    exit
+if(ext == ".mp4"):
+    print("\nThere is/are video file(s) to analyze for %s...success  yea !..\n" % inp)
+    exit
+#################################################################
+
+# find number of cores
+num_cores = multiprocessing.cpu_count()
+#num_cores = 1 # activate this line for identifying/removing files that stop script with errors
+if not os.path.exists('popstar_results'):
+        os.mkdir('popstar_results')
+if not os.path.exists('popstar_results/FDA'):
+        os.mkdir('popstar_results/FDA')
+# read popstar ctl file
+infile = open("popstar-classify.ctl", "r")
+infile_lines = infile.readlines()
+num_folders = 0
+for x in range(len(infile_lines)):
+    infile_line = infile_lines[x]
+    #print(infile_line)
+    infile_line_array = str.split(infile_line, ",")
+    header = infile_line_array[0]
+    value = infile_line_array[1]
+    #print(header)
+    #print(value)
+    if(header == "folder1"):
+        name1 = value
+        print("my file/folder name is",name1)
+        if(name1!=""):
+            num_folders=num_folders+1
+    if(header == "folder2"):
+        name2 = value
+        print("my file/folder name is",name2)
+        if(name2!=""):
+            num_folders=num_folders+1
+    if(header == "folder3"):
+        name3 = value
+        print("my file/folder name is",name3)
+        if(name3!=""):
+            num_folders=num_folders+1
+    if(header == "folder4"):
+        name4 = value
+        print("my file/folder name is",name4)
+        if(name4!=""):
+            num_folders=num_folders+1
+    if(header == "folder5"):
+        name5 = value
+        print("my file/folder name is",name5)
+        if(name5!=""):
+            num_folders=num_folders+1
+    if(header == "folder6"):
+        name6 = value
+        print("my file/folder name is",name6)
+        if(name6!=""):
+            num_folders=num_folders+1
+
+infile.close()
+ ###### variable assignments ######
+inp1 = ""+name1+""
+inp2 = ""+name2+""
+inp3 = ""+name3+""
+inp4 = ""+name4+""
+inp5 = ""+name5+""
+inp6 = ""+name6+""
+print("classifying %s folders" % num_folders)
+
+if(num_folders <=1):
+    print("not enough categories for classification (must be 2 or more)\n")
+    exit()
+if(num_folders == 2):
+    folder_list = [inp1,inp2]
+if(num_folders == 3):
+    folder_list = [inp1,inp2,inp3]
+if(num_folders == 4):
+    folder_list = [inp1,inp2,inp3,inp4]    
+if(num_folders == 5):
+    folder_list = [inp1,inp2,inp3,inp4,inp5]    
+if(num_folders == 6):
+    folder_list = [inp1,inp2,inp3,inp4,inp5,inp6]     
+    
+##############################################################
+def findDIM():
+    print("finding proper dimension of square grid")
+    flengths = []
+    fname_cnts = []
+    
+    #global labels
+    labels = np.array([], dtype=int)
+    #global Cvals
+    Cvals = []
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
+        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        print(dir_list)
+        if not os.path.exists('popstar_results/FDA/%s' % inp):
+            os.mkdir('popstar_results/FDA/%s' % inp)
+        fname_cnt = 0
+        for fname in dir_list:
+            print(fname)
+            fname_cnt = fname_cnt+1
+            dirname = fname
+            readPath = "%s_analysis/ternary_video_norm_%s.txt" % (inp,dirname)
+            df = pd.read_csv(readPath, sep = "\t")
+            #print(df)
+            
+            Cset = []
+            for i in range(len(df)-1):
+                df_row = df.iloc[i,0]
+                df_row = df_row.split(",")
+                #print(df_row)
+                energy = df_row[0]
+                control = df_row[1]
+                surprise = df_row[2]
+            flengths.append(i)
+        fname_cnts.append(fname_cnt)
+    print(flengths)
+    print(fname_cnts)
+    global min_fnames
+    global min_flengths
+    min_fnames = min(fname_cnts)
+    min_flengths = min(flengths)
+    print("min fnames = %s" % min_fnames)
+    print("min flengths = %s" % min_flengths)
+    
+def collectDF():
+    print("collecting dataframe")
+    writePath = "popstar_results/FDA_video_features_%s.txt" % folder_list
+    txt_out = open(writePath, "w")
+    txt_out.write("folder\tfile\tenergy\tcontrol\tsurprise\n")
+    global labels
+    labels = np.array([], dtype=int)
+    global Cvals
+    Cvals = []
+    global Evals
+    Evals = []
+    global Svals
+    Svals = []
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
+        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        print(dir_list)
+        if not os.path.exists('popstar_results/FDA/%s' % inp):
+            os.mkdir('popstar_results/FDA/%s' % inp)
+        fname_cnt = 0
+        for fname in dir_list:
+            print(fname)
+            fname_cnt = fname_cnt+1
+            dirname = fname
+            readPath = "%s_analysis/ternary_video_norm_%s.txt" % (inp,dirname)
+            df = pd.read_csv(readPath, sep = "\t")
+            #print(df)
+            writePath2 = "popstar_results/FDA/%s/FDA_video_features_%s.txt" % (inp,dirname)
+            txt_out2 = open(writePath2, "w")
+            txt_out2.write("folder\tfile\tenergy\tcontrol\tsurprise\n")
+            Cset = []
+            Eset = []
+            Sset = []
+            for i in range(len(df)-1):
+                df_row = df.iloc[i,0]
+                df_row = df_row.split(",")
+                #print(df_row)
+                energy = df_row[0]
+                control = df_row[1]
+                surprise = df_row[2]
+                cleaned_dirname = "".join(dirname.split()) # remove all whitespace
+                print("%s\t%s\t%s\t%s\t%s" % (inp,cleaned_dirname,energy,control,surprise))
+                txt_out.write("%s\t%s\t%s\t%s\t%s\n" % (inp,cleaned_dirname,energy,control,surprise))
+                txt_out2.write("%s\t%s\t%s\t%s\t%s\n" % (inp,cleaned_dirname,energy,control,surprise))
+                if(i<=min_flengths): # max number of sliding window frames
+                    Cset.append(control)
+                    Eset.append(energy)
+                    Sset.append(surprise)
+                #correct_labels.append(j)
+            if(fname_cnt<=min_fnames): # max number of songs
+                Cvals.append(Cset)
+                Evals.append(Eset)
+                Svals.append(Sset)
+                labels = np.append(labels, j)
+            txt_out2.close()        
+    txt_out.close()
+
+def clusterFDA():       
+    print("functional data analysis (FDA)")
+    writePath = "popstar_results/FDA_video_classifier_results_%s.txt" % folder_list
+    global txt_out3
+    txt_out3 = open(writePath, "w")
+    txt_out3.write("FDA results\n\n")
+    
+    #print(labels)
+    differences = []
+    #### control data ####
+    print("conducting FDA on CONTROL time series signatures")
+    #print(Cvals)
+    np_Cvals = np.array(Cvals)
+    np_Cvals = np_Cvals.astype(float)
+    #print(np_Cvals)
+    control_data = skfda.FDataGrid(data_matrix=np_Cvals)
+    #print(control_data)
+    input_data = control_data
+    input_label = "control_data"
+    txt_out3.write("\n\nCONTROL\n")
+    FDA(input_data,input_label)
+    differences.append(difference)    
+    #### energy data ####
+    print("conducting FDA on ENERGY time series signatures")
+    #print(Evals)
+    np_Evals = np.array(Evals)
+    np_Evals = np_Evals.astype(float)
+    #print(np_Evals)
+    energy_data = skfda.FDataGrid(data_matrix=np_Evals)
+    #print(energy_data)
+    input_data = energy_data
+    input_label = "energy_data"
+    txt_out3.write("\n\nENERGY\n")
+    FDA(input_data,input_label)
+    differences.append(difference) 
+    #### surprise data ####
+    print("conducting FDA on SURPRISE time series signatures")
+    #print(Svals)
+    np_Svals = np.array(Svals)
+    np_Svals = np_Svals.astype(float)
+    #print(np_Svals)
+    surprise_data = skfda.FDataGrid(data_matrix=np_Svals)
+    #print(surprise_data)
+    input_data = surprise_data
+    input_label = "surprise_data"
+    txt_out3.write("\n\nSURPRISE\n")
+    FDA(input_data,input_label)
+    differences.append(difference) 
+    txt_out3.close()
+    print("abs differences are...")
+    print(differences)
+    # bar plot
+    categories = ['CONTROL', 'ENERGY', 'SURPRISE']
+    values = differences
+    df = pd.DataFrame({'attention_feature': categories, 'abs_distance': values})
+    sns.set_theme(style="whitegrid")
+    sns.barplot(data=df, x='attention_feature', y='abs_distance', palette='viridis')
+    plt.title("distances between group mean functional curves")
+    plt.savefig("popstar_results/FDA_video_distances_%s.png" % (folder_list))
+    plt.show()
+    
+def FDA(input_data, input_label):    
+    
+    X = input_data
+    y = labels
+    
+        
+    n_points = min_flengths
+
+    new_points = X.grid_points[0][:n_points]
+    new_data = X.data_matrix[:, :n_points]
+
+    X = X.copy(
+        grid_points=new_points,
+        data_matrix=new_data,
+        domain_range=(float(np.min(new_points)), float(np.max(new_points))),
+    )
+    
+    # show only 20 functions 
+    n_plot = num_folders*min_fnames
+    #X[:n_plot].plot(group=y)
+    X[:n_plot].plot()
+    plt.title("%s (input from each track)" % input_label, loc="left")
+    plt.savefig("popstar_results/FDA_video_input_tracks_%s_%s.png" % (folder_list, input_label))
+    #plt.show()
+       
+    
+    print("FDA - spline smoothing")
+    
+    ##### find best bandwidth ####################
+    
+    bw_options = [0.05, 0.04,0.03,0.02,0.01,0.007,0.005,0.002,0.001]
+    bw_best = 0.05
+    pf_options = []
+    for i in bw_options:
+        smoother = KernelSmoother(NadarayaWatsonHatMatrix(bandwidth=i,kernel=normal,),)
+        X_smooth = smoother.fit_transform(X)
+        reg = FisherRaoElasticRegistration(penalty=0.01,)
+        if(num_folders==2):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2)
+        if(num_folders==3):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3)    
+        if(num_folders==4):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4) 
+        if(num_folders==5):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+            X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5)
+        if(num_folders==6):
+            X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+            X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+            X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+            X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+            X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+            X_reg_grp6 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 5])
+            X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5, X_reg_grp6)
+        X_train, X_test, y_train, y_test = train_test_split(X_reg,y,test_size=0.3,random_state=0,stratify=y,)
+        centroid = NearestCentroid()
+        centroid.fit(X_train, y_train)
+        centroid_pred = centroid.predict(X_test)
+        centroid_score = centroid.score(X_test, y_test)
+        pf_options.append(centroid_score)
+        print("searching best bandwidth %s performance %s" % (i,centroid_score))
+    max_pf = max(pf_options)
+    max_index = pf_options.index(max_pf)
+    bw_best = bw_options[max_index]
+    print("best bandwidth = %s" % str(bw_best))
+    ################################################
+    
+    
+    # smoothing function
+    smoother = KernelSmoother(
+        NadarayaWatsonHatMatrix(
+            bandwidth=bw_best,
+            kernel=normal,
+        ),
+    )
+    X_smooth = smoother.fit_transform(X)
+    #print(X_smooth)
+    fig = X_smooth[:n_plot].plot(group=y)
+    
+    print("FDA - registration (alignment)")
+    reg = FisherRaoElasticRegistration(
+        penalty=0.01,
+    )
+    
+    global difference
+    if(num_folders==2):
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       fd1 = X_reg_grp1.mean()
+       fd2 = X_reg_grp2.mean()
+       difference = l2_distance(fd1,fd2)
+       difference = difference[0]
+       print("abs functional difference = %s" % difference)
+       txt_out3.write("abs functional difference = %s\n" % difference)
+       
+    if(num_folders==3):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       fd1 = X_reg_grp1.mean()
+       fd2 = X_reg_grp2.mean()
+       fd3 = X_reg_grp3.mean()
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd1,fd3)
+       difference = (diff1 + diff2 + diff3)/3
+       difference = difference[0]
+       print("abs functional difference = %s" % difference)
+       txt_out3.write("abs functional difference = %s\n" % difference)
+       
+    if(num_folders==4):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+       #fig = X_reg_grp4.plot(color="C3")
+       X_reg_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+       fd1 = X_reg_grp1.mean()
+       fd2 = X_reg_grp2.mean()
+       fd3 = X_reg_grp3.mean()
+       fd4 = X_reg_grp4.mean()
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd3,fd4)
+       diff4 = l2_distance(fd1,fd3)
+       diff5 = l2_distance(fd2,fd4)
+       diff6 = l2_distance(fd1,fd4)
+       difference = (diff1 + diff2 + diff3 + diff4 + diff5 + diff6)/6
+       difference = difference[0]
+       print("abs functional difference = %s" % difference)
+       txt_out3.write("abs functional difference = %s\n" % difference)
+       
+    if(num_folders==5):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+       #fig = X_reg_grp4.plot(color="C3")
+       X_reg_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+       X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+       #fig = X_reg_grp5.plot(color="C4")
+       X_reg_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
+       fd1 = X_reg_grp1.mean()
+       fd2 = X_reg_grp2.mean()
+       fd3 = X_reg_grp3.mean()
+       fd4 = X_reg_grp4.mean()
+       fd5 = X_reg_grp5.mean()
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd3,fd4)
+       diff4 = l2_distance(fd4,fd5)
+       diff5 = l2_distance(fd1,fd3)
+       diff6 = l2_distance(fd2,fd4)
+       diff7 = l2_distance(fd3,fd5)
+       diff8 = l2_distance(fd1,fd4)
+       diff9 = l2_distance(fd2,fd5)
+       diff10 = l2_distance(fd1,fd5)
+       difference = (diff1 + diff2 + diff3 + diff4 + diff5 + diff6 + diff7 + diff8 + diff9 + diff10)/10
+       difference = difference[0]
+       print("abs functional difference = %s" % difference)
+       txt_out3.write("abs functional difference = %s\n" % difference)
+       
+    if(num_folders==6):   
+       X_reg_grp1 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 0])
+       #fig = X_reg_grp1.plot(color="C0")
+       X_reg_grp1.mean().plot(fig=fig, color="blue", linewidth=3)
+       X_reg_grp2 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 1])
+       #fig = X_reg_grp2.plot(color="C1")
+       X_reg_grp2.mean().plot(fig=fig, color="orange", linewidth=3)
+       X_reg_grp3 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 2])
+       #fig = X_reg_grp3.plot(color="C2")
+       X_reg_grp3.mean().plot(fig=fig, color="green", linewidth=3)
+       X_reg_grp4 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 3])
+       #fig = X_reg_grp4.plot(color="C3")
+       X_reg_grp4.mean().plot(fig=fig, color="red", linewidth=3)
+       X_reg_grp5 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 4])
+       #fig = X_reg_grp5.plot(color="C4")
+       X_reg_grp5.mean().plot(fig=fig, color="purple", linewidth=3)
+       X_reg_grp6 = reg.fit_transform(X_smooth[:n_plot][y[:n_plot] == 5])
+       #fig = X_reg_grp6.plot(color="C5")
+       X_reg_grp6.mean().plot(fig=fig, color="brown", linewidth=3)
+       fd1 = X_reg_grp1.mean()
+       fd2 = X_reg_grp2.mean()
+       fd3 = X_reg_grp3.mean()
+       fd4 = X_reg_grp4.mean()
+       fd5 = X_reg_grp5.mean()
+       fd6 = X_reg_grp6.mean()
+       diff1 = l2_distance(fd1,fd2)
+       diff2 = l2_distance(fd2,fd3)
+       diff3 = l2_distance(fd3,fd4)
+       diff4 = l2_distance(fd4,fd5)
+       diff5 = l2_distance(fd5,fd6)
+       diff6 = l2_distance(fd1,fd3)
+       diff7 = l2_distance(fd2,fd4)
+       diff8 = l2_distance(fd3,fd5)
+       diff9 = l2_distance(fd4,fd6)
+       diff10 = l2_distance(fd1,fd4)
+       diff11 = l2_distance(fd2,fd5)
+       diff12 = l2_distance(fd3,fd6)
+       diff13 = l2_distance(fd1,fd5)
+       diff14 = l2_distance(fd2,fd6)
+       diff15 = l2_distance(fd1,fd6)
+       difference = (diff1 + diff2 + diff3 + diff4 + diff5 + diff6 + diff7 + diff8 + diff9 + diff10 + diff11 + diff12 + diff13 + diff14 + diff15)/15
+       difference = difference[0]
+       print("abs functional difference = %s" % difference)
+       txt_out3.write("abs functional difference = %s\n" % difference)
+       
+    plt.title("%s (smoothed, averaged, and registered classes)" % input_label, loc="left")
+    plt.savefig("popstar_results/FDA_video_classes_%s_%s.png" % (folder_list, input_label))
+    #plt.show()
+    
+    print("FDA - functional clustering")
+    
+    # compile registered and smoothed functional data for train-test split
+    if(num_folders==2):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2)
+    if(num_folders==3):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3)
+    if(num_folders==4):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4)    
+    if(num_folders==5):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5) 
+    if(num_folders==6):
+        X_reg = X_reg_grp1.concatenate(X_reg_grp2, X_reg_grp3, X_reg_grp4, X_reg_grp5, X_reg_grp6) 
+    
+    
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_reg,
+        y,
+        test_size=0.3,
+        random_state=0,
+        stratify=y,
+    )
+    
+    neigh = KNeighborsClassifier(n_neighbors = 5)
+    neigh.fit(X_train, y_train)
+    neigh_pred = neigh.predict(X_test)
+    print(neigh_pred)
+    print(
+        f"The score of Fixed K=5 KNN Classifier is "
+        f"{neigh.score(X_test, y_test):2.2%}",
+    )
+    
+    '''
+    depth = MaximumDepthClassifier()
+    depth.fit(X_train, y_train)
+    depth_pred = depth.predict(X_test)
+    print(depth_pred)
+    print(
+        f"The score of Maximum Depth Classifier is "
+        f"{depth.score(X_test, y_test):2.2%}",
+    )
+    '''
+    
+    knn = KNeighborsClassifier()
+    knn.fit(X_train, y_train)
+    knn_pred = knn.predict(X_test)
+    print(knn_pred)
+    print(f"The score of L2 norm KNN is {knn.score(X_test, y_test):2.2%}")
+    
+    
+
+    centroid = NearestCentroid()
+    centroid.fit(X_train, y_train)
+    centroid_pred = centroid.predict(X_test)
+    print(centroid_pred)
+    print(
+        f"The score of Nearest Centroid Classifier is "
+        f"{centroid.score(X_test, y_test):2.2%}",
+    )
+    
+    
+    qda = QuadraticDiscriminantAnalysis(
+        ParametricGaussianCovariance(
+            Gaussian(variance=6, length_scale=1),
+        ),
+        regularizer=0.05,
+    )
+    qda.fit(X_train, y_train)
+    qda_pred = qda.predict(X_test)
+    print(qda_pred)
+    print(f"The score of functional QDA is {qda.score(X_test, y_test):2.2%}")
+    print("FDA - plotting signature functions grouped by class")
+    accuracies = pd.DataFrame({
+        "Classification methods":
+            [
+                "fixed K-Nearest-Neighbors",
+                "tuned K-Nearest-Neighbors",
+                "Nearest Centroid Classifier",
+                "Functional QDA",
+            ],
+        "Accuracy":
+            [
+                f"{neigh.score(X_test, y_test):2.2%}",
+                f"{knn.score(X_test, y_test):2.2%}",
+                f"{centroid.score(X_test, y_test):2.2%}",
+                f"{qda.score(X_test, y_test):2.2%}",
+            ],
+    })
+    
+    str_accuracies = str(accuracies)
+    print(accuracies)
+    txt_out3.write(str_accuracies)
+    # accuracy scores
+    centroid_score = f"{centroid.score(X_test, y_test):2.2%}"
+    neigh_score = f"{neigh.score(X_test, y_test):2.2%}"
+    knn_score = f"{knn.score(X_test, y_test):2.2%}"
+    qda_score = f"{qda.score(X_test, y_test):2.2%}"
+    # grid plot
+    fig, axs = plt.subplots(2, 2)
+    plt.subplots_adjust(hspace=0.45, bottom=0.06)
+
+    X_test.plot(group=centroid_pred, axes=axs[0][1])
+    axs[0][1].set_title("Nearest Centroid = %s" % centroid_score, loc="left")
+
+    X_test.plot(group=neigh_pred, axes=axs[0][0])
+    axs[0][0].set_title("fixed KNN (K = 5) = %s" % neigh_score, loc="left")
+
+    X_test.plot(group=knn_pred, axes=axs[1][0])
+    axs[1][0].set_title("tuned KNN = %s" % knn_score, loc="left")
+
+    X_test.plot(group=qda_pred, axes=axs[1][1])
+    axs[1][1].set_title("Functional QDA = %s" % qda_score, loc="left")
+    plt.suptitle("classifiers - %s" % input_label)
+    plt.savefig("popstar_results/FDA_video_classifiers_%s_%s.png" % (folder_list, input_label))
+    plt.show()
+    
+    ############## create networx grapghs  #########################
+    if(num_folders >= 2):
+        fd0 = X_reg  # for overall distances
+        fd1 = X_reg_grp1 # for within group distances
+        fd2 = X_reg_grp2
+    if(num_folders >= 3):
+        fd3 = X_reg_grp3
+    if(num_folders >= 4):
+        fd4 = X_reg_grp4
+    if(num_folders >= 5):
+        fd5 = X_reg_grp5
+    if(num_folders >= 6):
+        fd6 = X_reg_grp6    
+    
+    #Compute Distance Matrix (L2 Distance)
+    # distance_matrix[i, j] is the distance between curve i and curve j
+    distance_matrix = np.zeros((fd0.n_samples, fd0.n_samples))
+    for i in range(fd0.n_samples):
+        for j in range(fd0.n_samples):
+            # Calculate l2_distance between pairs
+            distance_matrix[i, j] = l2_distance(fd0[i], fd0[j])
+    print(distance_matrix)
+           
+    # get color labels
+    if(num_folders >= 2):
+        distance_matrix1 = np.zeros((fd1.n_samples, fd1.n_samples))
+        for i in range(fd1.n_samples):
+            for j in range(fd1.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix1[i, j] = l2_distance(fd1[i], fd1[j])
+                
+                
+        distance_matrix2 = np.zeros((fd2.n_samples, fd2.n_samples))
+        for i in range(fd2.n_samples):
+            for j in range(fd2.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix2[i, j] = l2_distance(fd2[i], fd2[j])
+                
+                
+    if(num_folders >= 3):
+        distance_matrix3 = np.zeros((fd3.n_samples, fd3.n_samples))
+        for i in range(fd3.n_samples):
+            for j in range(fd3.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix3[i, j] = l2_distance(fd3[i], fd3[j])
+                
+                
+    if(num_folders >= 4):
+        distance_matrix4 = np.zeros((fd4.n_samples, fd4.n_samples))
+        for i in range(fd4.n_samples):
+            for j in range(fd4.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix4[i, j] = l2_distance(fd4[i], fd4[j])
+                
+                
+    if(num_folders >= 5):
+        distance_matrix5 = np.zeros((fd5.n_samples, fd5.n_samples))
+        for i in range(fd5.n_samples):
+            for j in range(fd5.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix5[i, j] = l2_distance(fd5[i], fd5[j])
+                
+                
+    if(num_folders >= 6):
+        distance_matrix6 = np.zeros((fd6.n_samples, fd6.n_samples))
+        for i in range(fd6.n_samples):
+            for j in range(fd6.n_samples):
+                # Calculate l2_distance between pairs
+                distance_matrix6[i, j] = l2_distance(fd6[i], fd6[j])
+                
+    
+    if(num_folders == 2):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+         #combine graphs    
+        G = nx.compose(G1, G2)   
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            
+    if(num_folders == 3):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+            
+    if(num_folders == 4):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        G4 = nx.from_numpy_array(distance_matrix4)
+        G4 = nx.relabel_nodes(G4, {n: n + 3000 for n in G4.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        centroid4 = nx.center(G4)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+        for node in G4.nodes():
+            G4.nodes[node]['graph_id'] = 'G4'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        G = nx.compose(G, G4)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+            if G.nodes[node].get('graph_id') == 'G4':
+                node_colors.append('red')   
+          
+    if(num_folders == 5):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        G4 = nx.from_numpy_array(distance_matrix4)
+        G4 = nx.relabel_nodes(G4, {n: n + 3000 for n in G4.nodes()})
+        G5 = nx.from_numpy_array(distance_matrix5)
+        G5 = nx.relabel_nodes(G5, {n: n + 4000 for n in G5.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        centroid4 = nx.center(G4)
+        centroid5 = nx.center(G5)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+        for node in G4.nodes():
+            G4.nodes[node]['graph_id'] = 'G4'
+        for node in G5.nodes():
+            G5.nodes[node]['graph_id'] = 'G5'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        G = nx.compose(G, G4)
+        G = nx.compose(G, G5)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+            if G.nodes[node].get('graph_id') == 'G4':
+                node_colors.append('red')
+            if G.nodes[node].get('graph_id') == 'G5':
+                node_colors.append('purple')   
+         
+    if(num_folders == 6):
+        # get centroids
+        G1 = nx.from_numpy_array(distance_matrix1)
+        G2 = nx.from_numpy_array(distance_matrix2)
+        G2 = nx.relabel_nodes(G2, {n: n + 1000 for n in G2.nodes()})
+        G3 = nx.from_numpy_array(distance_matrix3)
+        G3 = nx.relabel_nodes(G3, {n: n + 2000 for n in G3.nodes()})
+        G4 = nx.from_numpy_array(distance_matrix4)
+        G4 = nx.relabel_nodes(G4, {n: n + 3000 for n in G4.nodes()})
+        G5 = nx.from_numpy_array(distance_matrix5)
+        G5 = nx.relabel_nodes(G5, {n: n + 4000 for n in G5.nodes()})
+        G6 = nx.from_numpy_array(distance_matrix6)
+        G6 = nx.relabel_nodes(G6, {n: n + 5000 for n in G6.nodes()})
+        centroid1 = nx.center(G1)
+        centroid2 = nx.center(G2)
+        centroid3 = nx.center(G3)
+        centroid4 = nx.center(G4)
+        centroid5 = nx.center(G5)
+        centroid6 = nx.center(G6)
+        # create id for color labels
+        for node in G1.nodes():
+            G1.nodes[node]['graph_id'] = 'G1'
+        for node in G2.nodes():
+            G2.nodes[node]['graph_id'] = 'G2'
+        for node in G3.nodes():
+            G3.nodes[node]['graph_id'] = 'G3'
+        for node in G4.nodes():
+            G4.nodes[node]['graph_id'] = 'G4'
+        for node in G5.nodes():
+            G5.nodes[node]['graph_id'] = 'G5'
+        for node in G6.nodes():
+            G6.nodes[node]['graph_id'] = 'G6'
+         #combine graphs    
+        G = nx.compose(G1, G2) 
+        G = nx.compose(G, G3)
+        G = nx.compose(G, G4)
+        G = nx.compose(G, G5)
+        G = nx.compose(G, G6)
+        # create color labels
+        node_colors = []
+        for node in G.nodes():
+            if G.nodes[node].get('graph_id') == 'G1':
+                node_colors.append('blue')
+            if G.nodes[node].get('graph_id') == 'G2':
+                node_colors.append('orange')
+            if G.nodes[node].get('graph_id') == 'G3':
+                node_colors.append('green')
+            if G.nodes[node].get('graph_id') == 'G4':
+                node_colors.append('red')
+            if G.nodes[node].get('graph_id') == 'G5':
+                node_colors.append('purple')
+            if G.nodes[node].get('graph_id') == 'G6':
+                node_colors.append('brown')     
+                 
+    # plot Kamada-Kawai graph network
+    distance_matrix = normalize(distance_matrix, axis=1, norm='l1')
+    # Define a tolerance threshold (adjust as needed)
+    tolerance = np.quantile(distance_matrix, 0.5) # drop edges for best largest 50% l2 distances in Kamada Kawai network
+    # Create a boolean mask for values whose absolute value is less than the tolerance
+    mask = np.abs(distance_matrix) > tolerance
+    # Use the mask to replace the selected values with 0
+    distance_matrix[mask] = 0
+    print(distance_matrix)
+    G0 = nx.from_numpy_array(distance_matrix)
+    pos = nx.kamada_kawai_layout(G0)
+    #print(pos)
+    print(G0)
+    edges_to_remove = [(u, v) for u, v, data in G0.edges(data=True) if data['weight'] == 0]
+    #Remove the identified edges
+    G0.remove_edges_from(edges_to_remove)
+    #print(f"Edges after removal: {list(G0.edges(data=True))}")
+    
+    
+    G0 = nx.from_numpy_array(distance_matrix)
+    pos = nx.kamada_kawai_layout(G0)
+    #print(pos)
+    print(G0)
+    edges_to_remove = [(u, v) for u, v, data in G0.edges(data=True) if data['weight'] == 0]
+    #Remove the identified edges
+    G0.remove_edges_from(edges_to_remove)
+    #print(f"Edges after removal: {list(G.edges(data=True))}")
+    
+    from networkx.algorithms.community.quality import modularity
+    from networkx.algorithms.community import label_propagation_communities
+    from itertools import islice
+    G1_n = G1.number_of_nodes()
+    G2_n = G2.number_of_nodes()
+    G1_start = 0
+    G1_stop = G1_n
+    G2_start = G1_n
+    G2_stop = G1_n+G2_n
+    G1_nodes = list(islice(G0.nodes(),G1_start,G1_stop))
+    G2_nodes = list(islice(G0.nodes(),G2_start,G2_stop))
+    if(num_folders==2):
+        communities = [G1_nodes,G2_nodes]
+    if(num_folders==3):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes]
+    if(num_folders==4):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        G4_n = G4.number_of_nodes()
+        G4_start = G1_n+G2_n+G3_n
+        G4_stop = G1_n+G2_n+G3_n+G4_n
+        G4_nodes = list(islice(G0.nodes(),G4_start,G4_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes,G4_nodes]
+    if(num_folders==5):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        G4_n = G4.number_of_nodes()
+        G4_start = G1_n+G2_n+G3_n
+        G4_stop = G1_n+G2_n+G3_n+G4_n
+        G4_nodes = list(islice(G0.nodes(),G4_start,G4_stop))
+        G5_n = G5.number_of_nodes()
+        G5_start = G1_n+G2_n+G3_n+G4_n
+        G5_stop = G1_n+G2_n+G3_n+G4_n+G5_n
+        G5_nodes = list(islice(G0.nodes(),G5_start,G5_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes,G4_nodes,G5_nodes]
+    if(num_folders==6):
+        G3_n = G3.number_of_nodes()
+        G3_start = G1_n+G2_n
+        G3_stop = G1_n+G2_n+G3_n
+        G3_nodes = list(islice(G0.nodes(),G3_start,G3_stop))
+        G4_n = G4.number_of_nodes()
+        G4_start = G1_n+G2_n+G3_n
+        G4_stop = G1_n+G2_n+G3_n+G4_n
+        G4_nodes = list(islice(G0.nodes(),G4_start,G4_stop))
+        G5_n = G5.number_of_nodes()
+        G5_start = G1_n+G2_n+G3_n+G4_n
+        G5_stop = G1_n+G2_n+G3_n+G4_n+G5_n
+        G5_nodes = list(islice(G0.nodes(),G5_start,G5_stop))
+        G6_n = G6.number_of_nodes()
+        G6_start = G1_n+G2_n+G3_n+G4_n+G5_n
+        G6_stop = G1_n+G2_n+G3_n+G4_n+G5_n+G6_n
+        G6_nodes = list(islice(G0.nodes(),G6_start,G6_stop))
+        communities = [G1_nodes,G2_nodes,G3_nodes,G4_nodes,G5_nodes,G6_nodes]
+    #communities = nx.community.label_propagation_communities(G0)
+    #print(communities)
+    # Calculate the modularity (ranges -0.5 to 1.0 with 0 indicating random modularity, and 0.3 - 0.7 as strong modularity)
+    Q = modularity(G0, communities)
+    Q = round(Q,5)
+    
+    print(f"The modularity of the classes is: {Q}")
+    if(num_folders==2):
+        plt.title("%s=blue|%s=orange" % (folder_list[0],folder_list[1]))
+    if(num_folders==3):
+        plt.title("%s=blue|%s=orange|%s=green" % (folder_list[0],folder_list[1],folder_list[2]))
+    if(num_folders==4):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3]))
+    if(num_folders==5):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4]))
+    if(num_folders==6):
+        plt.title("%s=blue|%s=orange|%s=green|%s=red|%s=purple|%s=brown" % (folder_list[0],folder_list[1],folder_list[2],folder_list[3],folder_list[4],folder_list[5]))
+    plt.suptitle("%s (Kamada Kawai network-l2 distances | modularity = %s)" % (input_label,Q))
+    nx.draw(G0, pos, with_labels=False, node_color=node_colors, node_size=100, width=0.1, edge_color='gray')
+    plt.savefig("popstar_results/FDA_video_kamada_kawai_network_%s_%s.png" % (folder_list, input_label))
+    plt.show()
+    ####
+    
+    
+    
+
+#################################################################################
+####################  main program      #########################################
+#################################################################################
+def main():
+    findDIM()
+    collectDF()
+    clusterFDA()
+    print("\nFDA signature classification on video is complete\n")   
+    
+        
+###############################################################
+if __name__ == '__main__':
+    main()
+    
+    

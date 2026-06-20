@@ -24,7 +24,36 @@ from plotnine import *
 import statsmodels.api as sm
 import seaborn as sn 
 import csv
+###############################################################################
+###############################################################################
+# read popstar ctl file
+infile = open("popstar.ctl", "r")
+infile_lines = infile.readlines()
+for x in range(len(infile_lines)):
+    infile_line = infile_lines[x]
+    #print(infile_line)
+    infile_line_array = str.split(infile_line, ",")
+    header = infile_line_array[0]
+    value = infile_line_array[1]
+    #print(header)
+    #print(value)
+    if(header == "name"):
+        name = value
+        print("my file/folder name is",name)
+    if(header == "fileExt"):
+        ext = value
+        print("my file extension(s) are",ext)   
+infile.close()
+ ###### variable assignments ######
+inp = ""+name+""
+ext = ""+ext+""
 
+if(ext != ".mp4"):
+    print("\nThere is/are no video file(s) to analyze for %s...skipping video processing...\n" % inp)
+    exit
+if(ext == ".mp4"):
+    print("\nThere is/are video file(s) to analyze for %s...success  yea !..\n" % inp)
+    exit
 ###############################################################################
 ###############################################################################
 features = ['% stability(CES)']
@@ -36,7 +65,7 @@ dir_list = os.listdir("popstar_results/")
 for i in range(len(dir_list)):
     myFile = dir_list[i]
     print(myFile[0:9])
-    if(myFile[0:11] == "permutation" and myFile[0:22] != "permutation_test_video"):
+    if(myFile[0:11] == "permutation" and myFile[0:22] == "permutation_test_video"):
         lst.append(str(myFile))
 print(lst)
 
@@ -44,7 +73,7 @@ print(lst)
 ###############################################################################
 def collectDF():
     print("collecting dataframe")
-    writePath = "popstar_results/CES_signal.txt"
+    writePath = "popstar_results/CES_video_signal.txt"
     txt_out = open(writePath, 'w')
     #txt_out.write("folder\tp-value\tnonrandom\n")
     labels = []
@@ -80,9 +109,9 @@ def collectDF():
     comparisons = labels
 
 def matrix_maker_files():
-    writePath = "popstar_results/CES_signal_matrix_files.txt"
+    writePath = "popstar_results/CES_video_signal_matrix_files.txt"
     txt_out = open(writePath, 'w')
-    readPath = "popstar_results/CES_signal.txt"
+    readPath = "popstar_results/CES_video_signal.txt"
     with open(readPath, "r") as file:
         lines = file.readlines()
         for line in lines:
@@ -95,7 +124,7 @@ def matrix_maker_files():
     print("\nmatrix is done\n")
     
 def heat_map_files():
-    readPath = "popstar_results/CES_signal_matrix_files.txt"
+    readPath = "popstar_results/CES_video_signal_matrix_files.txt"
     
     with open(readPath, 'r') as file:
         csv_reader = csv.reader(file, delimiter='\t')
@@ -119,7 +148,7 @@ def heat_map_files():
     hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = comparisons, annot = False, vmin = 0, vmax = 100)
     ax.set_aspect('equal') # Ensure square cells
     plt.tight_layout()
-    plt.savefig('popstar_results/CES_signal_matrix_files.jpg')
+    plt.savefig('popstar_results/CES_video_signal_matrix_files.jpg')
     plt.show()
     plt.close()
     myMIN = np.min(txt_in)
@@ -128,14 +157,14 @@ def heat_map_files():
     hm = sn.heatmap(data = txt_in, ax=ax, cmap="rocket", xticklabels = features, yticklabels = comparisons, annot = False, vmin = myMIN, vmax = myMAX)
     ax.set_aspect('equal') # Ensure square cells
     plt.tight_layout()
-    plt.savefig('popstar_results/CES_signal_matrix_files_scaled.jpg')
+    plt.savefig('popstar_results/CES_video_signal_matrix_files_scaled.jpg')
     plt.show()
     plt.close()
     print("\nheatmap is done\n") 
 
 def matrix_maker_folders():
-    writePath = "popstar_results/CES_signal_matrix_folders.txt"
-    readPath = "popstar_results/CES_signal.txt"
+    writePath = "popstar_results/CES_video_signal_matrix_folders.txt"
+    readPath = "popstar_results/CES_video_signal.txt"
     df = pd.read_csv(readPath, sep = "\t", header=None)
     avgs_df = df.groupby(0, as_index=False).mean()
     print(df)
@@ -155,7 +184,7 @@ def matrix_maker_folders():
     print("\nmatrix is done\n")
     
 def heat_map_folders():
-    readPath = "popstar_results/CES_signal_matrix_folders.txt"
+    readPath = "popstar_results/CES_video_signal_matrix_folders.txt"
     with open(readPath, 'r') as file:
         csv_reader = csv.reader(file, delimiter='\t')
         txt_in = list(csv_reader)
@@ -178,7 +207,7 @@ def heat_map_folders():
     ax.set_aspect('equal') # Ensure square cells
     plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
     plt.tight_layout()
-    plt.savefig('popstar_results/CES_signal_matrix_folders.jpg')
+    plt.savefig('popstar_results/CES_video_signal_matrix_folders.jpg')
     plt.show()
     plt.close()
     myMIN = np.min(txt_in)
@@ -188,13 +217,13 @@ def heat_map_folders():
     ax.set_aspect('equal') # Ensure square cells
     plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
     plt.tight_layout()
-    plt.savefig('popstar_results/CES_signal_matrix_folders_scaled.jpg')
+    plt.savefig('popstar_results/CES_video_signal_matrix_folders_scaled.jpg')
     plt.show()
     plt.close()
     print("\nheatmap is done\n") 
 
 def errorbar_folders():
-    readPath = "popstar_results/CES_signal.txt"
+    readPath = "popstar_results/CES_video_signal.txt"
     df = pd.read_csv(readPath, sep = "\t", header=None)
     print(df)
     folder = df[0]
@@ -207,7 +236,7 @@ def errorbar_folders():
     plt.title('KW test | h=%s, p=%s' % (h_statistic,p_value))
     
     # Display the plot
-    plt.savefig("popstar_results/CES_signal_bars.png")
+    plt.savefig("popstar_results/CES_video_signal_bars.png")
     plt.show()
     print("\nerror chart is done\n") 
 ###############################################################
@@ -219,7 +248,7 @@ def main():
     matrix_maker_folders()
     heat_map_folders()
     errorbar_folders()
-    print("\nheatmap is completed\n")
+    print("\nheatmap on video is completed\n")
 ###############################################################
 if __name__ == '__main__':
     main()

@@ -106,6 +106,8 @@ class Ui_Dialog(object):
         print("making heatmap for CES signals")
         cmd = "python3 CESheatmap.py"
         os.system(cmd)
+        cmd = "python3 CESheatmap_video.py"
+        os.system(cmd)
         
     def classifyIt(self):
         print("running RF classifier")
@@ -124,6 +126,8 @@ class Ui_Dialog(object):
         f.write("folder6,%s,#query folder to analyze\n" % filename6)
         f.close()
         cmd = "python3 classifyFeatures.py"
+        os.system(cmd)
+        cmd = "python3 classifyFeatures_video.py"
         os.system(cmd)
     
     def clusterIt(self):
@@ -144,7 +148,8 @@ class Ui_Dialog(object):
         f.close()
         cmd = "python3 clusterFeatures.py"
         os.system(cmd)
-
+        cmd = "python3 clusterFeatures_video.py"
+        os.system(cmd)
 
 if __name__ == "__main__":
     import sys

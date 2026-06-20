@@ -81,6 +81,8 @@ class Ui_Dialog(object):
         f.close()
         cmd = "python3 compareDist.py"
         os.system(cmd)
+        cmd = "python3 compareDist_video.py"
+        os.system(cmd)
         
     def compareSignal(self):
         print("compare fitness signal features")
@@ -92,6 +94,8 @@ class Ui_Dialog(object):
         f.write("folder2,%s,#query folder to analyze\n" % filename2)
         f.close()
         cmd = "python3 compareSignal.py"
+        os.system(cmd)
+        cmd = "python3 compareSignal_video.py"
         os.system(cmd)
 
 if __name__ == "__main__":
