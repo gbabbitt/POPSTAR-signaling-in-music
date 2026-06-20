@@ -63,6 +63,15 @@ for x in range(len(infile_lines)):
     if(header == "metro"):
         met = value
         print("my metronome option is",met)
+    if(header == "spch"):
+        spchOpt = value
+        print("speech-normalize",spchOpt)
+    if(header == "self"):
+        selfOpt = value
+        print("self-normalize",selfOpt)
+    if(header == "musi"):
+        musiOpt = value
+        print("music-normalize",musiOpt)
     if(header == "fileExt"):
         ext = value
         print("my file extension(s) are",ext)   
@@ -71,6 +80,9 @@ infile.close()
 inp = ""+name+""
 tm = int(tm)
 met = ""+met+""
+spchOpt = ""+spchOpt+""
+selfOpt = ""+selfOpt+""
+musiOpt = ""+musiOpt+""
 ext = ""+ext+""
 
 '''
@@ -832,13 +844,29 @@ def CESmap_batch():
             print("%s\t%s\t%s\t%s" % (i,control, energy, surprise))
             f.write("%s,%s,%s\n" % (energy, control, surprise))
         f.close()
-        # normalize each feature column
-        vals_control = np.array(vals_control)
-        vals_energy = np.array(vals_energy)
-        vals_surprise = np.array(vals_surprise)
-        norm_control = (vals_control - np.min(vals_control)) / (np.max(vals_control) - np.min(vals_control))
-        norm_energy = (vals_energy - np.min(vals_energy)) / (np.max(vals_energy) - np.min(vals_energy))
-        norm_surprise = (vals_surprise- np.min(vals_surprise)) / (np.max(vals_surprise) - np.min(vals_surprise))
+        # self-normalize each feature column
+        if(selfOpt == "yes"):
+            vals_control = np.array(vals_control)
+            vals_energy = np.array(vals_energy)
+            vals_surprise = np.array(vals_surprise)
+            norm_control = (vals_control - np.min(vals_control)) / (np.max(vals_control) - np.min(vals_control))
+            norm_energy = (vals_energy - np.min(vals_energy)) / (np.max(vals_energy) - np.min(vals_energy))
+            norm_surprise = (vals_surprise- np.min(vals_surprise)) / (np.max(vals_surprise) - np.min(vals_surprise))
+        # z-normalize each feature column to underwater ambient scenery
+        if(selfOpt == "no"):
+            vals_control = np.array(vals_control)
+            vals_energy = np.array(vals_energy)
+            vals_surprise = np.array(vals_surprise)
+            control_mean = 52.239
+            control_sd = 1.502
+            energy_mean = 0.169
+            energy_sd = 0.007
+            surprise_mean = 102.098
+            surprise_sd = 0.198
+            norm_control = (vals_control - control_mean)) / (control_sd))
+            norm_energy = (vals_energy - energy_mean)) / (energy_sd))
+            norm_surprise = (vals_surprise - surprise_mean)) / (surprise_sd))
+              
         f = open("%s_analysis/ternary_video_norm_%s.txt" % (inp,filename[:-4]), "w")
         f.write("energy,control,surprise\n")
         for i in range(len(norm_control)):
