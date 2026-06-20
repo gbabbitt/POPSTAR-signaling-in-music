@@ -350,7 +350,7 @@ def GlobOptContrast_batch():
         cap.release()
         cv2.destroyAllWindows()
 
-def OptFlow2():
+def OptFlow_cpu():
     print("\ncalculating dense optical flow (Farneback) on %s\n" % input1)
     cap0 = cv2.VideoCapture(input1)
     fps = cap0.get(cv2.CAP_PROP_FPS) # frames per second
@@ -491,7 +491,7 @@ def OptFlow2():
     print("\ncompleted dense optical flow (Farneback) on %s\n" % input1)
 
     
-def OptFlow():
+def OptFlow_gpu():
     print("\ncalculating dense optical flow (Farneback) on %s\n" % input1)
     cap0 = cv2.VideoCapture(input1)
     fps = cap0.get(cv2.CAP_PROP_FPS) # frames per second
@@ -518,7 +518,18 @@ def OptFlow():
         #print(frame)
         # Convert the frame to grayscale for intensity calculation
         gray_frame_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+        cuda_count = cv2.cuda.getCudaEnabledDeviceCount()
+        if cuda_count == 0:
+            raise RuntimeError("OpenCV was not built with CUDA support enabled.")
+        gpu_flow_engine = cv2.cuda_FarnebackOpticalFlow.create(5, 0.5, False, 13, 10, 5, 1.1, 0)
+        gpu_frame_prev = cv2.cuda_GpuMat()
+        gpu_frame_next = cv2.cuda_GpuMat()
+        gpu_flow = cv2.cuda_GpuMat()
+        gpu_frame_prev.upload(gray_frame)
+        gpu_frame_next.upload(gray_frame_next)
+        gpu_flow_engine.calc(gpu_frame_prev, gpu_frame_next, gpu_flow)
+        flow = gpu_flow.download()
+        #flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
         magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1],angleInDegrees=True)
         opt_flow_values.append(magnitude)
         dlt_flow_values.append(angle)
@@ -804,9 +815,9 @@ def CESmap():
         energy_sd = 0.007
         surprise_mean = 102.098
         surprise_sd = 0.198
-        norm_control = (abs(vals_control - control_mean) / (control_sd))
-        norm_energy = (abs(vals_energy - energy_mean) / (energy_sd))
-        norm_surprise = (abs(vals_surprise - surprise_mean) / (surprise_sd))
+        norm_control = (((abs(vals_control - control_mean) / (control_sd))*sf+1)/2)
+        norm_energy = (((abs(vals_energy - energy_mean) / (energy_sd))*sf+1)/2)
+        norm_surprise = (((abs(vals_surprise - surprise_mean) / (surprise_sd))*sf+1)/2)
     f = open("%s_analysis/ternary_video_norm.txt" % (inp), "w")
     f.write("energy,control,surprise\n")
     for i in range(len(norm_control)):
@@ -872,15 +883,16 @@ def CESmap_batch():
             vals_control = np.array(vals_control)
             vals_energy = np.array(vals_energy)
             vals_surprise = np.array(vals_surprise)
+            sf = 0.5  # scaling factor
             control_mean = 52.239
             control_sd = 1.502
             energy_mean = 0.169
             energy_sd = 0.007
             surprise_mean = 102.098
             surprise_sd = 0.198
-            norm_control = (abs(vals_control - control_mean) / (control_sd))
-            norm_energy = (abs(vals_energy - energy_mean) / (energy_sd))
-            norm_surprise = (abs(vals_surprise - surprise_mean) / (surprise_sd))
+            norm_control = (((abs(vals_control - control_mean) / (control_sd))*sf+1)/2)
+            norm_energy = (((abs(vals_energy - energy_mean) / (energy_sd))*sf+1)/2)
+            norm_surprise = (((abs(vals_surprise - surprise_mean) / (surprise_sd))*sf+1)/2)
         f = open("%s_analysis/ternary_video_norm_%s.txt" % (inp,filename[:-4]), "w")
         f.write("energy,control,surprise\n")
         for i in range(len(norm_control)):
@@ -925,10 +937,12 @@ def main():
         print(f"File Size: {file_size_mb:.2f} MB")
         time.sleep(2)
         GlobOptContrast()
-        if(file_size_mb <= 2):
-            OptFlow()
-        if(file_size_mb > 2):                
-            OptFlow2()
+        cuda_count = cv2.cuda.getCudaEnabledDeviceCount()
+        print("cuda count is %s" % cuda_count)
+        if(cuda_count == 0):
+            OptFlow_cpu()
+        if(cuda_count != 0):
+            OptFlow_gpu()
         CESmap()
         print("\nvideo processing is complete\n")
         
