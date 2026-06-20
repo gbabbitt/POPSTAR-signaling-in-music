@@ -804,9 +804,9 @@ def CESmap():
         energy_sd = 0.007
         surprise_mean = 102.098
         surprise_sd = 0.198
-        norm_control = (vals_control - control_mean) / (control_sd)
-        norm_energy = (vals_energy - energy_mean) / (energy_sd)
-        norm_surprise = (vals_surprise - surprise_mean) / (surprise_sd)
+        norm_control = (abs(vals_control - control_mean) / (control_sd))
+        norm_energy = (abs(vals_energy - energy_mean) / (energy_sd))
+        norm_surprise = (abs(vals_surprise - surprise_mean) / (surprise_sd))
     f = open("%s_analysis/ternary_video_norm.txt" % (inp), "w")
     f.write("energy,control,surprise\n")
     for i in range(len(norm_control)):
@@ -878,9 +878,9 @@ def CESmap_batch():
             energy_sd = 0.007
             surprise_mean = 102.098
             surprise_sd = 0.198
-            norm_control = (vals_control - control_mean) / (control_sd)
-            norm_energy = (vals_energy - energy_mean) / (energy_sd)
-            norm_surprise = (vals_surprise - surprise_mean) / (surprise_sd)
+            norm_control = (abs(vals_control - control_mean) / (control_sd))
+            norm_energy = (abs(vals_energy - energy_mean) / (energy_sd))
+            norm_surprise = (abs(vals_surprise - surprise_mean) / (surprise_sd))
         f = open("%s_analysis/ternary_video_norm_%s.txt" % (inp,filename[:-4]), "w")
         f.write("energy,control,surprise\n")
         for i in range(len(norm_control)):
