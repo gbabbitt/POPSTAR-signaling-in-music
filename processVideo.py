@@ -809,6 +809,7 @@ def CESmap():
         vals_control = np.array(vals_control)
         vals_energy = np.array(vals_energy)
         vals_surprise = np.array(vals_surprise)
+        sf = 0.5  # scaling factor
         control_mean = 52.239
         control_sd = 1.502
         energy_mean = 0.169
