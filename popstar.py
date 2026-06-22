@@ -25,7 +25,7 @@ musiOption = "no"
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(479, 676)
+        Dialog.resize(500, 676)
         self.pushButton = QtWidgets.QPushButton(Dialog)
         self.pushButton.setGeometry(QtCore.QRect(30, 530, 171, 31))
         self.pushButton.setObjectName("pushButton")
@@ -107,7 +107,7 @@ class Ui_Dialog(object):
         self.label_4.setObjectName("label_4")
         # beat tracker box
         self.checkBox = QtWidgets.QCheckBox(Dialog)
-        self.checkBox.setGeometry(QtCore.QRect(375, 490, 80, 31))
+        self.checkBox.setGeometry(QtCore.QRect(375, 490, 80, 51))
         self.checkBox.setObjectName("checkBox")
         self.checkBox.setChecked(True)
         self.label_7 = QtWidgets.QLabel(Dialog)
@@ -122,7 +122,7 @@ class Ui_Dialog(object):
         self.label_5.setScaledContents(True)
         ###########################################
         self.label_6 = QtWidgets.QLabel(Dialog)
-        self.label_6.setGeometry(QtCore.QRect(365, 410, 100, 31))
+        self.label_6.setGeometry(QtCore.QRect(365, 410, 120, 31))
         self.label_6.setObjectName("label_6")
         
         # Radio button for self normalization option
@@ -130,19 +130,19 @@ class Ui_Dialog(object):
         self.radioButton_self.setGeometry(QtCore.QRect(375, 470, 80, 31))
         # adding signal and slot 
         self.radioButton_self.toggled.connect(self.selfselected)
-        self.radioButton_self.setText("single")
+        self.radioButton_self.setText("self/self")
         # Radio button for speech normalization option
         self.radioButton_spch = QtWidgets.QRadioButton(Dialog)
-        self.radioButton_spch.setGeometry(QtCore.QRect(375, 450, 80, 31))
+        self.radioButton_spch.setGeometry(QtCore.QRect(375, 450, 120, 31))
         # adding signal and slot 
         self.radioButton_spch.toggled.connect(self.spchselected)
-        self.radioButton_spch.setText("other")
+        self.radioButton_spch.setText("language/sea")
         # Radio button for music normalization option
         self.radioButton_musi = QtWidgets.QRadioButton(Dialog)
         self.radioButton_musi.setGeometry(QtCore.QRect(375, 430, 80, 31))
         # adding signal and slot 
         self.radioButton_musi.toggled.connect(self.musiselected)
-        self.radioButton_musi.setText("music")
+        self.radioButton_musi.setText("music/sea")
         
         ###########################################
         self.retranslateUi(Dialog)
@@ -165,7 +165,7 @@ class Ui_Dialog(object):
         self.pushButton_5.setText(_translate("Dialog", "4. make dynamic trajectory"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
         self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">window length (seconds)</span></p></body></html>"))
-        self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:500;\">sound-type</span></p></body></html>"))
+        self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:500;\">norm audio/video</span></p></body></html>"))
 ######################################### subroutines ######################################################
     def selfselected(self, selected):
         if selected:
