@@ -181,11 +181,11 @@ https://templatemo.com/tm-536-dream-pulse
               <div>
                 
 			  <p>
-			  POPSTAR: python module dependencies (PyQt5, numpy (version<= 2.0.0 due to scikit-fda dependencies), scipy, pandas, multiprocess, scikit-learn, scikit-fda, matplotlib, statsmodels, seaborn, plotnine, progress, librosa, networkx, soundfile, pydub, moviepy==1.0.3 to avoid recent bug, hurst, EntropyHub, python-ternary, opencv-python, yt-dlp) NOTE: for best results, the CPU on the computer should support at least 4 cores.  
+			  POPSTAR: python module dependencies (PyQt5, numpy (version <= 2.0.0 due to scikit-fda dependencies), scipy, pandas, multiprocess, scikit-learn, scikit-fda, matplotlib, statsmodels, seaborn, plotnine, progress, networkx, librosa, soundfile, pydub, moviepy==1.0.3 to avoid recent bug, hurst, EntropyHub, python-ternary, opencv-python, yt-dlp) NOTE: for best results, the CPU on the computer should support at least 4 cores.  
               </p>
 			  <p>QUICK START (Linux or Mac terminal, or Windows cmd): </p>
-			  <p>(linux) sudo apt install ffmpeg</p>  
-              <p>pip3 install  PyQt5, numpy, scipy, pandas, etc. </p>
+              <p>(linux) sudo apt install ffmpeg </p>
+			  <p>pip3 install  PyQt5, numpy, scipy, pandas, etc. </p>
 			  <p>unzip our download folder, add files to be analyzed (.wav or .mp3)</p>
 			  <p>python3 popstar.py</p>
 			  <p> on GUI, enter file or folder to analyze, select sound-type (self=single file, music, or other), click buttons in numbered order on the user interface</p>
@@ -242,6 +242,22 @@ https://templatemo.com/tm-536-dream-pulse
 			  POPSTAR also can convert each song to b-spline functions of CES over time and apply functional data analsis (FDA), machine learning classification, and graph network analysis for comparing the L2 distances (i.e. individuality) of songs within/between artists, musical genres, and/or animal species. 
               </p>
 			  <img src="img/networks.png" alt="Client Image" class="img-fluid tm-client-img" />
+			  <div></div>
+			  <div></div>
+			  <h2 class="tm-color-primary tm-section-title mb-4">Analysis of CES (control, energy, surprise) in video</h2>
+			  <div></div>
+			  <p>
+			  When .mp4 files are analyzed in POPSTAR, the control, energy, and surprise is also measured dynamically using calculations of global optical contrast within movie frames as a measure of control, and dense optical flow between frames as a measure of energy and surprise. Energy is defined as the vector magnitude of flow between frames and surprise is defined as the standard deviation of the vector angles between frames. 
+			  </p>
+			  <video controls width="800"><source src="img/video1.mp4"  type="video/mp4"></video>
+			  <p>
+			   - here is a music video with high degree of optical flow (i.e. energy) which is reflects the strong use of cinematic techniques of camera panning and tracking.
+			  </p>
+			  <video controls width="800"><source src="img/video2.mp4"  type="video/mp4"></video>
+			  <p>
+			   - here is a music video with more balanced elements of optical contrast (i.e. control), flow (i.e. energy) and change in flow (i.e. surprise). It reflects the balance of CES that is present in human dance captured with a basic camera technique.
+			  </p>
+			  <div></div>
 			  <p>
 			  Do you think popular music contains ancient fitness signaling as we have described here?  Download POPSTAR and explore! 
 			  </p>
