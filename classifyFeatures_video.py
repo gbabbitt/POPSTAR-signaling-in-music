@@ -268,7 +268,7 @@ def collectDFeb():
     txt_out1.write("folder\tenergy\n")
     txt_out2.write("folder\tcontrol\n")
     txt_out3.write("folder\tsurprise\n")
-    
+        
     for j in range(len(folder_list)):
         inp = folder_list[j]
         lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
@@ -307,7 +307,11 @@ def collectDFeb():
             txt_out1.write("%s\t%s\n" % (inp,energy_avg))
             txt_out2.write("%s\t%s\n" % (inp,control_avg))
             txt_out3.write("%s\t%s\n" % (inp,surprise_avg))
-
+            energy_list.clear()
+            control_list.clear()
+            surprise_list.clear()
+            
+            
 def  errorBarPlot():   
     # Create a sample dataframe
     readPath = "popstar_results/ternary_video_compare_%s.txt" % (folder_list)
@@ -324,7 +328,7 @@ def  errorBarPlot():
     plt.legend(title='ternary axes')
     plt.savefig("popstar_results/compareSignal_video_%s.png" % (folder_list))
     plt.show()
-    
+    plt.close()
     
 def KruskalWallis():
     print("Kruskal-Wallis tests on energy, control and surprise")

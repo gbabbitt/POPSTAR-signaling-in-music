@@ -88,6 +88,8 @@ for x in range(len(infile_lines)):
         print("my file/folder name is",name2)    
 infile.close()
  ###### variable assignments ######
+global inp1
+global inp2
 inp1 = ""+name1+""
 inp2 = ""+name2+""
 
@@ -143,6 +145,9 @@ def collectDF():
         txt_out1.write("%s\t%s\n" % (inp1,energy_avg))
         txt_out2.write("%s\t%s\n" % (inp1,control_avg))
         txt_out3.write("%s\t%s\n" % (inp1,surprise_avg))
+        energy_list.clear()
+        control_list.clear()
+        surprise_list.clear()
     ####################################
     lst = os.listdir("%s_analysis/intervals/" % (inp2)) # your directory path
     number_files = len(lst)
@@ -153,7 +158,7 @@ def collectDF():
     for fname in dir_list:
         print(fname)
         dirname = fname
-        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp2,dirname)
+        readPath = "%s_analysis/ternary_video_norm_%s.txt" % (inp2,dirname)
         df = pd.read_csv(readPath, sep = "\t")
         #print(df)    
         energy_list = []
@@ -180,6 +185,9 @@ def collectDF():
         txt_out1.write("%s\t%s\n" % (inp2,energy_avg))
         txt_out2.write("%s\t%s\n" % (inp2,control_avg))
         txt_out3.write("%s\t%s\n" % (inp2,surprise_avg))
+        energy_list.clear()
+        control_list.clear()
+        surprise_list.clear()
     txt_out.close()
     txt_out1.close()
     txt_out2.close()
@@ -239,6 +247,7 @@ def  errorBarPlot1(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):
     plt.legend(title='ternary axes')
     plt.savefig("popstar_results/compareSignal_video_%s_%s.png" % (inp1,inp2))
     plt.show()
+    plt.close()
     
 def ansari():    
     readPath = "popstar_results/energy_video_compare_%s_%s.txt" % (inp1,inp2)
@@ -276,7 +285,7 @@ def ansari():
     
 def  errorBarPlot2(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):   
     # Create a sample dataframe
-    readPath = "popstar_results/ternary_compare_%s_%s.txt" % (inp1,inp2)
+    readPath = "popstar_results/ternary_video_compare_%s_%s.txt" % (inp1,inp2)
     df = pd.read_csv(readPath, sep = "\t")
     # Plotting the bar plot with error bars
     sns.barplot(x='folder', y='value', hue='ternary', data=df, errorbar='ci')
@@ -290,7 +299,8 @@ def  errorBarPlot2(energy_H,energy_p,control_H,control_p,surprise_H,surprise_p):
     # Display the plot
     plt.legend(title='ternary axes')
     plt.savefig("popstar_results/compareSignal_video_%s_%s_variance.png" % (inp1,inp2))
-    plt.show()    
+    plt.show()
+    plt.close()
     
 #################################################################################
 ####################  main program      #########################################
