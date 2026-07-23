@@ -578,7 +578,7 @@ def main_batch_tplots2(item):
     valX = 0.5
     valY = 0.5
     valZ = 0.5  
-    for i in range(face_num-1):
+    for i in range(face_num-2):
         if(i == 0):
             valX = 0.5
             valY = 0.5
