@@ -340,7 +340,7 @@ def main():
             df2 = pd.read_csv(readPath2, delimiter=',',header=0)
             TEdata = df2.values  # convert dataframe to matrix
             TEvalue = TEdata[0][2]
-            TEvalue = round(TEvalue,3)
+            TEvalue = round(TEvalue,4)
             print(TEvalue)
             
         tdata = {}
@@ -583,7 +583,7 @@ def main_batch_tplots2(item):
         df2 = pd.read_csv(readPath2, delimiter=',',header=0)
         TEdata = df2.values  # convert dataframe to matrix
         TEvalue = TEdata[0][2]
-        TEvalue = round(TEvalue,3)
+        TEvalue = round(TEvalue,4)
         print(TEvalue)
     tdata = {}
     valX = 0.5
