@@ -260,14 +260,17 @@ def collectDFeb():
     writePath1 = "popstar_results/energy_video_compare_%s.txt" % (folder_list)
     writePath2 = "popstar_results/control_video_compare_%s.txt" % (folder_list)
     writePath3 = "popstar_results/surprise_video_compare_%s.txt" % (folder_list)
+    
     txt_out = open(writePath, "w")
     txt_out1 = open(writePath1, "w")
     txt_out2 = open(writePath2, "w")
     txt_out3 = open(writePath3, "w")
+    
     txt_out.write("folder\tternary\tvalue\n")
     txt_out1.write("folder\tenergy\n")
     txt_out2.write("folder\tcontrol\n")
     txt_out3.write("folder\tsurprise\n")
+    
         
     for j in range(len(folder_list)):
         inp = folder_list[j]
@@ -310,7 +313,47 @@ def collectDFeb():
             energy_list.clear()
             control_list.clear()
             surprise_list.clear()
-            
+
+
+def TEerrorBarPlot():
+    print("plotting comparison of transfer energy")
+    writePath4 = "popstar_results/TE_video_compare_%s.txt" % (folder_list)   
+    txt_out4 = open(writePath4, "w")
+    txt_out4.write("folder\tvalue\n")
+    
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
+        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        print(dir_list)
+        readPath = "%s_analysis/TEvalues.txt" % (inp)
+        df = pd.read_csv(readPath, sep = ",")
+        #print(df)
+        for row in df.itertuples(index=True):
+            #print(row[3])
+            trans_ent = row[3]
+            txt_out4.write("%s\t%s\n" % (inp,trans_ent))
+            print("%s\t%s\n" % (inp,trans_ent))
+    txt_out4.close()
+    ###### make plot
+    # Create a sample dataframe
+    readPath = "popstar_results/TE_video_compare_%s.txt" % (folder_list)
+    df = pd.read_csv(readPath, sep = "\t")
+    # Plotting the bar plot with error bars
+    sns.barplot(x='folder', y='value', hue='folder', data=df, errorbar='ci')
+
+    # Adding labels and title
+    plt.xlabel('folder')
+    plt.ylabel('normalized transfer entropy')
+    plt.title('transfer entropy H=%s p=%s' % (value_H,value_p))
+    # Display the plot
+    #plt.legend(title='transfer entropy')
+    plt.savefig("popstar_results/compareTEvideo_%s.png" % (folder_list))
+    plt.show()
+    plt.close()      
             
 def  errorBarPlot():   
     # Create a sample dataframe
@@ -329,7 +372,8 @@ def  errorBarPlot():
     plt.savefig("popstar_results/compareSignal_video_%s.png" % (folder_list))
     plt.show()
     plt.close()
-    
+
+   
 def KruskalWallis():
     print("Kruskal-Wallis tests on energy, control and surprise")
     print(folder_list)
@@ -357,25 +401,37 @@ def KruskalWallis():
     global surprise_p
     surprise_H = round(stat,3)
     surprise_p = round(p,3)
+    readPath = "popstar_results/TE_video_compare_%s.txt" % (folder_list)
+    df = pd.read_csv(readPath, sep = "\t")
+    groups = [df['value'][df['folder'] == g] for g in df['folder'].unique()]
+    stat, p = kruskal(*groups)
+    global value_H
+    global value_p
+    value_H = round(stat,3)
+    value_p = round(p,3)
     print("Kruskal-Wallis tests")
     print("energy| H=%s p=%s" % (energy_H,energy_p))
     print("control| H=%s p=%s" % (control_H,control_p))
     print("surprise| H=%s p=%s" % (surprise_H,surprise_p))
+    print("trans entropy| H=%s p=%s" % (value_H,value_p))
     return energy_H
     return energy_p
     return control_H
     return control_p
     return surprise_H
-    return surprise_p        
+    return surprise_p
+    return value_H
+    return value_p 
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
 def main():
-    #collectDFrf()
+    
     collectDFeb()
     KruskalWallis()
     errorBarPlot()
-    #RFclass()
+    TEerrorBarPlot()
+    
     print("\nerror bar chart and KW test on video CES is complete\n")   
     
         
