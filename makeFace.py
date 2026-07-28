@@ -188,7 +188,7 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     
 
 
-def ternary_plot2(tdata, i, valX, valY, valZ):
+def ternary_plot2(tdata, i, TEvalue, valX, valY, valZ):
     #print("making ternary plots")
     # Create a figure and axes with ternary scale
     fig, tax = ternary.figure(scale=1.0)
@@ -221,9 +221,9 @@ def ternary_plot2(tdata, i, valX, valY, valZ):
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
     if(selfOpt == "yes"):
-       tax.set_title("Video CES Signal - distance from video center", fontsize=14, y=-0.15)
+       tax.set_title("Video CES Signal - distance from video center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
     if(selfOpt == "no"):
-       tax.set_title("Video CES Signal - distance from avg ambient scenery", fontsize=14, y=-0.15)
+       tax.set_title("Video CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
 
@@ -336,12 +336,18 @@ def main():
             df = pd.read_csv(readPath, delimiter=',',header=1)
             data = df.values  # convert dataframe to matrix
             print(data)
-        
+            readPath2 = "%s_analysis/TEvalues.txt" % (inp)
+            df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+            TEdata = df2.values  # convert dataframe to matrix
+            TEvalue = TEdata[0][2]
+            TEvalue = round(TEvalue,3)
+            print(TEvalue)
+            
         tdata = {}
         valX = 0.5
         valY = 0.5
         valZ = 0.5  
-        for i in range(face_num-1):
+        for i in range(face_num-2):
             if(i == 0):
                 valX = 0.5
                 valY = 0.5
@@ -370,7 +376,7 @@ def main():
             if not os.path.exists('%s_analysis/tplots2' % inp):
                 os.mkdir('%s_analysis/tplots2' % inp)
             print("generating ternary plot 2 %s" % str(i+1))
-            tax = ternary_plot2(tdata, i, valX, valY, valZ)
+            tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
             # save image
             tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
             tax.close()
@@ -573,7 +579,12 @@ def main_batch_tplots2(item):
         df = pd.read_csv(readPath, delimiter=',',header=1)
         data = df.values  # convert dataframe to matrix
         print(data)
-        
+        readPath2 = "%s_analysis/TEvalues.txt" % (inp)
+        df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+        TEdata = df2.values  # convert dataframe to matrix
+        TEvalue = TEdata[0][2]
+        TEvalue = round(TEvalue,3)
+        print(TEvalue)
     tdata = {}
     valX = 0.5
     valY = 0.5
@@ -607,7 +618,7 @@ def main_batch_tplots2(item):
         if not os.path.exists('%s_analysis/tplots2' % inp):
             os.mkdir('%s_analysis/tplots2' % inp)
         print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
-        tax = ternary_plot2(tdata, i, valX, valY, valZ)
+        tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
         tax.close()   

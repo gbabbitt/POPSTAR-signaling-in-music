@@ -53,6 +53,7 @@ from pydub import AudioSegment
 import soundfile
 import librosa 
 import multiprocessing
+import infomeasure as im
 
 # IMPORTANT NOTE - run in base conda env, not in atomdance conda env   
 ################################################################################
@@ -1262,6 +1263,115 @@ def norm_data_batch():
                 line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
                 txt_out.write(line + '\n')  # Write line to file with newline character
             txt_out.close
+
+# Since A + B + C = 1, a ternary plot is fundamentally a 2D space.
+# We map the 3D composition to 2D Cartesian coordinates (X, Y).
+def ternary_to_cartesian(ternary_data):
+    """Converts (A, B, C) ternary coordinates into (X, Y) Cartesian coordinates."""
+    A = ternary_data[:, 0]
+    B = ternary_data[:, 1]
+    C = ternary_data[:, 2]
+    
+    # Standard geometric mapping for an equilateral triangle
+    x = 0.5 * (2 * B + C) / (A + B + C)
+    y = (np.sqrt(3) / 2) * C / (A + B + C)
+    
+    # Stack into a (N, 2) array
+    return np.column_stack((x, y))
+
+def trans_ent():
+    print("calculating transfer entropy")
+    # Convert both systems to their 2D spatial trajectory equivalents
+    readPath1 = "%s_analysis/ternary_norm.txt" % (inp)
+    readPath2 = "%s_analysis/ternary_video_norm.txt" % (inp)
+    writePath = "%s_analysis/TEvalues.txt" % (inp)
+    raw_1 = pd.read_csv(readPath1, sep = ",", header = 0)
+    raw_2 = pd.read_csv(readPath2, sep = ",", header = 0)
+    raw_1 = raw_1.to_numpy()
+    raw_2 = raw_2.to_numpy()
+    #audio_2d - convert ternary to cartesian
+    #print(raw_1)
+    A = raw_1[:, 0]
+    B = raw_1[:, 1]
+    C = raw_1[:, 2]
+    # Standard geometric mapping for an equilateral triangle
+    x = 0.5 * (2 * B + C) / (A + B + C)
+    y = (np.sqrt(3) / 2) * C / (A + B + C)
+    audio_2d = np.column_stack((x, y))
+    audio_2d = audio_2d[:-1] # remove last row so arrays are equal in length
+    #print(audio_2d)
+    #audio_2d - convert ternary to cartesian
+    A = raw_2[:, 0]
+    B = raw_2[:, 1]
+    C = raw_2[:, 2]
+    # Standard geometric mapping for an equilateral triangle
+    x = 0.5 * (2 * B + C) / (A + B + C)
+    y = (np.sqrt(3) / 2) * C / (A + B + C)
+    visual_2d = np.column_stack((x, y))
+    
+    # TE from audio to visual (TE be high if there is high dependency)
+    te_aud_to_vis = im.transfer_entropy(visual_2d, audio_2d, approach="metric", noise_level=0.001)
+    #print(te_aud_to_vis)
+    ttl_e = im.entropy(visual_2d, approach="kernel", bandwidth=0.5, kernel="box")
+    #print(ttl_e)
+    norm_te = abs(te_aud_to_vis/(0.00000001 + ttl_e))
+    txt_out = open(writePath, 'a')
+    txt_out.write("filename,TE_unadj,TE_norm\n")
+    txt_out.write("%s,%s,%s\n" % (inp,te_aud_to_vis,norm_te))
+    print("--- Transfer Entropy Analysis ---")
+    print("TE (audio -> visual %s): %s nats" % (inp, norm_te))
+    txt_out.close
+    
+def trans_ent_batch():
+    print("calculating transfer entropy")
+    folder_path1 = "%s_analysis/intervals/" % inp
+    #print(folder_path1)
+    cnt = 0
+    for foldername in os.listdir(folder_path1):
+        folder_path2 = os.path.join(folder_path1, "%s" % (foldername))
+        print(folder_path2)
+                    
+        print("getting data")
+        readPath1 = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
+        readPath2 = "%s_analysis/ternary_video_norm_%s.txt" % (inp,foldername)
+        writePath = "%s_analysis/TEvalues_%s.txt" % (inp,foldername)
+        raw_1 = pd.read_csv(readPath1, sep = ",", header = 0)
+        raw_2 = pd.read_csv(readPath2, sep = ",", header = 0)
+        raw_1 = raw_1.to_numpy()
+        raw_2 = raw_2.to_numpy()
+        #audio_2d - convert ternary to cartesian
+        #print(raw_1)
+        A = raw_1[:, 0]
+        B = raw_1[:, 1]
+        C = raw_1[:, 2]
+        # Standard geometric mapping for an equilateral triangle
+        x = 0.5 * (2 * B + C) / (A + B + C)
+        y = (np.sqrt(3) / 2) * C / (A + B + C)
+        audio_2d = np.column_stack((x, y))
+        audio_2d = audio_2d[:-1] # remove last row so arrays are equal in length
+        #print(audio_2d)
+        #audio_2d - convert ternary to cartesian
+        A = raw_2[:, 0]
+        B = raw_2[:, 1]
+        C = raw_2[:, 2]
+        # Standard geometric mapping for an equilateral triangle
+        x = 0.5 * (2 * B + C) / (A + B + C)
+        y = (np.sqrt(3) / 2) * C / (A + B + C)
+        visual_2d = np.column_stack((x, y))
+        # TE from audio to visual (TE be high if there is high dependency)
+        te_aud_to_vis = im.transfer_entropy(visual_2d, audio_2d, approach="metric", noise_level=0.001)
+        #print(te_aud_to_vis)
+        ttl_e = im.entropy(visual_2d, approach="kernel", bandwidth=0.5, kernel="box")
+        #print(ttl_e)
+        norm_te = abs(te_aud_to_vis/(0.00000001 + ttl_e))
+        txt_out = open(writePath, 'a')
+        if(cnt == 0):
+            txt_out.write("foldername,TE_unadj,TE_norm\n")
+        txt_out.write("%s,%s,%s\n" % (foldername,te_aud_to_vis,norm_te))
+        print("--- Transfer Entropy Analysis ---")
+        print("TE (audio -> visual %s): %s nats" % (foldername, norm_te))
+        txt_out.close()
+        cnt = cnt+1
         
 #################################################################################
 ####################  main program      #########################################
@@ -1329,13 +1439,22 @@ def main():
         coll_data()
         print("normalizing data")
         norm_data()
+        if(ext == ".mp4"):
+            print("analyzing transfer entropy between audio and visual trajectories")
+            trans_ent()
+    
     if(fileORfolder == "folder"):
         print("collecting data")
         coll_data_batch()
         print("normalizing data")
         norm_data_batch()
-    
-    
+        if(ext == ".mp4"):
+            print("analyzing transfer entropy between audio and visual trajectories")
+            trans_ent_batch()
+        
+        
+        
+        
     print("\nsignal analysis is complete\n")   
     
         
