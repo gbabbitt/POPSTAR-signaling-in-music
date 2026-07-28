@@ -1327,6 +1327,8 @@ def trans_ent_batch():
     folder_path1 = "%s_analysis/intervals/" % inp
     #print(folder_path1)
     cnt = 0
+    writePath = "%s_analysis/TEvalues.txt" % (inp)
+    txt_out = open(writePath, 'w')
     for foldername in os.listdir(folder_path1):
         folder_path2 = os.path.join(folder_path1, "%s" % (foldername))
         print(folder_path2)
@@ -1334,7 +1336,7 @@ def trans_ent_batch():
         print("getting data")
         readPath1 = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
         readPath2 = "%s_analysis/ternary_video_norm_%s.txt" % (inp,foldername)
-        writePath = "%s_analysis/TEvalues_%s.txt" % (inp,foldername)
+        #writePath = "%s_analysis/TEvalues_%s.txt" % (inp,foldername)
         raw_1 = pd.read_csv(readPath1, sep = ",", header = 0)
         raw_2 = pd.read_csv(readPath2, sep = ",", header = 0)
         raw_1 = raw_1.to_numpy()
@@ -1364,14 +1366,14 @@ def trans_ent_batch():
         ttl_e = im.entropy(visual_2d, approach="kernel", bandwidth=0.5, kernel="box")
         #print(ttl_e)
         norm_te = abs(te_aud_to_vis/(0.00000001 + ttl_e))
-        txt_out = open(writePath, 'a')
         if(cnt == 0):
             txt_out.write("foldername,TE_unadj,TE_norm\n")
         txt_out.write("%s,%s,%s\n" % (foldername,te_aud_to_vis,norm_te))
         print("--- Transfer Entropy Analysis ---")
         print("TE (audio -> visual %s): %s nats" % (foldername, norm_te))
-        txt_out.close()
         cnt = cnt+1
+    txt_out.close()
+        
         
 #################################################################################
 ####################  main program      #########################################
