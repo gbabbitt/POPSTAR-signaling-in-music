@@ -635,12 +635,10 @@ if __name__ == '__main__':
         main()
     if(fof == "folder"):
         create_list()
-        '''
         with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
             pool.map(main_batch_faces, folder_paths1)
         with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
             pool.map(main_batch_tplots1, folder_paths2)
-        '''
         if(ext == ".mp4"):
             with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
                 pool.map(main_batch_tplots2, folder_paths3)
