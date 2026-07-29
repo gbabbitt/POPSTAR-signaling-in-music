@@ -271,7 +271,31 @@ def collectDFeb():
     txt_out2.write("folder\tcontrol\n")
     txt_out3.write("folder\tsurprise\n")
     
-        
+    print("plotting comparison of transfer energy")
+    writePath4 = "popstar_results/TE_video_compare_%s.txt" % (folder_list)   
+    txt_out4 = open(writePath4, "w")
+    txt_out4.write("folder\tvalue\n")
+    
+    # collect data for transfer energy
+    for j in range(len(folder_list)):
+        inp = folder_list[j]
+        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        number_files = len(lst)
+        print("number of files")
+        print(number_files)
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        print(dir_list)
+        readPath = "%s_analysis/TEvalues.txt" % (inp)
+        df = pd.read_csv(readPath, sep = ",")
+        #print(df)
+        for row in df.itertuples(index=True):
+            #print(row[3])
+            trans_ent = row[3]
+            txt_out4.write("%s\t%s\n" % (inp,trans_ent))
+            print("%s\t%s\n" % (inp,trans_ent))
+    txt_out4.close()
+    
+    # collect data for ternary plots       
     for j in range(len(folder_list)):
         inp = folder_list[j]
         lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
