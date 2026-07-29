@@ -1361,11 +1361,14 @@ def trans_ent_batch():
         y = (np.sqrt(3) / 2) * C / (A + B + C)
         visual_2d = np.column_stack((x, y))
         # TE from audio to visual (TE be high if there is high dependency)
-        te_aud_to_vis = im.transfer_entropy(visual_2d, audio_2d, approach="metric", noise_level=0.001)
-        #print(te_aud_to_vis)
-        ttl_e = im.entropy(visual_2d, approach="kernel", bandwidth=0.5, kernel="box")
-        #print(ttl_e)
-        norm_te = abs(te_aud_to_vis/(0.00000001 + ttl_e))
+        te_aud_to_vis = 0
+        norm_te = 0
+        if(len(audio_2d) == len(visual_2d)):
+            te_aud_to_vis = im.transfer_entropy(visual_2d, audio_2d, approach="metric", noise_level=0.001)
+            #print(te_aud_to_vis)
+            ttl_e = im.entropy(visual_2d, approach="kernel", bandwidth=0.5, kernel="box")
+            #print(ttl_e)
+            norm_te = abs(te_aud_to_vis/(0.00000001 + ttl_e))
         if(cnt == 0):
             txt_out.write("foldername,TE_unadj,TE_norm\n")
         txt_out.write("%s,%s,%s\n" % (foldername,te_aud_to_vis,norm_te))
