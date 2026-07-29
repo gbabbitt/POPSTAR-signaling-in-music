@@ -582,8 +582,13 @@ def main_batch_tplots2(item):
         readPath2 = "%s_analysis/TEvalues.txt" % (inp)
         df2 = pd.read_csv(readPath2, delimiter=',',header=0)
         TEdata = df2.values  # convert dataframe to matrix
-        #TEvalue = TEdata[0][2]
-        #TEvalue = round(TEvalue,4)
+        for k in range(len(TEdata)):
+            TEname = TEdata[k][0]
+            TEvalue = TEdata[k][2]
+            TEvalue = round(TEvalue,4)
+            if(TEname == foldername):
+                TEmatch = TEvalue
+        TEvalue = TEmatch
         print(TEvalue)
     tdata = {}
     valX = 0.5
@@ -617,8 +622,6 @@ def main_batch_tplots2(item):
             continue
         if not os.path.exists('%s_analysis/tplots2' % inp):
             os.mkdir('%s_analysis/tplots2' % inp)
-        TEvalue = TEdata[i][2]
-        TEvalue = round(TEvalue,4)
         print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
         # save image
@@ -632,10 +635,12 @@ if __name__ == '__main__':
         main()
     if(fof == "folder"):
         create_list()
+        '''
         with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
             pool.map(main_batch_faces, folder_paths1)
         with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
             pool.map(main_batch_tplots1, folder_paths2)
+        '''
         if(ext == ".mp4"):
             with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
                 pool.map(main_batch_tplots2, folder_paths3)
