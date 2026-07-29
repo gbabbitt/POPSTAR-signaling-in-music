@@ -582,8 +582,8 @@ def main_batch_tplots2(item):
         readPath2 = "%s_analysis/TEvalues.txt" % (inp)
         df2 = pd.read_csv(readPath2, delimiter=',',header=0)
         TEdata = df2.values  # convert dataframe to matrix
-        TEvalue = TEdata[0][2]
-        TEvalue = round(TEvalue,4)
+        #TEvalue = TEdata[0][2]
+        #TEvalue = round(TEvalue,4)
         print(TEvalue)
     tdata = {}
     valX = 0.5
@@ -617,6 +617,8 @@ def main_batch_tplots2(item):
             continue
         if not os.path.exists('%s_analysis/tplots2' % inp):
             os.mkdir('%s_analysis/tplots2' % inp)
+        TEvalue = TEdata[i][2]
+        TEvalue = round(TEvalue,4)
         print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
         # save image
