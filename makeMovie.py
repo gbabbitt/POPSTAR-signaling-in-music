@@ -865,7 +865,8 @@ def main():
         combinedMovie_audio_video()
         copyMovie()
         distances()
-        distances_video()
+        if(ext == ".mp4"):
+            distances_video()
         
     if(fof == "folder"):
         renderFaceMovie_batch()
@@ -876,7 +877,8 @@ def main():
         combinedMovie_audio_video_batch()
         copyMovie_batch()
         distances_batch()
-        distances_video_batch()
+        if(ext == ".mp4"):
+            distances_video_batch()
 ###############################################################
 if __name__ == '__main__':
     main()
