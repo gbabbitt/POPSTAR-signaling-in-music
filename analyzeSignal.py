@@ -113,6 +113,8 @@ if(fof=="file"):
     lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
     face_num = int(len(lst)/4)  # note folder has 4 types of files
     print("number of Chernoff faces is %s" % face_num)
+
+
 #####################################################################
 def create_file_lists():   
     folder_path = "%s_analysis/intervals/" % inp
@@ -784,17 +786,64 @@ def coll_data():
                 print("TEMPO matching %s to %s" % (i,seg_num))
                 file_name = line_split2[0]
                 TEMPO= float(line_split2[1])
-                
         txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MSE,NVI,TEMPO))
+    txt_out.close
+
+
+def coll_mfcc_data():
+    print("collecting data")
+    writePath = "%s_analysis/features_mfcc_raw.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    txt_out.write("file,MFCCstatic,MFCCdelta,MFCCdelta2\n")
+    readPath11 = "%s_analysis/MFCCstatic.txt" % (inp)
+    txt_in11 = open(readPath11, 'r')
+    readPath12 = "%s_analysis/MFCCdelta.txt" % (inp)
+    txt_in12 = open(readPath12, 'r')
+    readPath13 = "%s_analysis/MFCCdelta2.txt" % (inp)
+    txt_in13 = open(readPath13, 'r')
+    MFCC1_lines = txt_in11.readlines()
+    MFCC2_lines = txt_in12.readlines()
+    MFCC3_lines = txt_in13.readlines()
+    length = len(MFCC1_lines)
+    for i in range(len(MFCC1_lines)-1):
+        for line in MFCC1_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("MFCC1 matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                MFCC1= float(line_split2[1])
+        for line in MFCC2_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("MFCC2 matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                MFCC2= float(line_split2[1])
+        for line in MFCC3_lines:
+            line_split1 = line.split("_")
+            seg_num = int(line_split1[0])
+            line_split2 = line.split(",")
+            if(i==seg_num):
+                print("MFCC3 matching %s to %s" % (i,seg_num))
+                file_name = line_split2[0]
+                MFCC3= float(line_split2[1])        
+        txt_out.write("%s,%s,%s,%s\n" % (file_name,MFCC1,MFCC2,MFCC3))
     txt_out.close
 
 
 def norm_data():
     print("normalizing data")
     readPath = "%s_analysis/features_raw.txt" % (inp)
+    readPath2 = "%s_analysis/features_mfcc_raw.txt" % (inp)
     writePath = "%s_analysis/features_norm.txt" % (inp)
     writePath2 = "%s_analysis/ternary.txt" % (inp)
     writePath3 = "%s_analysis/ternary_norm.txt" % (inp)
+    writePath4 = "%s_analysis/features_mfcc_norm.txt" % (inp)
+    writePath5 = "%s_analysis/ternary_mfcc.txt" % (inp)
+    writePath6 = "%s_analysis/ternary_mfcc_norm.txt" % (inp)
     df = pd.read_csv(readPath, delimiter=',',header=0)
     #print(df)
     df = df.iloc[:, 1:] # drop newlines
@@ -802,11 +851,18 @@ def norm_data():
     df[np.isinf(df)] = np.nan # replace inf with nan
     #df = df.drop(df.index[-1]) # drop last line due to lack of signal
     #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
+    df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+    #print(df)
+    df2 = df2.iloc[:, 1:] # drop newlines
+    print(df)
+    df2[np.isinf(df2)] = np.nan # replace inf with nan
+    
     ##############################################################
     ###### minmax normalization individually on each column ######
     ##############################################################
     if(selfOpt == "yes"):
         df_norm = df.copy()
+        df2_norm = df2.copy()
         column = 'AC1values'
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
         column = 'AMPvalues'
@@ -827,14 +883,22 @@ def norm_data():
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
         column = 'TEMPOvalues'
         df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+        column = 'MFCCstatic'
+        df2_norm[column] = MinMaxScaler().fit_transform(np.array(df2_norm[column]).reshape(-1,1))
+        column = 'MFCCdelta'
+        df2_norm[column] = MinMaxScaler().fit_transform(np.array(df2_norm[column]).reshape(-1,1))
+        column = 'MFCCdelta'
+        df2_norm[column] = MinMaxScaler().fit_transform(np.array(df2_norm[column]).reshape(-1,1))
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
-           
+        df2_norm = df2_norm.fillna(0.000001) # replace nan and inf with near zero values
+        print(df2_norm) 
     ########################################################
     ##### z-score to normalize signal to human speech  #####
     ########################################################
     if(spchOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
         df_norm = df.copy() 
+        df2_norm = df2.copy()
         sf = 0.5  # scaling factor
         column = 'AC1values'
         mean = 0.97653440247693
@@ -876,14 +940,28 @@ def norm_data():
         mean = 122.951671791625  
         sd = 33.0895698422496
         df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'MFCCstatic'
+        mean = 1.0  
+        sd = 0.5
+        df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'MFCCdelta'
+        mean = 1.0  
+        sd = 0.5
+        df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'MFCCdelta2'
+        mean = 1.0  
+        sd = 0.5
+        df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
-    
+        df2_norm = df2_norm.fillna(0.000001) # replace nan and inf with near zero values
+        print(df2_norm)
     ########################################################
     ##### z-score to normalize signal to human music  #####
     ########################################################
     if(musiOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
-        df_norm = df.copy() 
+        df_norm = df.copy()
+        df2_norm = df2.copy()
         sf = 0.5  # scaling factor
         column = 'AC1values'
         mean = 0.978570312462978
@@ -924,10 +1002,23 @@ def norm_data():
         column = 'TEMPOvalues'
         mean = 126.274104792716
         sd = 31.8314668399539
-        df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'MFCCstatic'
+        mean = 1.0  
+        sd = 0.5
+        df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'MFCCdelta'
+        mean = 1.0  
+        sd = 0.5
+        df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+        column = 'MFCCdelta2'
+        mean = 1.0  
+        sd = 0.5
+        df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
         df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
         print(df_norm)
-        
+        df2_norm = df2_norm.fillna(0.000001) # replace nan and inf with near zero values
+        print(df2_norm)
+    # musical features    
     with open(writePath, 'w') as txt_out:
         txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
         for index, row in df_norm.iterrows():
@@ -957,6 +1048,39 @@ def norm_data():
             line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
             txt_out.write(line + '\n')  # Write line to file with newline character
         txt_out.close
+    # MFCC features    
+    with open(writePath4, 'w') as txt_out:
+        txt_out.write("MFCCdelta,MFCCstatic,MFCCdelta2\n")
+        for index, row in df2_norm.iterrows():
+            line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+            txt_out.write(line + '\n')  # Write line to file with newline character
+        txt_out.close
+    df_energy = df2_norm[['MFCCdelta']].mean(axis=1)
+    df_control = df2_norm[['MFCCstatic']].mean(axis=1)
+    df_surprise = df2_norm[['MFCCdelta2']].mean(axis=1)
+    #df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
+    #df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
+    #df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
+    df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
+    print(df_ternary)
+    with open(writePath5, 'w') as txt_out:
+        txt_out.write("energy,control,surprise\n")
+        for index, row in df_ternary.iterrows():
+            line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+            txt_out.write(line + '\n')  # Write line to file with newline character
+        txt_out.close
+    df_ternary = df_ternary.abs() # hardens against extreme values in plots normalized to human speech
+    df_ternary_norm = df_ternary.div(df_ternary.sum(axis=1), axis=0)
+    print(df_ternary_norm)
+    with open(writePath6, 'w') as txt_out:
+        txt_out.write("energy,control,surprise\n")
+        for index, row in df_ternary_norm.iterrows():
+            line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+            txt_out.write(line + '\n')  # Write line to file with newline character
+        txt_out.close
+
+
+
     
 def coll_data_batch():
     folder_path1 = "%s_analysis/intervals/" % inp
@@ -1084,11 +1208,65 @@ def coll_data_batch():
                     print("TEMPO matching %s to %s" % (i,seg_num))
                     file_name = line_split2[0]
                     TEMPO= float(line_split2[1])
-            
             txt_out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (file_name,AC1,AMP,BIV,EVI,FFV,HEN,LZC,MSE,NVI,TEMPO))
         txt_out.close
 
-
+def coll_mfcc_data_batch():
+    folder_path1 = "%s_analysis/intervals/" % inp
+    #print(folder_path1)
+    for foldername in os.listdir(folder_path1):
+        folder_path2 = os.path.join(folder_path1, "%s" % (foldername))
+        print(folder_path2)
+        path_array = folder_path2.split("/")
+        foldername = path_array[2]
+        print(foldername)
+           
+        print("collecting data")
+        writePath = "%s_analysis/features_mfcc_raw_%s.txt" % (inp,foldername)
+        txt_out = open(writePath, 'w')
+        txt_out.write("file,MFCCstatic,MFCCdelta,MFCCdelta2\n")
+        txt_out.close
+       
+        readPath11 = "%s_analysis/MFCCstatic_%s.txt" % (inp,foldername)
+        txt_in11 = open(readPath11, 'r')
+        readPath12 = "%s_analysis/MFCCdelta_%s.txt" % (inp,foldername)
+        txt_in12 = open(readPath12, 'r')
+        readPath13 = "%s_analysis/MFCCdelta2_%s.txt" % (inp,foldername)
+        txt_in13 = open(readPath13, 'r')
+        MFCC1_lines = txt_in11.readlines()
+        MFCC2_lines = txt_in12.readlines()
+        MFCC3_lines = txt_in13.readlines()
+        length = len(MFCC1_lines)
+        for i in range(len(MFCC1_lines)-1):
+            for line in MFCC1_lines:
+                line_split1 = line.split("_")
+                seg_num = int(line_split1[0])
+                line_split2 = line.split(",")
+                if(i==seg_num):
+                    print("MFCC1 matching %s to %s" % (i,seg_num))
+                    file_name = line_split2[0]
+                    MFCC1= float(line_split2[1])
+            for line in MFCC2_lines:
+                line_split1 = line.split("_")
+                seg_num = int(line_split1[0])
+                line_split2 = line.split(",")
+                if(i==seg_num):
+                    print("MFCC2 matching %s to %s" % (i,seg_num))
+                    file_name = line_split2[0]
+                    MFCC2= float(line_split2[1])
+            for line in MFCC3_lines:
+                line_split1 = line.split("_")
+                seg_num = int(line_split1[0])
+                line_split2 = line.split(",")
+                if(i==seg_num):
+                    print("MFCC3 matching %s to %s" % (i,seg_num))
+                    file_name = line_split2[0]
+                    MFCC3= float(line_split2[1])        
+            txt_out.write("%s,%s,%s,%s\n" % (file_name,MFCC1,MFCC2,MFCC3))
+        txt_out.close
+        
+        
+        
 def norm_data_batch():
     folder_path1 = "%s_analysis/intervals/" % inp
     #print(folder_path1)
@@ -1098,9 +1276,13 @@ def norm_data_batch():
                     
         print("normalizing data")
         readPath = "%s_analysis/features_raw_%s.txt" % (inp,foldername)
+        readPath2 = "%s_analysis/features_mfcc_raw_%s.txt" % (inp,foldername)
         writePath = "%s_analysis/features_norm_%s.txt" % (inp,foldername)
         writePath2 = "%s_analysis/ternary_%s.txt" % (inp,foldername)
         writePath3 = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
+        writePath4 = "%s_analysis/features_mfcc_norm_%s.txt" % (inp,foldername)
+        writePath5 = "%s_analysis/ternary_mfcc_%s.txt" % (inp,foldername)
+        writePath6 = "%s_analysis/ternary_mfcc_norm_%s.txt" % (inp,foldername)
         df = pd.read_csv(readPath, delimiter=',',header=0)
         df = df.fillna(0.000001) # replace nan and inf with near zero values
         print(df)
@@ -1108,11 +1290,16 @@ def norm_data_batch():
         df[np.isinf(df)] = np.nan # replace inf with nan
         #df = df.drop(df.index[-1]) # drop last line due to lack of signal
         #df = pd.concat([df, df.iloc[[-1]]], ignore_index=True)  # copy last line to maintain proper index size
-        ##############################################################
+        df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+        df2 = df2.fillna(0.000001) # replace nan and inf with near zero values
+        print(df2)
+        df2 = df2.iloc[:, 1:]
+        df2[np.isinf(df2)] = np.nan # replace inf with nan##############################################################
         ###### minmax normalization individually on each column ######
         ##############################################################
         if(selfOpt == "yes"):
             df_norm = df.copy()
+            df2_norm = df2.copy()
             column = 'AC1values'
             df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
             column = 'AMPvalues'
@@ -1133,14 +1320,22 @@ def norm_data_batch():
             df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
             column = 'TEMPOvalues'
             df_norm[column] = MinMaxScaler().fit_transform(np.array(df_norm[column]).reshape(-1,1))
+            column = 'MFCCstatic'
+            df2_norm[column] = MinMaxScaler().fit_transform(np.array(df2_norm[column]).reshape(-1,1))
+            column = 'MFCCdelta'
+            df2_norm[column] = MinMaxScaler().fit_transform(np.array(df2_norm[column]).reshape(-1,1))
+            column = 'MFCCdelta'
+            df2_norm[column] = MinMaxScaler().fit_transform(np.array(df2_norm[column]).reshape(-1,1))
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
-        
+            df2_norm = df2_norm.fillna(0.000001) # replace nan and inf with near zero values
+            print(df2_norm)      
         ########################################################
         ##### z-score to normalize signal to human speech  #####
         ########################################################
         if(spchOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
-            df_norm = df.copy() 
+            df_norm = df.copy()
+            df2_norm = df2.copy()
             sf = 0.5  # scaling factor
             column = 'AC1values'
             mean = 0.97653440247693
@@ -1182,14 +1377,28 @@ def norm_data_batch():
             mean = 122.951671791625 
             sd = 33.0895698422496
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'MFCCstatic'
+            mean = 1.0  
+            sd = 0.5
+            df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'MFCCdelta'
+            mean = 1.0  
+            sd = 0.5
+            df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'MFCCdelta2'
+            mean = 1.0  
+            sd = 0.5
+            df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
-            
+            df2_norm = df2_norm.fillna(0.000001) # replace nan and inf with near zero values
+            print(df2_norm)
         ########################################################
         ##### z-score to normalize signal to human music  #####
         ########################################################
         if(musiOpt == "yes"):  # note: z score is rescaled from -1,1 to 0,1
-            df_norm = df.copy() 
+            df_norm = df.copy()
+            df2_norm = df2.copy()
             sf = 0.5  # scaling factor
             column = 'AC1values'
             mean = 0.978570312462978
@@ -1231,9 +1440,23 @@ def norm_data_batch():
             mean = 126.274104792716
             sd = 31.8314668399539
             df_norm[column] = np.array((((df_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'MFCCstatic'
+            mean = 1.0  
+            sd = 0.5
+            df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'MFCCdelta'
+            mean = 1.0  
+            sd = 0.5
+            df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
+            column = 'MFCCdelta2'
+            mean = 1.0  
+            sd = 0.5
+            df2_norm[column] = np.array((((df2_norm[column]-mean)/sd)*sf+1)/2)
             df_norm = df_norm.fillna(0.000001) # replace nan and inf with near zero values
             print(df_norm)
-            
+            df2_norm = df2_norm.fillna(0.000001) # replace nan and inf with near zero values
+            print(df2_norm)
+        # musical features    
         with open(writePath, 'w') as txt_out:
             txt_out.write("AC1values,AMPvalues,BIVvalues,EVIvalues,FFVvalues,HENvalues,LZCvalues,MSEvalues,NVIvalues,TEMPOvalues\n")
             for index, row in df_norm.iterrows():
@@ -1263,6 +1486,37 @@ def norm_data_batch():
                 line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
                 txt_out.write(line + '\n')  # Write line to file with newline character
             txt_out.close
+        # MFCC features    
+        with open(writePath4, 'w') as txt_out:
+            txt_out.write("MFCCstatic,MFCCdelta,MFCCdelta2\n")
+            for index, row in df2_norm.iterrows():
+                line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+                txt_out.write(line + '\n')  # Write line to file with newline character
+            txt_out.close
+        df_energy = df2_norm[['MFCCdelta']].mean(axis=1)
+        df_control = df2_norm[['MFCCstatic']].mean(axis=1)
+        df_surprise = df2_norm[['MFCCdelta2']].mean(axis=1)
+        #df_energy = df_norm[['AC1values', 'AMPvalues', 'TEMPOvalues']].max(axis=1)
+        #df_control = df_norm[['FFVvalues', 'EVIvalues', 'HENvalues']].max(axis=1)
+        #df_surprise = df_norm[['LZCvalues', 'MSEvalues', 'NVIvalues']].max(axis=1)
+        df_ternary = pd.concat([df_energy, df_control, df_surprise], axis=1)
+        print(df_ternary)
+        with open(writePath5, 'w') as txt_out:
+            txt_out.write("energy,control,surprise\n")
+            for index, row in df_ternary.iterrows():
+                line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+                txt_out.write(line + '\n')  # Write line to file with newline character
+            txt_out.close
+        df_ternary = df_ternary.abs() # hardens against extreme values in plots normalized to human speech
+        df_ternary_norm = df_ternary.div(df_ternary.sum(axis=1), axis=0)
+        print(df_ternary_norm)
+        with open(writePath6, 'w') as txt_out:
+            txt_out.write("energy,control,surprise\n")
+            for index, row in df_ternary_norm.iterrows():
+                line = ','.join(str("{:.8f}".format(x)) for x in row.values)  # Convert row to comma-separated string
+                txt_out.write(line + '\n')  # Write line to file with newline character
+            txt_out.close
+
 
 # Since A + B + C = 1, a ternary plot is fundamentally a 2D space.
 # We map the 3D composition to 2D Cartesian coordinates (X, Y).
@@ -1376,7 +1630,205 @@ def trans_ent_batch():
         print("TE (audio -> visual %s): %s nats" % (foldername, norm_te))
         cnt = cnt+1
     txt_out.close()
+ 
+def trans_ent_mfcc():
+    print("calculating transfer entropy")
+    # Convert both systems to their 2D spatial trajectory equivalents
+    readPath1 = "%s_analysis/ternary_norm.txt" % (inp)
+    readPath2 = "%s_analysis/ternary_mfcc_norm.txt" % (inp)
+    writePath = "%s_analysis/TEvalues_mfcc.txt" % (inp)
+    raw_1 = pd.read_csv(readPath1, sep = ",", header = 0)
+    raw_2 = pd.read_csv(readPath2, sep = ",", header = 0)
+    raw_1 = raw_1.to_numpy()
+    raw_2 = raw_2.to_numpy()
+    #audio_2d - convert ternary to cartesian
+    #print(raw_1)
+    A = raw_1[:, 0]
+    B = raw_1[:, 1]
+    C = raw_1[:, 2]
+    # Standard geometric mapping for an equilateral triangle
+    x = 0.5 * (2 * B + C) / (A + B + C)
+    y = (np.sqrt(3) / 2) * C / (A + B + C)
+    audio_2d = np.column_stack((x, y))
+    audio_2d = audio_2d[:-1] # remove last row so arrays are equal in length
+    #print(audio_2d)
+    #audio_2d - convert ternary to cartesian
+    A = raw_2[:, 0]
+    B = raw_2[:, 1]
+    C = raw_2[:, 2]
+    # Standard geometric mapping for an equilateral triangle
+    x = 0.5 * (2 * B + C) / (A + B + C)
+    y = (np.sqrt(3) / 2) * C / (A + B + C)
+    visual_2d = np.column_stack((x, y))
+    
+    # TE from audio to visual (TE be high if there is high dependency)
+    te_aud_to_vis = im.transfer_entropy(visual_2d, audio_2d, approach="metric", noise_level=0.001)
+    #print(te_aud_to_vis)
+    ttl_e = im.entropy(visual_2d, approach="kernel", bandwidth=0.5, kernel="box")
+    #print(ttl_e)
+    norm_te = abs(te_aud_to_vis/(0.00000001 + ttl_e))
+    txt_out = open(writePath, 'a')
+    txt_out.write("filename,TE_unadj,TE_norm\n")
+    txt_out.write("%s,%s,%s\n" % (inp,te_aud_to_vis,norm_te))
+    print("--- Transfer Entropy Analysis ---")
+    print("TE (audio -> visual %s): %s nats" % (inp, norm_te))
+    txt_out.close
+    
+def trans_ent_mfcc_batch():
+    print("calculating transfer entropy")
+    folder_path1 = "%s_analysis/intervals/" % inp
+    #print(folder_path1)
+    cnt = 0
+    writePath = "%s_analysis/TEvalues_mfcc.txt" % (inp)
+    txt_out = open(writePath, 'w')
+    for foldername in os.listdir(folder_path1):
+        folder_path2 = os.path.join(folder_path1, "%s" % (foldername))
+        print(folder_path2)
+                    
+        print("getting data")
+        readPath1 = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
+        readPath2 = "%s_analysis/ternary_mfcc_norm_%s.txt" % (inp,foldername)
+        #writePath = "%s_analysis/TEvalues_%s.txt" % (inp,foldername)
+        raw_1 = pd.read_csv(readPath1, sep = ",", header = 0)
+        raw_2 = pd.read_csv(readPath2, sep = ",", header = 0)
+        raw_1 = raw_1.to_numpy()
+        raw_2 = raw_2.to_numpy()
+        #audio_2d - convert ternary to cartesian
+        #print(raw_1)
+        A = raw_1[:, 0]
+        B = raw_1[:, 1]
+        C = raw_1[:, 2]
+        # Standard geometric mapping for an equilateral triangle
+        x = 0.5 * (2 * B + C) / (A + B + C)
+        y = (np.sqrt(3) / 2) * C / (A + B + C)
+        audio_2d = np.column_stack((x, y))
+        audio_2d = audio_2d[:-1] # remove last row so arrays are equal in length
+        #print(audio_2d)
+        #audio_2d - convert ternary to cartesian
+        A = raw_2[:, 0]
+        B = raw_2[:, 1]
+        C = raw_2[:, 2]
+        # Standard geometric mapping for an equilateral triangle
+        x = 0.5 * (2 * B + C) / (A + B + C)
+        y = (np.sqrt(3) / 2) * C / (A + B + C)
+        visual_2d = np.column_stack((x, y))
+        # TE from audio to visual (TE be high if there is high dependency)
+        te_aud_to_vis = 0
+        norm_te = 0
+        if(len(audio_2d) == len(visual_2d)):
+            te_aud_to_vis = im.transfer_entropy(visual_2d, audio_2d, approach="metric", noise_level=0.001)
+            #print(te_aud_to_vis)
+            ttl_e = im.entropy(visual_2d, approach="kernel", bandwidth=0.5, kernel="box")
+            #print(ttl_e)
+            norm_te = abs(te_aud_to_vis/(0.00000001 + ttl_e))
+        if(cnt == 0):
+            txt_out.write("foldername,TE_unadj,TE_norm\n")
+        txt_out.write("%s,%s,%s\n" % (foldername,te_aud_to_vis,norm_te))
+        print("--- Transfer Entropy Analysis ---")
+        print("TE (audio -> visual %s): %s nats" % (foldername, norm_te))
+        cnt = cnt+1
+    txt_out.close()
+
+
+def mfcc_static(item):
+    print("collecting mfcc for %s" % inp)
+    path_objs = item.split("/")
+    if(fileORfolder == "file"):
+        filename = path_objs[2]
+        writePath1 = "%s_analysis/MFCCstatic.txt" % (inp)
+    if(fileORfolder == "folder"):
+        foldername = path_objs[2]
+        filename = path_objs[3] 
+        writePath1 = "%s_analysis/MFCCstatic_%s.txt" % (inp,foldername)
+    txt_out1 = open(writePath1, 'a')
+    infile = item  
+    y, sr = librosa.load(infile, duration = 2.0)
+    #extract static MFCC's
+    mfccs_static = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    mfccs_static_vnorms = np.linalg.norm(mfccs_static, axis=1)
+    epsilon = 1e-8
+    min_vnorm = np.min(mfccs_static_vnorms)
+    max_vnorm = np.max(mfccs_static_vnorms)
+    minmax_scores = (mfccs_static_vnorms - min_vnorm) / (max_vnorm - min_vnorm + epsilon)
+    mfccs_static_mean = abs(np.mean(minmax_scores))
+    #print(mfccs_static_mean)
+    # average each output
+    txt_out1.write("%s,%s\n" % (filename,mfccs_static_mean))
+    #mfcc_stack = np.vstack([mfccs_static, mfccs_delta, mfccs_delta2])
+    if(fileORfolder == "file"):
+        print("MFCC (static) = %s for %s" % (mfccs_static_mean,filename))
+    if(fileORfolder == "folder"):
+        print("MFCC (static) = %s for %s in %s" % (mfccs_static_mean,filename,foldername))
+    txt_out1.close
+    
+
+def mfcc_delta(item):
+    print("collecting mfcc for %s" % inp)
+    path_objs = item.split("/")
+    if(fileORfolder == "file"):
+        filename = path_objs[2]
+        writePath2 = "%s_analysis/MFCCdelta.txt" % (inp)
+    if(fileORfolder == "folder"):
+        foldername = path_objs[2]
+        filename = path_objs[3] 
+        writePath2 = "%s_analysis/MFCCdelta_%s.txt" % (inp,foldername)
+    txt_out2 = open(writePath2, 'a')
+    infile = item  
+    y, sr = librosa.load(infile, duration = 2.0)
+    mfccs_static = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    #extract dynamic MFCC's - first derivative
+    mfccs_delta = librosa.feature.delta(mfccs_static)
+    mfccs_delta_vnorms = np.linalg.norm(mfccs_delta, axis=1)
+    epsilon = 1e-8
+    min_vnorm = np.min(mfccs_delta_vnorms)
+    max_vnorm = np.max(mfccs_delta_vnorms)
+    minmax_scores = (mfccs_delta_vnorms - min_vnorm) / (max_vnorm - min_vnorm + epsilon)
+    mfccs_delta_mean = abs(np.mean(minmax_scores))
+    #print(mfccs_delta_mean)
+    # average each output
+    txt_out2.write("%s,%s\n" % (filename,mfccs_delta_mean))
+    #mfcc_stack = np.vstack([mfccs_static, mfccs_delta, mfccs_delta2])
+    if(fileORfolder == "file"):
+        print("MFCC (dynamic - order 1) = %s for %s" % (mfccs_delta_mean,filename))
+    if(fileORfolder == "folder"):
+        print("MFCC (dynamic - order 1) = %s for %s in %s" % (mfccs_delta_mean,filename,foldername))
+    txt_out2.close
+    
+
+def mfcc_delta2(item):
+    print("collecting mfcc for %s" % inp)
+    path_objs = item.split("/")
+    if(fileORfolder == "file"):
+        filename = path_objs[2]
+        writePath3 = "%s_analysis/MFCCdelta2.txt" % (inp)
+    if(fileORfolder == "folder"):
+        foldername = path_objs[2]
+        filename = path_objs[3] 
+        writePath3 = "%s_analysis/MFCCdelta2_%s.txt" % (inp,foldername)
+    txt_out3 = open(writePath3, 'a')
+    infile = item  
+    y, sr = librosa.load(infile, duration = 2.0)
+    mfccs_static = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    #extract dynamic MFCC's - second derivative
+    mfccs_delta2 = librosa.feature.delta(mfccs_static, order=2)
+    mfccs_delta2_vnorms = np.linalg.norm(mfccs_delta2, axis=1)
+    epsilon = 1e-8
+    min_vnorm = np.min(mfccs_delta2_vnorms)
+    max_vnorm = np.max(mfccs_delta2_vnorms)
+    minmax_scores = (mfccs_delta2_vnorms - min_vnorm) / (max_vnorm - min_vnorm + epsilon)
+    mfccs_delta2_mean = abs(np.mean(minmax_scores))
+    #print(mfccs_delta2_mean)
+    # average each output
+    txt_out3.write("%s,%s\n" % (filename,mfccs_delta2_mean))
         
+    #mfcc_stack = np.vstack([mfccs_static, mfccs_delta, mfccs_delta2])
+    if(fileORfolder == "file"):
+        print("MFCC (dynamic- order 2) = %s for %s" % (mfccs_delta2_mean,filename))
+    if(fileORfolder == "folder"):
+        print("MFCC (dynamic - order 2) = %s for %s in %s" % (mfccs_delta2_mean,filename,foldername))
+    txt_out3.close
+
+       
         
 #################################################################################
 ####################  main program      #########################################
@@ -1390,7 +1842,7 @@ def main():
         create_file_lists_batch()
         print(data_file_paths)
         print(sound_file_paths)
-    
+        
     ####################
     # energy metrics
     ####################
@@ -1437,28 +1889,46 @@ def main():
     #txt_out.close
     #with multiprocessing.Pool(processes=1) as pool: # Use os.cpu_count() for max processes
     #    pool.map(adf_stat, sound_file_paths)
-        
+    
+    ########################################################
+    ####    MFCC - mel frequency cepstral coefficients   ###
+    ########################################################
+    print("calculating static Mel-Frequeency Cepstral Coefficients")
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(mfcc_static, sound_file_paths)
+    print("calculating delta Mel-Frequeency Cepstral Coefficients")
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(mfcc_delta, sound_file_paths)
+    print("calculating delta delta Mel-Frequeency Cepstral Coefficients")
+    with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+        pool.map(mfcc_delta2, sound_file_paths)    
+    
     ###################    
     if(fileORfolder == "file"):
         print("collecting data")
         coll_data()
+        coll_mfcc_data()
         print("normalizing data")
         norm_data()
         if(ext == ".mp4"):
             print("analyzing transfer entropy between audio and visual trajectories")
             trans_ent()
-    
+        if(ext == ".mp3" or ext == ".wav"):
+            print("analyzing transfer entropy between audio and visual trajectories")
+            trans_ent_mfcc()
+            
     if(fileORfolder == "folder"):
         print("collecting data")
         coll_data_batch()
+        coll_mfcc_data_batch()
         print("normalizing data")
         norm_data_batch()
         if(ext == ".mp4"):
             print("analyzing transfer entropy between audio and visual trajectories")
             trans_ent_batch()
-        
-        
-        
+        if(ext == ".mp3" or ext == ".wav"):
+            print("analyzing transfer entropy between audio and visual trajectories")
+            trans_ent_mfcc_batch()   
         
     print("\nsignal analysis is complete\n")   
     

@@ -220,10 +220,19 @@ def ternary_plot2(tdata, i, TEvalue, valX, valY, valZ):
     tax.left_axis_label("intellectual impact", fontsize=fsE, color='green') # A
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
-    if(selfOpt == "yes"):
+    if(selfOpt == "yes" and ext == ".mp4"):
        tax.set_title("Video CES Signal - distance from video center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
-    if(selfOpt == "no"):
+    if(selfOpt == "no" and ext == ".mp4"):
        tax.set_title("Video CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "yes" and ext == ".mp3"):
+       tax.set_title("MFCC CES Signal - distance from video center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "no" and ext == ".mp3"):
+       tax.set_title("MFCC CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "yes" and ext == ".wav"):
+       tax.set_title("MFCC CES Signal - distance from video center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "no" and ext == ".wav"):
+       tax.set_title("MFCC CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
 
@@ -380,7 +389,61 @@ def main():
             # save image
             tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
             tax.close()
-   
+
+    if(ext == ".mp3" or ext == ".wav"):   
+        if(signalType == "real"): # real signal    
+            print("importing computed data")
+            readPath = "%s_analysis/ternary_mfcc_norm.txt" % (inp)
+            df = pd.read_csv(readPath, delimiter=',',header=1)
+            data = df.values  # convert dataframe to matrix
+            print(data)
+            readPath2 = "%s_analysis/TEvalues_mfcc.txt" % (inp)
+            df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+            TEdata = df2.values  # convert dataframe to matrix
+            TEvalue = TEdata[0][2]
+            TEvalue = round(TEvalue,4)
+            print(TEvalue)
+            
+        tdata = {}
+        valX = 0.5
+        valY = 0.5
+        valZ = 0.5  
+        for i in range(face_num-2):
+            if(i == 0):
+                valX = 0.5
+                valY = 0.5
+                valZ = 0.5
+            elif(i>0):
+                if(signalType == "random"): # random signal
+                    valX = rnd.random()
+                    valY = rnd.random()
+                    valZ = rnd.random()
+                if(signalType == "real"): # real signal
+                    XYZ = data[i]
+                    #print(XYZ)
+                    valX = data[i][0]
+                    valY =  data[i][1]
+                    valZ =  data[i][2]
+            tdata_name = "N%s" % i
+            tdata_add = [valX, valY, valZ]
+            tdata_sum = sum(tdata_add)
+            # Normalize the numbers so that they sum to 1
+            tdata_norm = [number / tdata_sum for number in tdata_add]
+            tdata.update({tdata_name: tdata_norm})
+            #tdata.append(tdata_add)
+            #print(tdata)
+            if(i>face_num-1):
+                continue
+            if not os.path.exists('%s_analysis/tplots2' % inp):
+                os.mkdir('%s_analysis/tplots2' % inp)
+            print("generating ternary plot 2 %s" % str(i+1))
+            tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
+            # save image
+            tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
+            tax.close()
+
+
+  
 ##################################################################        
 
 def create_list():   
@@ -400,7 +463,7 @@ def create_list():
         os.mkdir('%s_analysis/faces' % (inp))
     if not os.path.exists('%s_analysis/tplots1' % (inp)):
         os.mkdir('%s_analysis/tplots1' % (inp))
-    if(ext == ".mp4"):
+    if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):
         if not os.path.exists('%s_analysis/tplots2' % (inp)):
             os.mkdir('%s_analysis/tplots2' % (inp))
     for i in range(number_files):    
@@ -411,19 +474,19 @@ def create_list():
             os.mkdir('%s_analysis/faces/%s' % (inp,dirname))
         if not os.path.exists('%s_analysis/tplots1/%s' % (inp,dirname)):
             os.mkdir('%s_analysis/tplots1/%s' % (inp,dirname))
-        if(ext == ".mp4"):
+        if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):
             if not os.path.exists('%s_analysis/tplots2/%s' % (inp,dirname)):
                 os.mkdir('%s_analysis/tplots2/%s' % (inp,dirname))
         
         folder_path1 = "%s_analysis/faces/%s" % (inp,dirname)
         folder_path2 = "%s_analysis/tplots1/%s" % (inp,dirname)
-        if(ext == ".mp4"):
+        if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):
             folder_path3 = "%s_analysis/tplots2/%s" % (inp,dirname)
         #print(filename)
         print("generating faces and tplots for %s" % (dirname))
         folder_paths1.append(folder_path1)
         folder_paths2.append(folder_path2)
-        if(ext == ".mp4"):     
+        if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):     
              folder_paths3.append(folder_path3)
     print(folder_paths1)
     print(folder_paths2)
@@ -491,7 +554,6 @@ def main_batch_faces(item):
     
 
 def main_batch_tplots1(item):
-    
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
@@ -555,7 +617,6 @@ def main_batch_tplots1(item):
         tax.close()
     
 def main_batch_tplots2(item):
-    
     folder_path = item
     print(folder_path)
     folder_path_array = folder_path.split("/")
@@ -628,6 +689,79 @@ def main_batch_tplots2(item):
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
         tax.close()   
 
+def main_batch_tplots2_mfcc(item):
+    folder_path = item
+    print(folder_path)
+    folder_path_array = folder_path.split("/")
+    foldername = "%s" % (folder_path_array[2])
+    #foldername = "%s.wav" % (folder_path_array[2])
+    print(foldername)
+    if not os.path.exists("%s_analysis/intervals/%s" % (inp,foldername)):
+        #foldername = "%s.mp3" % (folder_path_array[2])
+        foldername = "%s" % (folder_path_array[2])
+        print(foldername)
+    # calculate number of faces for single file
+    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
+    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    print("number of tplots is %s" % face_num)  
+    ###########################
+    # make each ternary plot 2
+    ###########################
+    if(signalType == "real"): # real signal    
+        print("importing computed data")
+        readPath = "%s_analysis/ternary_mfcc_norm_%s.txt" % (inp,foldername)
+        df = pd.read_csv(readPath, delimiter=',',header=1)
+        data = df.values  # convert dataframe to matrix
+        print(data)
+        readPath2 = "%s_analysis/TEvalues_mfcc.txt" % (inp)
+        df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+        TEdata = df2.values  # convert dataframe to matrix
+        for k in range(len(TEdata)):
+            TEname = TEdata[k][0]
+            TEvalue = TEdata[k][2]
+            TEvalue = round(TEvalue,4)
+            if(TEname == foldername):
+                TEmatch = TEvalue
+        TEvalue = TEmatch
+        print(TEvalue)
+    tdata = {}
+    valX = 0.5
+    valY = 0.5
+    valZ = 0.5  
+    for i in range(face_num-2):
+        if(i == 0):
+            valX = 0.5
+            valY = 0.5
+            valZ = 0.5
+        elif(i>0):
+            if(signalType == "random"): # random signal
+                valX = rnd.random()
+                valY = rnd.random()
+                valZ = rnd.random()
+            if(signalType == "real"): # real signal
+                XYZ = data[i]
+                #print(XYZ)
+                valX = data[i][0]
+                valY =  data[i][1]
+                valZ =  data[i][2]
+        tdata_name = "N%s" % i
+        tdata_add = [valX, valY, valZ]
+        tdata_sum = sum(tdata_add)
+        # Normalize the numbers so that they sum to 1
+        tdata_norm = [number / tdata_sum for number in tdata_add]
+        tdata.update({tdata_name: tdata_norm})
+        #tdata.append(tdata_add)
+        #print(tdata)
+        if(i>face_num-1):
+            continue
+        if not os.path.exists('%s_analysis/tplots2' % inp):
+            os.mkdir('%s_analysis/tplots2' % inp)
+        print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
+        tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
+        # save image
+        tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
+        tax.close()   
+
 
 ###############################################################
 if __name__ == '__main__':
@@ -642,3 +776,8 @@ if __name__ == '__main__':
         if(ext == ".mp4"):
             with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
                 pool.map(main_batch_tplots2, folder_paths3)
+        if(ext == ".mp3" or ext == ".wav"):
+            with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+                pool.map(main_batch_tplots2_mfcc, folder_paths3)
+    print("finished making .png files")           
+                

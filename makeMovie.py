@@ -259,7 +259,7 @@ def renderTplotMovie():
     vid_writer.release()
     
     ############################
-    if(ext == ".mp4"):  
+    if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):  
         print("rendering movie 2")
         folder = "%s_analysis/tplots2" % inp
         video_filename = "%s_analysis/myMovie_tplots2.mp4" % inp
@@ -338,7 +338,7 @@ def renderTplotMovie_batch():
         trk1 = trk1 + 1
     ############################
     
-    if(ext == ".mp4"):  
+    if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):  
         print("rendering movie 2")
         lst = os.listdir(inp) # your directory path
         number_files = len(lst)
@@ -416,7 +416,7 @@ def tplotMovie_audio_video():
     final_clip.write_videofile("%s_analysis/myMovieSound_tplots1.mp4" % inp)
     #####################
     
-    if(ext == ".mp4"):  
+    if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):  
         print("combining audio and video for movie 2 for %s" % inp)
         audio_file = "%s_analysis/trimmed_%s.wav" % (inp,inp)
         video_file = "%s_analysis/myMovie_tplots2.mp4" % inp
@@ -476,7 +476,7 @@ def tplotMovie_audio_video_batch():
         final_clip.write_videofile("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname))
     #####################
     
-    if(ext == ".mp4"):  
+    if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"):  
         print("rendering movie")
         lst = os.listdir(inp) # your directory path
         number_files = len(lst)
@@ -516,18 +516,19 @@ def combine_side_by_side():
     clip0 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
     if(ext == ".mp3" or ext == ".wav" ): 
         clip1 = VideoFileClip("%s_analysis/myMovie_faces.mp4" % inp)
+        clip2 = VideoFileClip("%s_analysis/myMovie_tplots2.mp4" % (inp))
     if(ext == ".mp4"):  
         shutil.copy("%s.mp4" % inp, "%s_analysis/%s.mp4" % (inp,inp))
         clip1 = VideoFileClip("%s_analysis/%s.mp4" % (inp,inp))
         clip2 = VideoFileClip("%s_analysis/myMovie_tplots2.mp4" % (inp))
-    else:
-        clip2 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
+    #else:
+    #    clip2 = VideoFileClip("%s_analysis/myMovie_tplots1.mp4" % inp)
     # Ensure both clips have the same height for side-by-side alignment
     clip1 = clip1.resize(height=clip0.h)
     clip2 = clip2.resize(height=clip0.h)
 
     # Concatenate the clips side by side
-    if(ext == ".mp4"): 
+    if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"): 
         final_clip = clips_array([[clip0, clip1, clip2]])
     else:
         final_clip = clips_array([[clip0, clip1]])
@@ -548,18 +549,19 @@ def combine_side_by_side_batch():
         clip0 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
         if(ext == ".mp3" or ext == ".wav" ): 
             clip1 = VideoFileClip("%s_analysis/myMovie_faces_%s.mp4" % (inp,dirname))
+            clip2 = VideoFileClip("%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname))
         if(ext == ".mp4"):  
             #clip1 = VideoFileClip("%s_analysis/%s.mp4" % (inp,inp))
             clip1 = VideoFileClip("%s/%s.mp4" % (inp,dirname))
             clip2 = VideoFileClip("%s_analysis/myMovie_tplots2_%s.mp4" % (inp,dirname))
-        else:
-            clip2 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
+        #else:
+        #    clip2 = VideoFileClip("%s_analysis/myMovie_tplots1_%s.mp4" % (inp,dirname))
         # Ensure both clips have the same height for side-by-side alignment
         clip1 = clip1.resize(height=clip0.h)
         clip2 = clip2.resize(height=clip0.h)
 
         # Concatenate the clips side by side
-        if(ext == ".mp4"): 
+        if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"): 
             final_clip = clips_array([[clip0, clip1, clip2]])
         else:
             final_clip = clips_array([[clip0, clip1]])
@@ -628,7 +630,7 @@ def copyMovie():
     print("loading movie")
     shutil.copy2("%s_analysis/myMovieSound_faces.mp4" % inp, "popstar_results/myMovie_faces_%s.mp4" % inp)
     shutil.copy2("%s_analysis/myMovieSound_tplots1.mp4" % inp, "popstar_results/myMovie_tplots1_%s.mp4" % inp)
-    if(ext == ".mp4"): 
+    if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"): 
         shutil.copy2("%s_analysis/myMovieSound_tplots2.mp4" % inp, "popstar_results/myMovie_tplots2_%s.mp4" % inp)
     shutil.copy2("%s_analysis/myMovieSound_combined.mp4" % inp, "popstar_results/myMovie_combo_%s.mp4" % inp)
 
@@ -645,7 +647,7 @@ def copyMovie_batch():
         dirname = fname[:-4]
         shutil.copy2("%s_analysis/myMovieSound_faces_%s.mp4" % (inp,dirname), "popstar_results/myMovie_faces_%s.mp4" % (dirname))
         shutil.copy2("%s_analysis/myMovieSound_tplots1_%s.mp4" % (inp,dirname), "popstar_results/myMovie_tplots1_%s.mp4" % (dirname))
-        if(ext == ".mp4"): 
+        if(ext == ".mp4" or ext == ".mp3" or ext == ".wav"): 
             shutil.copy2("%s_analysis/myMovieSound_tplots2_%s.mp4" % (inp,dirname), "popstar_results/myMovie_tplots2_%s.mp4" % (dirname))
         shutil.copy2("%s_analysis/myMovieSound_combined_%s.mp4" % (inp,dirname), "popstar_results/myMovie_combo_%s.mp4" % (dirname))
 
@@ -849,6 +851,106 @@ def distances_video_batch():
         txt_out2.close
         txt_out3.close
         
+def distances_mfcc():
+    print("calc distances")
+    readPath = "%s_analysis/ternary_mfcc_norm.txt" % (inp)
+    writePath = "%s_analysis/distances_mfcc.txt" % (inp)
+    writePath2 = "%s_analysis/distances_mfcc_order1.txt" % (inp)
+    writePath3 = "%s_analysis/distances_mfcc_order0.txt" % (inp)
+    txt_out = open(writePath, "w")
+    txt_out2 = open(writePath2, "w")
+    txt_out3 = open(writePath3, "w")
+    txt_out.write("order\tdistance\n")
+    txt_out2.write("distance\n")
+    txt_out3.write("distance\n")
+    df = pd.read_csv(readPath)
+    print(df)
+    #df_array = np.array(df)
+    df_bootstrap = df.sample(n = len(df), axis='index', replace=True)
+    distances = []
+    for i in range(len(df)-1):
+        x2 = df.iloc[i+1,0]
+        x1 = df.iloc[i,0]
+        y2 = df.iloc[i+1,1]
+        y1 = df.iloc[i,1]
+        z2 = df.iloc[i+1,2]
+        z1 = df.iloc[i,2]
+        dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+        txt_out.write("first_order\t%s\n" % str(dist))
+        txt_out2.write("%s\n" % str(dist))
+        distances.append(dist)
+    #print(distances)
+    for i in range(len(df_bootstrap)-1):
+        x2 = df_bootstrap.iloc[i+1,0]
+        x1 = df_bootstrap.iloc[i,0]
+        y2 = df_bootstrap.iloc[i+1,1]
+        y1 = df_bootstrap.iloc[i,1]
+        z2 = df_bootstrap.iloc[i+1,2]
+        z1 = df_bootstrap.iloc[i,2]
+        dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+        txt_out.write("zero_order\t%s\n" % str(dist))
+        txt_out3.write("%s\n" % str(dist))
+        distances.append(dist)
+    #print(distances)
+    txt_out.close
+    txt_out2.close
+    txt_out3.close
+    
+def distances_mfcc_batch():
+    print("calc distances")
+    lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+    #lst = os.listdir(inp) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+    print(dir_list)
+    for fname in dir_list:
+        print(fname)
+        dirname = fname
+        readPath = "%s_analysis/ternary_mfcc_norm_%s.txt" % (inp,dirname)
+        writePath = "%s_analysis/distances_mfcc_%s.txt" % (inp,dirname)
+        writePath2 = "%s_analysis/distances_mfcc_order1_%s.txt" % (inp,dirname)
+        writePath3 = "%s_analysis/distances_mfcc_order0_%s.txt" % (inp,dirname)
+        txt_out = open(writePath, "w")
+        txt_out2 = open(writePath2, "w")
+        txt_out3 = open(writePath3, "w")
+        txt_out.write("order\tdistance\n")
+        txt_out2.write("distance\n")
+        txt_out3.write("distance\n")
+        df = pd.read_csv(readPath)
+        print(df)
+         #df_array = np.array(df)
+        df_bootstrap = df.sample(n = len(df), axis='index', replace=True)
+        distances = []
+        for i in range(len(df)-1):
+            x2 = df.iloc[i+1,0]
+            x1 = df.iloc[i,0]
+            y2 = df.iloc[i+1,1]
+            y1 = df.iloc[i,1]
+            z2 = df.iloc[i+1,2]
+            z1 = df.iloc[i,2]
+            dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+            txt_out.write("first_order\t%s\n" % str(dist))
+            txt_out2.write("%s\n" % str(dist))
+            distances.append(dist)
+        #print(distances)
+        for i in range(len(df_bootstrap)-1):
+            x2 = df_bootstrap.iloc[i+1,0]
+            x1 = df_bootstrap.iloc[i,0]
+            y2 = df_bootstrap.iloc[i+1,1]
+            y1 = df_bootstrap.iloc[i,1]
+            z2 = df_bootstrap.iloc[i+1,2]
+            z1 = df_bootstrap.iloc[i,2]
+            dist = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
+            txt_out.write("zero_order\t%s\n" % str(dist))
+            txt_out3.write("%s\n" % str(dist))
+            distances.append(dist)
+        #print(distances)
+        txt_out.close
+        txt_out2.close
+        txt_out3.close
+        
 
  
  
@@ -867,7 +969,9 @@ def main():
         distances()
         if(ext == ".mp4"):
             distances_video()
-        
+        if(ext == ".mp3" or ext == ".wav"):
+            distances_mfcc()
+            
     if(fof == "folder"):
         renderFaceMovie_batch()
         faceMovie_audio_video_batch()
@@ -879,6 +983,8 @@ def main():
         distances_batch()
         if(ext == ".mp4"):
             distances_video_batch()
+        if(ext == ".mp3" or ext == ".wav"):
+            distances_mfcc_batch()    
 ###############################################################
 if __name__ == '__main__':
     main()
