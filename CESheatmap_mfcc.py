@@ -36,7 +36,7 @@ dir_list = os.listdir("popstar_results/")
 for i in range(len(dir_list)):
     myFile = dir_list[i]
     print(myFile[0:9])
-    if(myFile[0:11] == "permutation" and myFile[0:22] != "permutation_test_video" and myFile[0:21] != "permutation_test_mfcc"):
+    if(myFile[0:11] == "permutation" and myFile[0:21] == "permutation_test_mfcc"):
         lst.append(str(myFile))
 print(lst)
 
@@ -44,7 +44,7 @@ print(lst)
 ###############################################################################
 def collectDF():
     print("collecting dataframe")
-    writePath = "popstar_results/CES_signal.txt"
+    writePath = "popstar_results/CES_signal_mfcc.txt"
     txt_out = open(writePath, 'w')
     #txt_out.write("folder\tp-value\tnonrandom\n")
     labels = []
@@ -219,7 +219,7 @@ def main():
     matrix_maker_folders()
     heat_map_folders()
     errorbar_folders()
-    print("\nheatmap is completed\n")
+    print("\nheatmap on MFCC is completed\n")
 ###############################################################
 if __name__ == '__main__':
     main()

@@ -83,6 +83,8 @@ class Ui_Dialog(object):
         os.system(cmd)
         cmd = "python3 compareDist_video.py"
         os.system(cmd)
+        cmd = "python3 compareDist_mfcc.py"
+        os.system(cmd)
         
     def compareSignal(self):
         print("compare fitness signal features")
@@ -97,6 +99,9 @@ class Ui_Dialog(object):
         os.system(cmd)
         cmd = "python3 compareSignal_video.py"
         os.system(cmd)
+        cmd = "python3 compareSignal_mfcc.py"
+        os.system(cmd)
+
 
 if __name__ == "__main__":
     import os

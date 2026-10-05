@@ -1660,7 +1660,6 @@ def trans_ent_mfcc():
     x = 0.5 * (2 * B + C) / (A + B + C)
     y = (np.sqrt(3) / 2) * C / (A + B + C)
     visual_2d = np.column_stack((x, y))
-    
     # TE from audio to visual (TE be high if there is high dependency)
     te_aud_to_vis = im.transfer_entropy(visual_2d, audio_2d, approach="metric", noise_level=0.001)
     #print(te_aud_to_vis)

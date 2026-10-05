@@ -108,6 +108,8 @@ class Ui_Dialog(object):
         os.system(cmd)
         cmd = "python3 CESheatmap_video.py"
         os.system(cmd)
+        cmd = "python3 CESheatmap_mfcc.py"
+        os.system(cmd)
         
     def classifyIt(self):
         print("running RF classifier")
@@ -129,6 +131,8 @@ class Ui_Dialog(object):
         os.system(cmd)
         cmd = "python3 classifyFeatures_video.py"
         os.system(cmd)
+        cmd = "python3 classifyFeatures_mfcc.py"
+        os.system(cmd)
     
     def clusterIt(self):
         print("running FDA signature classification analysis")
@@ -149,6 +153,8 @@ class Ui_Dialog(object):
         cmd = "python3 clusterFeatures.py"
         os.system(cmd)
         cmd = "python3 clusterFeatures_video.py"
+        os.system(cmd)
+        cmd = "python3 clusterFeatures_mfcc.py"
         os.system(cmd)
 
 if __name__ == "__main__":
