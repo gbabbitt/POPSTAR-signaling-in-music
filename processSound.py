@@ -253,11 +253,14 @@ def time_sample():
     # start and end time 
     for i in range(ints): 
         if(met == "no"):
-            start = i*125  # note 250 = 0.125 second fixed window
-            end = i*125+tm*1000
+            start = i*1000  # note 1000 = 0.5 second fixed window
+            end = i*1000+tm*1000 # over-lapping windows
+            #end = i*1000+i*1000 # non-over-lapping windows
         if(met == "yes"):
             start = i*beat_int*1000  # attempt to match beat intervals
-            end = i*beat_int*1000+tm*1000
+            end = i*beat_int*1000+tm*1000 # tm is user defined
+            #end = i*beat_int*1000+beat_int*1000 # tm is beat interval (non-overlapping windows)
+        print("start: %s end: %s" % (start,end))
         print("start: %s end: %s" % (start,end))
         # song interval 
         finterval = song[start: end] 
@@ -317,11 +320,13 @@ def time_sample_batch():
         # start and end time 
         for j in range(ints): 
             if(met == "no"):
-                start = j*125  # note 250 = 0.125 second fixed window
-                end = j*125+tm*1000
+                start = j*1000  # note 1000 = 0.5 second fixed window
+                #end = j*1000+tm*1000 # overlapping windows
+                end = j*1000+i*1000 # non-over-lapping windows
             if(met == "yes"):
                 start = j*beat_int*1000  # attempt to match beat intervals
-                end = j*beat_int*1000+tm*1000
+                #end = j*beat_int*1000+tm*1000 # tm is user defined
+                end = j*beat_int*1000+beat_int*1000 # tm is beat interval (non-overlapping windows)
             print("start: %s end: %s" % (start,end))
             # song interval 
             finterval = song[start: end] 

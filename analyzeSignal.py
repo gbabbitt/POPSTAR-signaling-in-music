@@ -10,6 +10,7 @@
 
 import getopt, sys # Allows for command line arguments
 import os
+import glob
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -1828,8 +1829,30 @@ def mfcc_delta2(item):
         print("MFCC (dynamic - order 2) = %s for %s in %s" % (mfccs_delta2_mean,filename,foldername))
     txt_out3.close
 
-       
-        
+def clean_files():
+    print("cleaning files from intervals folder")
+    # Find all .wav files in the intervals directory
+    files = glob.glob(os.path.join("%s_analysis/intervals" % (inp), "*.wav"))
+    # Loop through and delete each file
+    for file in files:
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except OSError as e:
+            print(f"Error deleting {file}: {e}")
+
+def clean_files_batch():
+    print("cleaning files from intervals folder")
+    for foldername in os.listdir("intervals"):
+        # Find all .wav files in the intervals directory
+        files = glob.glob(os.path.join("%s_analysis/intervals/%s" % (inp,foldername), "*.wav"))
+        # Loop through and delete each file
+        for file in files:
+            try:
+                os.remove(file)
+                print(f"Deleted: {file}")
+            except OSError as e:
+                print(f"Error deleting {file}: {e}")      
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
@@ -1916,7 +1939,8 @@ def main():
         if(ext == ".mp3" or ext == ".wav"):
             print("analyzing transfer entropy between audio and visual trajectories")
             trans_ent_mfcc()
-            
+        clean_files()
+        
     if(fileORfolder == "folder"):
         print("collecting data")
         coll_data_batch()
@@ -1929,6 +1953,7 @@ def main():
         if(ext == ".mp3" or ext == ".wav"):
             print("analyzing transfer entropy between audio and visual trajectories")
             trans_ent_mfcc_batch()   
+        clean_files_batch()
         
     print("\nsignal analysis is complete\n")   
     

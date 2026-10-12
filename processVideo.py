@@ -206,7 +206,8 @@ def GlobOptContrast():
             end_video = end/1000
         if(met == "yes"):
             start = i*beat_int*1000  # attempt to match beat intervals
-            end = i*beat_int*1000+tm*1000
+            end = i*beat_int*1000+tm*1000 # overlapping window
+            #end = i*beat_int*1000+beat_int*1000 # non-overlapping window
             start_video = start/1000
             end_video = end/1000
         #print("audio start: %s end: %s" % (start,end))
@@ -324,7 +325,8 @@ def GlobOptContrast_batch():
                 end_video = end/1000
             if(met == "yes"):
                 start = i*beat_int*1000  # attempt to match beat intervals
-                end = i*beat_int*1000+tm*1000
+                #end = i*beat_int*1000+tm*1000
+                end = i*beat_int*1000+beat_int*1000 # non-overlapping window
                 start_video = start/1000
                 end_video = end/1000
             #print("audio start: %s end: %s" % (start,end))
@@ -415,6 +417,7 @@ def OptFlow_cpu():
         if(met == "yes"):
             start = i*beat_int*1000  # attempt to match beat intervals
             end = i*beat_int*1000+tm*1000
+            #end = i*beat_int*1000+beat_int*1000 # non-overlapping window
             start_video = start/1000
             end_video = end/1000
         #print("audio start: %s end: %s" % (start,end))
@@ -459,7 +462,7 @@ def OptFlow_cpu():
             #print(frame)
             # Convert the frame to grayscale for intensity calculation
             gray_frame_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+            flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 3, 3, 5, 1.2, 0)
             magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1],angleInDegrees=True)
             opt_flow_values.append(magnitude)
             dlt_flow_values.append(angle)
@@ -588,6 +591,7 @@ def OptFlow_gpu():
         if(met == "yes"):
             start = i*beat_int*1000  # attempt to match beat intervals
             end = i*beat_int*1000+tm*1000
+            #end = i*beat_int*1000+beat_int*1000 # non-overlapping window
             start_video = start/1000
             end_video = end/1000
         #print("audio start: %s end: %s" % (start,end))
@@ -692,7 +696,8 @@ def OptFlow_batch():
                 end_video = end/1000
             if(met == "yes"):
                 start = i*beat_int*1000  # attempt to match beat intervals
-                end = i*beat_int*1000+tm*1000
+                #end = i*beat_int*1000+tm*1000
+                end = i*beat_int*1000+beat_int*1000 # non-overlapping window
                 start_video = start/1000
                 end_video = end/1000
             #print("audio start: %s end: %s" % (start,end))
@@ -737,7 +742,7 @@ def OptFlow_batch():
                 #print(frame)
                 # Convert the frame to grayscale for intensity calculation
                 gray_frame_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+                flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 3, 3, 5, 1.2, 0)
                 magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1],angleInDegrees=True)
                 opt_flow_values.append(magnitude)
                 dlt_flow_values.append(angle)
@@ -943,7 +948,8 @@ def main():
         if(cuda_count == 0):
             OptFlow_cpu()
         if(cuda_count != 0):
-            OptFlow_gpu()
+            #OptFlow_gpu()
+            OptFlow_cpu()
         CESmap()
         print("\nvideo processing is complete\n")
         
