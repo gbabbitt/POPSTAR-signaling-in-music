@@ -1843,7 +1843,7 @@ def clean_files():
 
 def clean_files_batch():
     print("cleaning files from intervals folder")
-    for foldername in os.listdir("intervals"):
+    for foldername in os.listdir("%s_analysis/intervals" % (inp)):
         # Find all .wav files in the intervals directory
         files = glob.glob(os.path.join("%s_analysis/intervals/%s" % (inp,foldername), "*.wav"))
         # Loop through and delete each file
