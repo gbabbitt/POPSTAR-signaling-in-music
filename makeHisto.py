@@ -60,12 +60,15 @@ fof = ""+fof+""
 lyr = "no"
 ext = ""+ext+""
 met = ""+met+""
-btint = float(btint)
+if(fof == "file"):
+    btint = float(btint)
+
 '''
 if(fof == "file"):
     print("CES stability calculations are not valid b/c overlapping windows were used.\n")
     exit()
 '''
+
 def mm_inf(df_order0, df_order1,dirname):
         print("make AIC/BIC")
         test=0
