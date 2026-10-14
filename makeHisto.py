@@ -43,6 +43,13 @@ for x in range(len(infile_lines)):
     if(header == "fileExt"):
         ext = value
         print("my file extension(s) are",ext)
+    if(header == "metro"):
+        met = value
+        print("my metronome option is",met)
+    if(header == "beatInt"):
+        btint = value
+        print("my beat interval is ",btint)
+
 if not os.path.exists('popstar_results'):
     os.mkdir('popstar_results')
     
@@ -52,11 +59,13 @@ tm = int(tm)
 fof = ""+fof+""
 lyr = "no"
 ext = ""+ext+""
-
+met = ""+met+""
+btint = float(btint)
+'''
 if(fof == "file"):
     print("CES stability calculations are not valid b/c overlapping windows were used.\n")
     exit()
-
+'''
 def mm_inf(df_order0, df_order1,dirname):
         print("make AIC/BIC")
         test=0
@@ -716,22 +725,27 @@ def main_audio():
                 if(p_value < 0.5):
                     p_value = 0.5
                 percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+                if(met == "yes"):
+                    min_val = ((tm-1)/tm*100)*btint # for single beat interval
+                if(met == "no"):
+                    min_val = ((tm-1)/tm*100)*0.5 # for half sec fixed window
+                adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for overlap in windows
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
-        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         writePath = "%s_analysis/permutation_test/permutation_test.txt" % (inp)
         txt_out = open(writePath, "w")
         txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         txt_out.close
         writePath2 = "popstar_results/permutation_test_%s.txt" % (inp)
         txt_out2 = open(writePath2, "w")
         txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         txt_out2.close
         sns.histplot(df, x="distance", hue="order", kde=True)
         p_value = round(p_value,4)
-        plt.title("stability in audio CES = %s for %s\n" % (p_value,inp))
+        plt.title("stability in audio CES = %s for %s\n" % (adj_percent_nr,inp))
         plt.savefig("%s_analysis/permutation_test/histogram_CES_stability.png" % (inp))
         plt.savefig("popstar_results/histogram-CES_stability_%s.png" % (inp))
         plt.show()
@@ -823,7 +837,7 @@ def main_audio():
                     p_value = cnt_below/(cnt_ttl+0.00001)
                     if(p_value < 0.5):
                         p_value = 0.5
-                    percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+                    percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5)) # no adjust for window overlap is needed
             print("permutation test completed")
             print("empirical p-value = %s" % p_value)
             print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
@@ -839,7 +853,7 @@ def main_audio():
             txt_out2.close
             sns.histplot(df, x="distance", hue="order", kde=True)
             p_value = round(p_value,4)
-            plt.title("stability in audio CES = %s for %s\n" % (p_value,dirname))
+            plt.title("stability in audio CES = %s for %s\n" % (percent_nr,dirname))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram-CES_stability_%s_%s.png" % (inp,dirname))
             #plt.show()
@@ -921,22 +935,27 @@ def main_audio_mfcc():
                 if(p_value < 0.5):
                     p_value = 0.5
                 percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+                if(met == "yes"):
+                    min_val = ((tm-1)/tm*100)*btint # for single beat interval
+                if(met == "no"):
+                    min_val = ((tm-1)/tm*100)*0.5 # for half sec fixed window
+                adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for overlap in windows
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
-        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         writePath = "%s_analysis/permutation_test/permutation_test_mfcc.txt" % (inp)
         txt_out = open(writePath, "w")
         txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         txt_out.close
         writePath2 = "popstar_results/permutation_test_mfcc_%s.txt" % (inp)
         txt_out2 = open(writePath2, "w")
         txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         txt_out2.close
         sns.histplot(df, x="distance", hue="order", kde=True)
         p_value = round(p_value,4)
-        plt.title("stability in audio CES = %s for %s\n" % (p_value,inp))
+        plt.title("stability in audio CES = %s for %s\n" % (adj_percent_nr,inp))
         plt.savefig("%s_analysis/permutation_test/histogram_CES_stability_mfcc.png" % (inp))
         plt.savefig("popstar_results/histogram-CES_stability_mfcc_%s.png" % (inp))
         plt.show()
@@ -1028,7 +1047,7 @@ def main_audio_mfcc():
                     p_value = cnt_below/(cnt_ttl+0.00001)
                     if(p_value < 0.5):
                         p_value = 0.5
-                    percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+                    percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5)) # no adjust for windo overlap is needed
             print("permutation test completed")
             print("empirical p-value = %s" % p_value)
             print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
@@ -1044,7 +1063,7 @@ def main_audio_mfcc():
             txt_out2.close
             sns.histplot(df, x="distance", hue="order", kde=True)
             p_value = round(p_value,4)
-            plt.title("stability in audio CES = %s for %s\n" % (p_value,dirname))
+            plt.title("stability in audio CES = %s for %s\n" % (percent_nr,dirname))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_mfcc_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram-CES_stability_mfcc_%s_%s.png" % (inp,dirname))
             #plt.show()
@@ -1127,23 +1146,25 @@ def main_video():
                 p_value = cnt_below/(cnt_ttl+0.00001)
                 if(p_value < 0.5):
                     p_value = 0.5
-                percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+                percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5)) 
+                min_val = (tm-1)/tm*100
+                adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for 50% overlap in windows
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
-        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         writePath = "%s_analysis/permutation_test/permutation_test_video.txt" % (inp)
         txt_out = open(writePath, "w")
         txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         txt_out.close
         writePath2 = "popstar_results/permutation_test_video_%s.txt" % (inp)
         txt_out2 = open(writePath2, "w")
         txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
         txt_out2.close
         sns.histplot(df, x="distance", hue="order", kde=True)
         p_value = round(p_value,4)
-        plt.title("stability in video CES = %s for %s\n" % (p_value,inp))
+        plt.title("stability in video CES = %s for %s\n" % (adj_percent_nr,inp))
         plt.savefig("%s_analysis/permutation_test/histogram_CES_stability_video.png" % (inp))
         plt.savefig("popstar_results/histogram-CES_stability_video_%s.png" % (inp))
         plt.show()
@@ -1236,22 +1257,24 @@ def main_video():
                     if(p_value < 0.5):
                         p_value = 0.5
                     percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+                    min_val = 50
+                    adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for 50% overlap in windows
             print("permutation test completed")
             print("empirical p-value = %s" % p_value)
-            print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+            print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
             writePath = "%s_analysis/permutation_test/%s/permutation_test_video.txt" % (inp,dirname)
             txt_out = open(writePath, "w")
             txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
-            txt_out.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+            txt_out.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
             txt_out.close
             writePath2 = "popstar_results/permutation_test_video_%s.txt" % (dirname)
             txt_out2 = open(writePath2, "w")
             txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
-            txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
+            txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
             txt_out2.close
             sns.histplot(df, x="distance", hue="order", kde=True)
             p_value = round(p_value,4)
-            plt.title("stability in CES (control, energy, surprise) = %s for %s\n" % (p_value,dirname))
+            plt.title("stability in CES (control, energy, surprise) = %s for %s\n" % (adj_percent_nr,dirname))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_video_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram-CES_stability_video_%s_%s.png" % (inp,dirname))
             #plt.show()
