@@ -742,7 +742,7 @@ def OptFlow_batch():
                 #print(frame)
                 # Convert the frame to grayscale for intensity calculation
                 gray_frame_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 3, 3, 5, 1.2, 0)
+                flow = cv2.calcOpticalFlowFarneback(gray_frame, gray_frame_next, None, 0.5, 3, 9, 3, 5, 1.2, 0)
                 magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1],angleInDegrees=True)
                 opt_flow_values.append(magnitude)
                 dlt_flow_values.append(angle)
