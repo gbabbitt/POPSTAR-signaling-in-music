@@ -1149,9 +1149,9 @@ def main_video():
                 p_value = cnt_below/(cnt_ttl+0.00001)
                 if(p_value < 0.5):
                     p_value = 0.5
-                percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5)) 
-                min_val = (tm-1)/tm*100
-                adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for 50% overlap in windows
+                adj_percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5)) 
+                #min_val = 50
+                #adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for 50% overlap in windows
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
         print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
@@ -1259,9 +1259,9 @@ def main_video():
                     p_value = cnt_below/(cnt_ttl+0.00001)
                     if(p_value < 0.5):
                         p_value = 0.5
-                    percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
-                    min_val = 50
-                    adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for 50% overlap in windows
+                    adj_percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
+                    #min_val = 50
+                    #adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for 50% overlap in windows
             print("permutation test completed")
             print("empirical p-value = %s" % p_value)
             print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
