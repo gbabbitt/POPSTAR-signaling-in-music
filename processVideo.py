@@ -206,8 +206,7 @@ def GlobOptContrast():
             end_video = end/1000
         if(met == "yes"):
             start = i*beat_int*1000  # attempt to match beat intervals
-            end = i*beat_int*1000+tm*1000 # overlapping window
-            #end = i*beat_int*1000+beat_int*1000 # non-overlapping window
+            end = i*beat_int*1000+tm*1000
             start_video = start/1000
             end_video = end/1000
         #print("audio start: %s end: %s" % (start,end))
@@ -325,8 +324,7 @@ def GlobOptContrast_batch():
                 end_video = end/1000
             if(met == "yes"):
                 start = i*beat_int*1000  # attempt to match beat intervals
-                #end = i*beat_int*1000+tm*1000
-                end = i*beat_int*1000+beat_int*1000 # non-overlapping window
+                end = i*beat_int*1000+tm*1000
                 start_video = start/1000
                 end_video = end/1000
             #print("audio start: %s end: %s" % (start,end))
@@ -417,7 +415,6 @@ def OptFlow_cpu():
         if(met == "yes"):
             start = i*beat_int*1000  # attempt to match beat intervals
             end = i*beat_int*1000+tm*1000
-            #end = i*beat_int*1000+beat_int*1000 # non-overlapping window
             start_video = start/1000
             end_video = end/1000
         #print("audio start: %s end: %s" % (start,end))
@@ -591,7 +588,6 @@ def OptFlow_gpu():
         if(met == "yes"):
             start = i*beat_int*1000  # attempt to match beat intervals
             end = i*beat_int*1000+tm*1000
-            #end = i*beat_int*1000+beat_int*1000 # non-overlapping window
             start_video = start/1000
             end_video = end/1000
         #print("audio start: %s end: %s" % (start,end))
@@ -696,8 +692,7 @@ def OptFlow_batch():
                 end_video = end/1000
             if(met == "yes"):
                 start = i*beat_int*1000  # attempt to match beat intervals
-                #end = i*beat_int*1000+tm*1000
-                end = i*beat_int*1000+beat_int*1000 # non-overlapping window
+                end = i*beat_int*1000+tm*1000
                 start_video = start/1000
                 end_video = end/1000
             #print("audio start: %s end: %s" % (start,end))
@@ -948,8 +943,7 @@ def main():
         if(cuda_count == 0):
             OptFlow_cpu()
         if(cuda_count != 0):
-            #OptFlow_gpu()
-            OptFlow_cpu()
+            OptFlow_cpu()  # gpu code is untested
         CESmap()
         print("\nvideo processing is complete\n")
         
