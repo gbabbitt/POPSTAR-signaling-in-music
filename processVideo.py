@@ -943,7 +943,7 @@ def main():
         if(cuda_count == 0):
             OptFlow_cpu()
         if(cuda_count != 0):
-            OptFlow_cpu()  # gpu code is untested
+            OptFlow_gpu()
         CESmap()
         print("\nvideo processing is complete\n")
         
