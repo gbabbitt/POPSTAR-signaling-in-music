@@ -19,7 +19,7 @@ from sklearn.mixture import GaussianMixture
 import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
-n_permutations = 100
+n_permutations = 200
 # read popstar ctl file
 infile = open("popstar.ctl", "r")
 infile_lines = infile.readlines()
@@ -47,9 +47,10 @@ for x in range(len(infile_lines)):
         met = value
         print("my metronome option is",met)
     if(header == "beatInt"):
-        btint = value
-        print("my beat interval is ",btint)
-
+        btInt = value
+        print("my beat interval is ",btInt)
+    
+    
 if not os.path.exists('popstar_results'):
     os.mkdir('popstar_results')
     
@@ -60,14 +61,41 @@ fof = ""+fof+""
 lyr = "no"
 ext = ""+ext+""
 met = ""+met+""
-if(fof == "file"):
-    btint = float(btint)
 
-'''
 if(fof == "file"):
-    print("CES stability calculations are not valid b/c overlapping windows were used.\n")
+    bInt = float(btInt)
+ 
+
+if(fof == "folder"):
+    lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+    number_files = len(lst)
+    print("number of files")
+    print(number_files)
+    dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+    print(dir_list)
+    ct = 0
+    btInts = []
+    for fname in dir_list:
+        print(fname)
+        dirname = fname
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            if(header == "beatInt_%s" % ct):
+                btInt = value
+                btInt = float(btInt)
+                btInts.append(btInt)
+        ct = ct+1
+    btInts = np.array(btInts)
+    print(btInts)
+    
+if(met == "no"):
+    print("CES stability calculations are not valid unless beat tracking is were used.\n")
     exit()
-'''
+
 
 def mm_inf(df_order0, df_order1,dirname):
         print("make AIC/BIC")
@@ -653,6 +681,7 @@ def mm_inf_mfcc(df_order0, df_order1,dirname):
    
 def main_audio():
     if(fof=="file"):
+        global bInt
         if not os.path.exists('%s_analysis/permutation_test' % (inp)):
             os.mkdir('%s_analysis/permutation_test' % (inp))
         print("make histogram")    
@@ -695,19 +724,25 @@ def main_audio():
         cnt_above = 0
         cnt_below = 0
         p_value = 0.5
+        print("bInt = %s" % bInt)
+        step = int(tm/bInt)
+        print("beat interval = %s secs | step interval = %s iterations" % (bInt,step))
         for x in range(n_permutations):
             df_shuffled = df_obs.sample(frac=1)
             #print(df_obs)
             #print(df_shuffled)
             df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
             #print(df_shuffled)
-            for i in range(len(df_shuffled)-1):
+            step = int(tm/bInt)
+            length = int((len(df_shuffled)-1)/step)
+            #print("beat interval = %s secs | step interval = %s iterations" % (btint,step))
+            for i in range(0, length, 1):
                 # obs steps
-                x2 = df_obs.iloc[i+1,0]
+                x2 = df_obs.iloc[i+step,0]
                 x1 = df_obs.iloc[i,0]
-                y2 = df_obs.iloc[i+1,1]
+                y2 = df_obs.iloc[i+step,1]
                 y1 = df_obs.iloc[i,1]
-                z2 = df_obs.iloc[i+1,2]
+                z2 = df_obs.iloc[i+step,2]
                 z1 = df_obs.iloc[i,2]
                 dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
                 # shuffled steps
@@ -728,27 +763,23 @@ def main_audio():
                 if(p_value < 0.5):
                     p_value = 0.5
                 percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
-                if(met == "yes"):
-                    min_val = ((tm-1)/tm*100)*btint # for single beat interval
-                if(met == "no"):
-                    min_val = ((tm-1)/tm*100)*0.5 # for half sec fixed window
-                adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for overlap in windows
+                
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
-        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
+        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         writePath = "%s_analysis/permutation_test/permutation_test.txt" % (inp)
         txt_out = open(writePath, "w")
         txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
+        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         txt_out.close
         writePath2 = "popstar_results/permutation_test_%s.txt" % (inp)
         txt_out2 = open(writePath2, "w")
         txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
+        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         txt_out2.close
         sns.histplot(df, x="distance", hue="order", kde=True)
         p_value = round(p_value,4)
-        plt.title("stability in audio CES = %s for %s\n" % (adj_percent_nr,inp))
+        plt.title("stability in audio CES = %s for %s\n" % (percent_nr,inp))
         plt.savefig("%s_analysis/permutation_test/histogram_CES_stability.png" % (inp))
         plt.savefig("popstar_results/histogram-CES_stability_%s.png" % (inp))
         plt.show()
@@ -765,6 +796,7 @@ def main_audio():
         print(number_files)
         dir_list = os.listdir("%s_analysis/intervals/" % (inp))
         print(dir_list)
+        cnt = 0
         for fname in dir_list:
             print(fname)
             dirname = fname
@@ -808,19 +840,25 @@ def main_audio():
             cnt_above = 0
             cnt_below = 0
             p_value = 0.5
+            bInt = btInts[cnt]
+            step = int(tm/bInt)
+            print("beat interval = %s secs | step interval = %s iterations" % (bInt,step))
             for x in range(n_permutations):
                 df_shuffled = df_obs.sample(frac=1)
                 #print(df_obs)
                 #print(df_shuffled)
                 df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
                 #print(df_shuffled)
-                for i in range(len(df_shuffled)-1):
+                step = int(tm/bInt)
+                length = int((len(df_shuffled)-1)/step)
+                #print("beat interval = %s secs | step interval = %s iterations" % (btint,step))
+                for i in range(0, length, 1):
                     # obs steps
-                    x2 = df_obs.iloc[i+1,0]
+                    x2 = df_obs.iloc[i+step,0]
                     x1 = df_obs.iloc[i,0]
-                    y2 = df_obs.iloc[i+1,1]
+                    y2 = df_obs.iloc[i+step,1]
                     y1 = df_obs.iloc[i,1]
-                    z2 = df_obs.iloc[i+1,2]
+                    z2 = df_obs.iloc[i+step,2]
                     z1 = df_obs.iloc[i,2]
                     dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
                     # shuffled steps
@@ -859,10 +897,12 @@ def main_audio():
             plt.title("stability in audio CES = %s for %s\n" % (percent_nr,dirname))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram-CES_stability_%s_%s.png" % (inp,dirname))
+            cnt = cnt +1
             #plt.show()
 
 def main_audio_mfcc():
     if(fof=="file"):
+        global bInt
         if not os.path.exists('%s_analysis/permutation_test' % (inp)):
             os.mkdir('%s_analysis/permutation_test' % (inp))
         print("make histogram")    
@@ -905,19 +945,24 @@ def main_audio_mfcc():
         cnt_above = 0
         cnt_below = 0
         p_value = 0.5
+        step = int(tm/bInt)
+        print("beat interval = %s secs | step interval = %s iterations" % (bInt,step))
         for x in range(n_permutations):
             df_shuffled = df_obs.sample(frac=1)
             #print(df_obs)
             #print(df_shuffled)
             df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
             #print(df_shuffled)
-            for i in range(len(df_shuffled)-1):
+            step = int(tm/bInt)
+            length = int((len(df_shuffled)-1)/step)
+            #print("beat interval = %s secs | step interval = %s iterations" % (btint,step))
+            for i in range(0, length, 1):
                 # obs steps
-                x2 = df_obs.iloc[i+1,0]
+                x2 = df_obs.iloc[i+step,0]
                 x1 = df_obs.iloc[i,0]
-                y2 = df_obs.iloc[i+1,1]
+                y2 = df_obs.iloc[i+step,1]
                 y1 = df_obs.iloc[i,1]
-                z2 = df_obs.iloc[i+1,2]
+                z2 = df_obs.iloc[i+step,2]
                 z1 = df_obs.iloc[i,2]
                 dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
                 # shuffled steps
@@ -938,27 +983,23 @@ def main_audio_mfcc():
                 if(p_value < 0.5):
                     p_value = 0.5
                 percent_nr = 0.0+(100-0.0)*((p_value-0.5)/(1.0-0.5))
-                if(met == "yes"):
-                    min_val = ((tm-1)/tm*100)*btint # for single beat interval
-                if(met == "no"):
-                    min_val = ((tm-1)/tm*100)*0.5 # for half sec fixed window
-                adj_percent_nr = 0.0+(100-0.0)*((percent_nr-min_val)/(100-min_val)) # adjust for overlap in windows
+                
         print("permutation test completed")
         print("empirical p-value = %s" % p_value)
-        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
+        print("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         writePath = "%s_analysis/permutation_test/permutation_test_mfcc.txt" % (inp)
         txt_out = open(writePath, "w")
         txt_out.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
+        txt_out.write("interpretation - %s percent of CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         txt_out.close
         writePath2 = "popstar_results/permutation_test_mfcc_%s.txt" % (inp)
         txt_out2 = open(writePath2, "w")
         txt_out2.write("empirical p-value = %s for %s\n" % (p_value,inp))
-        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (adj_percent_nr))
+        txt_out2.write("interpretation - %s percent of the CES trajectory in the dynamic ternary plot is non-random" % (percent_nr))
         txt_out2.close
         sns.histplot(df, x="distance", hue="order", kde=True)
         p_value = round(p_value,4)
-        plt.title("stability in audio CES = %s for %s\n" % (adj_percent_nr,inp))
+        plt.title("stability in audio CES = %s for %s\n" % (percent_nr,inp))
         plt.savefig("%s_analysis/permutation_test/histogram_CES_stability_mfcc.png" % (inp))
         plt.savefig("popstar_results/histogram-CES_stability_mfcc_%s.png" % (inp))
         plt.show()
@@ -975,6 +1016,7 @@ def main_audio_mfcc():
         print(number_files)
         dir_list = os.listdir("%s_analysis/intervals/" % (inp))
         print(dir_list)
+        cnt = 0
         for fname in dir_list:
             print(fname)
             dirname = fname
@@ -1018,19 +1060,25 @@ def main_audio_mfcc():
             cnt_above = 0
             cnt_below = 0
             p_value = 0.5
+            bInt = btInts[cnt]
+            step = int(tm/bInt)
+            print("beat interval = %s secs | step interval = %s iterations" % (bInt,step))
             for x in range(n_permutations):
                 df_shuffled = df_obs.sample(frac=1)
                 #print(df_obs)
                 #print(df_shuffled)
                 df_shuffled = df_shuffled.reset_index(drop=True) # drop=True prevents original index from becoming a column
                 #print(df_shuffled)
-                for i in range(len(df_shuffled)-1):
+                step = int(tm/bInt)
+                length = int((len(df_shuffled)-1)/step)
+                #print("beat interval = %s secs | step interval = %s iterations" % (btint,step))
+                for i in range(0, length, 1):
                     # obs steps
-                    x2 = df_obs.iloc[i+1,0]
+                    x2 = df_obs.iloc[i+step,0]
                     x1 = df_obs.iloc[i,0]
-                    y2 = df_obs.iloc[i+1,1]
+                    y2 = df_obs.iloc[i+step,1]
                     y1 = df_obs.iloc[i,1]
-                    z2 = df_obs.iloc[i+1,2]
+                    z2 = df_obs.iloc[i+step,2]
                     z1 = df_obs.iloc[i,2]
                     dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
                     # shuffled steps
@@ -1069,6 +1117,7 @@ def main_audio_mfcc():
             plt.title("stability in audio CES = %s for %s\n" % (percent_nr,dirname))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_mfcc_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram-CES_stability_mfcc_%s_%s.png" % (inp,dirname))
+            cnt = cnt + 1
             #plt.show()
 
 
