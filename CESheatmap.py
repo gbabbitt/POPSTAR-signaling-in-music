@@ -35,7 +35,7 @@ dir_list = os.listdir("popstar_results/")
 #print(dir_list)
 for i in range(len(dir_list)):
     myFile = dir_list[i]
-    print(myFile[0:9])
+    #print(myFile[0:9])
     if(myFile[0:11] == "permutation" and myFile[0:22] != "permutation_test_video" and myFile[0:21] != "permutation_test_mfcc"):
         lst.append(str(myFile))
 print(lst)

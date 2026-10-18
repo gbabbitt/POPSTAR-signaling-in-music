@@ -50,10 +50,10 @@ ext = ""+ext+""
 
 if(ext != ".mp4"):
     print("\nThere is/are no video file(s) to analyze for %s...skipping video processing...\n" % inp)
-    exit
+    exit()
 if(ext == ".mp4"):
     print("\nThere is/are video file(s) to analyze for %s...success  yea !..\n" % inp)
-    exit
+    
 ###############################################################################
 ###############################################################################
 features = ['% stability(CES)']
@@ -64,7 +64,7 @@ dir_list = os.listdir("popstar_results/")
 #print(dir_list)
 for i in range(len(dir_list)):
     myFile = dir_list[i]
-    print(myFile[0:9])
+    #print(myFile[0:9])
     if(myFile[0:11] == "permutation" and myFile[0:22] == "permutation_test_video"):
         lst.append(str(myFile))
 print(lst)
