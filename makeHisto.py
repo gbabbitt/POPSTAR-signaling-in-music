@@ -1174,11 +1174,11 @@ def main_video():
             #print(df_shuffled)
             for i in range(len(df_shuffled)-1):
                 # obs steps
-                x2 = df_obs.iloc[i+1,0]
+                x2 = df_obs.iloc[i+2,0]  # set step to 2 to account for 50% overlap in sliding window
                 x1 = df_obs.iloc[i,0]
-                y2 = df_obs.iloc[i+1,1]
+                y2 = df_obs.iloc[i+2,1]
                 y1 = df_obs.iloc[i,1]
-                z2 = df_obs.iloc[i+1,2]
+                z2 = df_obs.iloc[i+2,2]
                 z1 = df_obs.iloc[i,2]
                 dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
                 # shuffled steps
@@ -1284,11 +1284,11 @@ def main_video():
                 #print(df_shuffled)
                 for i in range(len(df_shuffled)-1):
                     # obs steps
-                    x2 = df_obs.iloc[i+1,0]
+                    x2 = df_obs.iloc[i+2,0]  # set step to 2 to account for 50% overlap in sliding window
                     x1 = df_obs.iloc[i,0]
-                    y2 = df_obs.iloc[i+1,1]
+                    y2 = df_obs.iloc[i+2,1]
                     y1 = df_obs.iloc[i,1]
-                    z2 = df_obs.iloc[i+1,2]
+                    z2 = df_obs.iloc[i+2,2]
                     z1 = df_obs.iloc[i,2]
                     dist_obs = np.sqrt((x2-x1)**2 + (y2-y1)**2 +(z2-z1)**2)
                     # shuffled steps
