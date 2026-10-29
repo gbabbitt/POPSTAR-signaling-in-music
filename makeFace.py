@@ -716,7 +716,7 @@ def main_batch_tplots2_mfcc(item):
         readPath2 = "%s_analysis/TEvalues_mfcc.txt" % (inp)
         df2 = pd.read_csv(readPath2, delimiter=',',header=0, on_bad_lines='skip')
         TEdata = df2.values  # convert dataframe to matrix
-        TEvalue = 0 # initiatize
+        TEmatch = 0 # initiatize
         for k in range(len(TEdata)):
             TEname = TEdata[k][0]
             TEvalue = TEdata[k][2]
@@ -770,10 +770,10 @@ if __name__ == '__main__':
         main()
     if(fof == "folder"):
         create_list()
-        #with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-        #    pool.map(main_batch_faces, folder_paths1)
-        #with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
-        #    pool.map(main_batch_tplots1, folder_paths2)
+        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+            pool.map(main_batch_faces, folder_paths1)
+        with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
+            pool.map(main_batch_tplots1, folder_paths2)
         if(ext == ".mp4"):
             with multiprocessing.Pool(processes=num_cores) as pool: # Use os.cpu_count() for max processes
                 pool.map(main_batch_tplots2, folder_paths3)
