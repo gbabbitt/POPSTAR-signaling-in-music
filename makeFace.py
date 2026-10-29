@@ -524,7 +524,7 @@ def main_batch_faces(item):
     if(signalType == "real"):
         print("importing computed data")
         readPath = "%s_analysis/features_norm_%s.txt" % (inp,foldername)
-        df = pd.read_csv(readPath, delimiter=',',header=1)
+        df = pd.read_csv(readPath, delimiter=',',header=1, on_bad_lines='skip')
         data = df.values  # convert dataframe to matrix
         print(data)
     
@@ -574,7 +574,7 @@ def main_batch_tplots1(item):
     if(signalType == "real"): # real signal    
         print("importing computed data")
         readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername)
-        df = pd.read_csv(readPath, delimiter=',',header=1)
+        df = pd.read_csv(readPath, delimiter=',',header=1, on_bad_lines='skip')
         data = df.values  # convert dataframe to matrix
         print(data)
     
@@ -637,11 +637,11 @@ def main_batch_tplots2(item):
     if(signalType == "real"): # real signal    
         print("importing computed data")
         readPath = "%s_analysis/ternary_video_norm_%s.txt" % (inp,foldername)
-        df = pd.read_csv(readPath, delimiter=',',header=1)
+        df = pd.read_csv(readPath, delimiter=',',header=1, on_bad_lines='skip')
         data = df.values  # convert dataframe to matrix
         print(data)
         readPath2 = "%s_analysis/TEvalues.txt" % (inp)
-        df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+        df2 = pd.read_csv(readPath2, delimiter=',',header=0, on_bad_lines='skip')
         TEdata = df2.values  # convert dataframe to matrix
         for k in range(len(TEdata)):
             TEname = TEdata[k][0]
@@ -710,11 +710,11 @@ def main_batch_tplots2_mfcc(item):
     if(signalType == "real"): # real signal    
         print("importing computed data")
         readPath = "%s_analysis/ternary_mfcc_norm_%s.txt" % (inp,foldername)
-        df = pd.read_csv(readPath, delimiter=',',header=1)
+        df = pd.read_csv(readPath, delimiter=',',header=1, on_bad_lines='skip')
         data = df.values  # convert dataframe to matrix
         print(data)
         readPath2 = "%s_analysis/TEvalues_mfcc.txt" % (inp)
-        df2 = pd.read_csv(readPath2, delimiter=',',header=0)
+        df2 = pd.read_csv(readPath2, delimiter=',',header=0, on_bad_lines='skip')
         TEdata = df2.values  # convert dataframe to matrix
         for k in range(len(TEdata)):
             TEname = TEdata[k][0]
