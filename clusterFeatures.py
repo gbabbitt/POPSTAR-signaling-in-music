@@ -337,7 +337,8 @@ def FDA(input_data, input_label):
     ##### find best bandwidth ####################
     
     bw_options = [0.05, 0.04,0.03,0.02,0.01,0.007,0.005,0.002,0.001]
-    bw_best = 0.05
+    #bw_best = 0.05
+    bw_best = 0.01
     pf_options = []
     for i in bw_options:
         smoother = KernelSmoother(NadarayaWatsonHatMatrix(bandwidth=i,kernel=normal,),)
