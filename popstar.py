@@ -130,19 +130,19 @@ class Ui_Dialog(object):
         self.radioButton_self.setGeometry(QtCore.QRect(375, 470, 80, 31))
         # adding signal and slot 
         self.radioButton_self.toggled.connect(self.selfselected)
-        self.radioButton_self.setText("self/self")
+        self.radioButton_self.setText("self")
         # Radio button for speech normalization option
         self.radioButton_spch = QtWidgets.QRadioButton(Dialog)
         self.radioButton_spch.setGeometry(QtCore.QRect(375, 450, 120, 31))
         # adding signal and slot 
         self.radioButton_spch.toggled.connect(self.spchselected)
-        self.radioButton_spch.setText("language/sea")
+        self.radioButton_spch.setText("language")
         # Radio button for music normalization option
         self.radioButton_musi = QtWidgets.QRadioButton(Dialog)
         self.radioButton_musi.setGeometry(QtCore.QRect(375, 430, 80, 31))
         # adding signal and slot 
         self.radioButton_musi.toggled.connect(self.musiselected)
-        self.radioButton_musi.setText("music/sea")
+        self.radioButton_musi.setText("music")
         
         ###########################################
         self.retranslateUi(Dialog)
@@ -151,21 +151,21 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "BabbittLab@RIT"))
-        self.pushButton.setText(_translate("Dialog", "3. calculate ternary plots"))
+        self.pushButton.setText(_translate("Dialog", "3. calculate frames "))
         self.pushButton_2.setText(_translate("Dialog", "exit"))
-        self.pushButton_3.setText(_translate("Dialog", "2. analyze audio signal"))
-        self.pushButton_4.setText(_translate("Dialog", "1. process audio/video"))
+        self.pushButton_3.setText(_translate("Dialog", "2. analyze signal"))
+        self.pushButton_4.setText(_translate("Dialog", "1. process input"))
         self.pushButton_6.setText(_translate("Dialog", "6. play Chernoff faces"))
         self.pushButton_7.setText(_translate("Dialog", "5. play trajectory"))
         self.pushButton_8.setText(_translate("Dialog", "see DOC"))
-        self.pushButton_9.setText(_translate("Dialog", "CES stability"))
+        self.pushButton_9.setText(_translate("Dialog", "CESmetric"))
         self.pushButton_10.setText(_translate("Dialog", "compare"))
         self.pushButton_11.setText(_translate("Dialog", "classify"))
         self.label.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-size:14pt; font-weight:600; color:#555500;\">POPSTAR - BabbittLab@RIT</span></p></body></html>"))
-        self.pushButton_5.setText(_translate("Dialog", "4. make dynamic trajectory"))
+        self.pushButton_5.setText(_translate("Dialog", "4. make movies"))
         self.label_3.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">name of file (or folder) </span></p></body></html>"))
-        self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">window length (seconds)</span></p></body></html>"))
-        self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:500;\">norm audio/video</span></p></body></html>"))
+        self.label_4.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:600;\">window length (sec)</span></p></body></html>"))
+        self.label_6.setText(_translate("Dialog", "<html><head/><body><p><span style=\" font-weight:500;\">normalization</span></p></body></html>"))
 ######################################### subroutines ######################################################
     def selfselected(self, selected):
         if selected:
@@ -291,12 +291,17 @@ class Ui_Dialog(object):
         f.write("self,%s,#self normalize to the song center value\n" % selfOption)
         f.write("fileExt,%s,#file extension\n" % fileExt)
         f.close()
-        print("pre-processing sound file(s)")
-        cmd = "python3 processSound.py"
-        os.system(cmd)
+        if(fileExt == ".mp4" or fileExt == ".mp3" or fileExt == ".wav"):
+            print("pre-processing sound file(s)")
+            cmd = "python3 processSound.py"
+            os.system(cmd)
         if(fileExt == ".mp4"):
-            print("processing videofile(s)")
+            print("processing video file(s)")
             cmd = "python3 processVideo.py"
+            os.system(cmd)
+        if(fileExt == ".txt"):
+            print("processing text file(s)")
+            cmd = "python3 processText.py"
             os.system(cmd)
         # setting for loop to set value of progress bar 
         for i in range(26): 

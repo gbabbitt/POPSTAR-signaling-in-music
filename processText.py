@@ -27,13 +27,15 @@ from plotnine import *
 import multiprocessing
 # IMPORTANT NOTE - run in base conda env, not in atomdance conda env   
 ################################################################################
-'''
-inp0 = input("\nChoose 'full' or 'fast' analysis for NVI index (default = full)\n" )
-inp00 = input("\nChoose 'trim' if you need to employ audio cutter (recommended for music files) (default = no)\n" )
-inp = input("\nName of sound file OR batch folder to analyze (e.g. type 'myfile' NOT 'myfile.wav')\n" )
-tm = input("\nEnter the time interval length to analyze (in seconds) (e.g. 30)\n" )
 
-'''
+print("\nIT APPEARS YOU ARE ANALYZING TEXT AND NOT AUDIOVISUAL FORMAT...")
+#tm = input("\nEnter the text chunk length to analyze (in tokens) (e.g. 600)\n")
+#stl = input("\nEnter the text chunk window step length (in tokens) (e.g. 300)\n")
+
+tm = 500
+stl = 250
+
+
 inp0 = "full"
 inp00 = "y"
 #inp = "test"
@@ -56,9 +58,9 @@ for x in range(len(infile_lines)):
     if(header == "name"):
         name = value
         print("my file/folder name is",name)
-    if(header == "int"):
-        tm = value
-        print("my time interval is",tm)
+    #if(header == "int"):
+    #    tm = value
+    #    print("my time interval is",tm)
     if(header == "metro"):
         met = value
         print("my metronome option is",met)
@@ -78,6 +80,7 @@ infile.close()
  ###### variable assignments ######
 inp = ""+name+""
 tm = int(tm)
+stl = int(stl)
 met = ""+met+""
 spchOpt = ""+spchOpt+""
 selfOpt = ""+selfOpt+""
@@ -91,8 +94,8 @@ if os.path.exists('%s_analysis' % inp):
 '''
 if not os.path.exists('%s_analysis' % inp):
         os.mkdir('%s_analysis' % inp)
-if not os.path.exists('%s_analysis/intervals' % inp):
-        os.mkdir('%s_analysis/intervals' % inp)        
+#if not os.path.exists('%s_analysis/intervals' % inp):
+#        os.mkdir('%s_analysis/intervals' % inp)        
 
 ################################################################################
 #########################   sonogram generator  ################################
@@ -125,11 +128,13 @@ else:
  
 def cos_sim():   
     # Initialize a lightweight LLM model and tokenizer
+    #model_name = input("\nEnter LLM model (e.g. sentence-transformers/all-MiniLM-L6-v2)\n")
     model_name = "sentence-transformers/all-MiniLM-L6-v2"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name)
     '''
     model_name = "meta-llama/Meta-Llama-3-8B"
+    hf_token = input("\nEnter Hugging Face token\n")
     hf_token = "YOUR_HUGGINGFACE_TOKEN_HERE" # Replace with your token
     quantization_config = BitsAndBytesConfig(load_in_8bit=True,) # Compresses model footprint down to ~9GB VRAM
     print("Loading Llama 3 (8B) into memory...")
@@ -146,8 +151,10 @@ def cos_sim():
     #sentence = "The artificial intelligence model extracted deep contextual embeddings."
     #sentence = "The financial bank is closed today, but the muddy river bank is still accessible."
     #sentence = "When forty winters shall besiege thy brow, And dig deep trenches in thy beauty's field, Thy youth's proud livery so gazed on now,  Will be a tattered weed of small worth held: Then being asked, where all thy beauty lies, Where all the treasure of thy lusty days."
-    
-    file_path = "test.txt"  # Replace with your actual file path
+    if(fileORfolder == "file"):
+        file_path = input4  # Replace with your actual file path
+    if(fileORfolder == "folder"):
+        file_path = inp  # Replace with your actual file path
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             full_text = file.read()
@@ -156,14 +163,16 @@ def cos_sim():
          print(f"Error: The file '{file_path}' was not found.")
          exit()
     #print(full_text)
-    tm = 500
+    #tm = 600
     win_length = tm
-    step_length = 250
+    step_length = stl
     text_length = len(full_text)
     n_steps = int((text_length/step_length))
     print("n_steps = %s" % n_steps)
     start = 0
     end = start + step_length
+    outfile = open("%s_analysis/cos_sim_%s.txt" % (inp,inp), "w")
+    outfile.write("raw\tcorrect\n")
     for i in range(n_steps):
         text_chunk = full_text[start:end]
         print("win_start = %s | win_end = %s | full_text = %s" % (start, end, text_length))
@@ -199,10 +208,10 @@ def cos_sim():
         print("-" * 55)
         print(f"{'Average RAW Pairwise Similarity':<35} | {avg_raw_similarity:.4f}")
         print(f"{'Average CORRECTED Pairwise Similarity':<35} | {avg_corrected_similarity:.4f}\n")
-        
+        outfile.write("%s\t%s\n" % (avg_raw_similarity,avg_corrected_similarity))
         start = start + step_length
         end = start + win_length
-        
+    outfile.close()    
         
 def compute_pairwise_cosine_similarity(embeddings):
     dot_product = np.dot(embeddings, embeddings.T)
@@ -211,7 +220,8 @@ def compute_pairwise_cosine_similarity(embeddings):
     norms_matrix[norms_matrix == 0] = 1e-9
     return dot_product / norms_matrix
 
-    
+def derive():
+    print("differentiating cosine similarity")
     
     
 def plot_llama():
@@ -292,7 +302,12 @@ def main():
         file_size_mb = file_size_bytes / (1024 * 1024)# Convert to Megabytes (MB)
         print(f"File Size: {file_size_mb:.2f} MB")
         time.sleep(1)
-        cos_sim()
+        print("calculating control = avg corrected cosine similarity")
+        time.sleep(1)
+        #cos_sim()
+        print("calculating energy and surprise = 1st/2nd derivatives of cosine similarity")
+        time.sleep(1)
+        derive()
         #plot_llama()
         print("\ntext processing is complete\n")
         
