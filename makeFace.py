@@ -12,7 +12,6 @@ signalType = "real"
 import getopt, sys # Allows for command line arguments
 import os
 import random as rnd
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

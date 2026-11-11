@@ -334,9 +334,33 @@ class Ui_Dialog(object):
             self.progressBar.setValue(i)
            
     def makeMovie(self):
-        print("rendering movie file")
-        cmd = "python3 makeMovie.py"
-        os.system(cmd)
+        filename = self.lineEdit_2.text()
+        if os.path.isfile(filename):
+            print("user input is a file")
+            fileORfolder = "file"
+            filename = filename[:-4]
+            # get file extension
+            fileExt = Path(self.lineEdit_2.text()).suffix
+            print("file name is %s" % filename)
+            print("file extension is %s" % fileExt)
+        if os.path.isdir(filename):
+            print("user input is a folder")
+            fileORfolder = "folder"
+            # get file extension
+            files = Path(self.lineEdit_2.text()).iterdir()
+            first_file = next((f for f in files if f.is_file()), None)
+            fileExt = first_file.suffix if first_file else "Folder is empty"
+            print("folder name is %s" % filename)
+            print("file extension is %s" % fileExt)
+            time.sleep(2)
+        if(fileExt != ".txt"):
+           print("rendering movie file")
+           cmd = "python3 makeMovie.py"
+           os.system(cmd)
+        if(fileExt == ".txt"):
+           print("rendering movie file")
+           cmd = "python3 makeMovieTXT.py"
+           os.system(cmd)
         for i in range(101): 
             time.sleep(0.01) 
             # setting value to progress bar 
