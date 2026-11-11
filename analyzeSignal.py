@@ -11,6 +11,7 @@
 import getopt, sys # Allows for command line arguments
 import os
 import glob
+import time
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -108,7 +109,10 @@ musiOpt = ""+musiOpt+""
 fileORfolder = fof
 met = ""+met+""
 ext = ""+ext+""
-
+if(ext == ".txt"):
+        print("no signal needs analyzed - skipping this step")
+        time.sleep(2)
+        exit()
 if(fof=="file"):
     # calculate number of faces for single file
     lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path

@@ -22,9 +22,9 @@ import time
 import torch
 from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, BitsAndBytesConfig
 from sklearn.decomposition import PCA
-# for ggplot
-from plotnine import *
 import multiprocessing
+import textwrap
+from PIL import Image, ImageDraw, ImageFont
 # IMPORTANT NOTE - run in base conda env, not in atomdance conda env   
 ################################################################################
 
@@ -94,8 +94,8 @@ if os.path.exists('%s_analysis' % inp):
 '''
 if not os.path.exists('%s_analysis' % inp):
         os.mkdir('%s_analysis' % inp)
-#if not os.path.exists('%s_analysis/intervals' % inp):
-#        os.mkdir('%s_analysis/intervals' % inp)        
+if not os.path.exists('%s_analysis/texts' % inp):
+        os.mkdir('%s_analysis/texts' % inp)        
 
 ################################################################################
 #########################   sonogram generator  ################################
@@ -209,6 +209,8 @@ def cos_sim():
         print(f"{'Average RAW Pairwise Similarity':<35} | {avg_raw_similarity:.4f}")
         print(f"{'Average CORRECTED Pairwise Similarity':<35} | {avg_corrected_similarity:.4f}\n")
         outfile.write("%s\t%s\n" % (avg_raw_similarity,avg_corrected_similarity))
+        # save text chunk to image
+        text_to_png(text_chunk, "%s_analysis/texts/text_%s.png" % (inp,i))
         start = start + step_length
         end = start + win_length
     outfile.close()    
@@ -222,75 +224,79 @@ def compute_pairwise_cosine_similarity(embeddings):
 
 def derive():
     print("differentiating cosine similarity")
+    readpath = "%s_analysis/cos_sim_%s.txt" % (inp,inp)
+    df = pd.read_csv(readpath, delimiter = "\t")
+    print(df)
+    control = df['correct'].to_numpy()
+    energy = np.diff(control)
+    surprise = np.diff(energy)
+    control = control[2:] # remove first 2 elemnets of array
+    energy = energy[1:] # remove first element of array
+    c_len = len(control)
+    e_len = len(energy)
+    s_len = len(surprise)
+    print("arr len %s %s %s" % (c_len, e_len, s_len))
+    # Combine into a DataFrame
+    ternary_raw = pd.DataFrame({
+        'energy': energy,
+        'control': control,
+        'surprise': surprise
+    })
+    print(ternary_raw)
+    writepath1 = "%s_analysis/ternary_txt_raw.txt" % (inp)
+    ternary_raw.to_csv(writepath1, index=False)
+    ternary_norm_prelim = (ternary_raw - ternary_raw.min()) / (ternary_raw.max() - ternary_raw.min())
+    writepath2 = "%s_analysis/ternary_txt_norm_prelim.txt" % (inp)
+    ternary_norm_prelim.to_csv(writepath2, index=False)
+    ternary_norm = ternary_norm_prelim.div(ternary_norm_prelim.sum(axis=1), axis=0)
+    writepath3 = "%s_analysis/ternary_txt_norm.txt" % (inp)
+    ternary_norm.to_csv(writepath3, index=False)
     
-    
-def plot_llama():
+def text_to_png(text, output_path="%s_analysis/texts/output.png" % (inp), wrap_width=60, padding=30):
+    # 1. Wrap long paragraphs into clean lines
+    wrapped_lines = []
+    for paragraph in text.splitlines():
+        if paragraph.strip() == "":
+            wrapped_lines.append("")
+        else:
+            wrapped_lines.extend(textwrap.wrap(paragraph, width=wrap_width))
+    formatted_text = "\n".join(wrapped_lines)
 
-    # 1. Configuration for standard desktop VRAM optimizations
-    model_id = "meta-llama/Meta-Llama-3-8B"
-    hf_token = "YOUR_HUGGINGFACE_TOKEN_HERE" # Replace with your token
+    # 2. Load a font (falls back to default if custom TTF isn't found)
+    try:
+      # Replace with a path to a .ttf file on your system (e.g., "arial.ttf" or "/System/Library/Fonts/Menlo.ttc")
+      font = ImageFont.truetype("arial.ttf", size=20)
+    except IOError:
+      font = ImageFont.load_default()
 
-    quantization_config = BitsAndBytesConfig(load_in_8bit=True,) # Compresses model footprint down to ~9GB VRAM
-    
-
-    # 2. Load Llama 3 Tokenizer and Model
-    print("Loading Llama 3 (8B) into memory...")
-    tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id, 
-        quantization_config=quantization_config,
-        device_map="auto",
-        token=hf_token
+    # 3. Calculate exact text dimensions using a temporary dummy image
+    dummy_img = Image.new("RGB", (1, 1))
+    dummy_draw = ImageDraw.Draw(dummy_img)
+    bbox = dummy_draw.multiline_textbbox(
+        (0, 0), formatted_text, font=font, spacing=6
     )
 
-    # 3. Define the paragraph to analyze
-    paragraph = "The financial bank is closed today, but the muddy river bank is still accessible."
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
 
-    # 4. Tokenize and extract vector space hidden states
-    inputs = tokenizer(paragraph, return_tensors="pt").to("cuda")
+    # 4. Create the final canvas with padding and draw the text
+    img_width = text_width + (padding * 2)
+    img_height = text_height + (padding * 2)
 
-    with torch.no_grad():
-        outputs = model(**inputs, output_hidden_states=True)
+    img = Image.new("RGB", (img_width, img_height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    draw.multiline_text(
+      (padding, padding),
+      formatted_text,
+      fill=(20, 20, 20),
+      font=font,
+      spacing=6,
+    )
+
+    # 5. Save as PNG
+    img.save(output_path, "PNG")
+    print(f"Saved image to {output_path}")  
     
-        # Extract from the final transformer layer before the output head
-        # Shape: [batch_size, tokens, 4096] -> squeeze to [tokens, 4096]
-        llama_vectors = outputs.hidden_states[-1].squeeze(0).cpu().float().numpy()
-
-    # 5. Decode token IDs back to strings for labeling
-    token_ids = inputs["input_ids"][0].tolist()
-    tokens = [tokenizer.decode([tid]).strip() for tid in token_ids]
-
-    # 6. Apply PCA to compress 4,096 dimensions into a 2D space
-    pca = PCA(n_components=2)
-    vectors_2d = pca.fit_transform(llama_vectors)
-
-    # 7. Plotting the Vector Space Mapping
-    plt.figure(figsize=(12, 8))
-    plt.scatter(vectors_2d[:, 0], vectors_2d[:, 1], color="royalblue", edgecolors="black", s=100, zorder=2)
-
-    # Annotate each token coordinate on the graph
-    for i, token in enumerate(tokens):
-        if token: # Skip empty strings from formatting pads
-            plt.annotate(
-                token, 
-                (vectors_2d[i, 0], vectors_2d[i, 1]),
-                textcoords="offset points", 
-                xytext=(0,10), 
-                ha='center', 
-                fontsize=10,
-                weight='bold' if token.lower() == "bank" else 'normal'
-            )
-
-    plt.title("Llama 3 Token Vector Space Visualization (PCA-Reduced)", fontsize=14, pad=15)
-    plt.xlabel("Principal Component 1", fontsize=11)
-    plt.ylabel("Principal Component 2", fontsize=11)
-    plt.grid(True, linestyle="--", alpha=0.5, zorder=1)
-    plt.show()
-
-
-
-
-
 #################################################################################
 ####################  main program      #########################################
 #################################################################################
@@ -304,11 +310,11 @@ def main():
         time.sleep(1)
         print("calculating control = avg corrected cosine similarity")
         time.sleep(1)
-        #cos_sim()
+        cos_sim()
         print("calculating energy and surprise = 1st/2nd derivatives of cosine similarity")
         time.sleep(1)
         derive()
-        #plot_llama()
+        
         print("\ntext processing is complete\n")
         
     if(fileORfolder == "folder"):
