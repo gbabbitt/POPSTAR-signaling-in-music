@@ -240,10 +240,33 @@ class Ui_Dialog(object):
             self.progressBar.setValue(i)
     
     def makeHist(self):
-        print("making histogram")
-        cmd = "python3 makeHisto.py"
-        os.system(cmd)
-    
+        filename = self.lineEdit_2.text()
+        if os.path.isfile(filename):
+            print("user input is a file")
+            fileORfolder = "file"
+            filename = filename[:-4]
+            # get file extension
+            fileExt = Path(self.lineEdit_2.text()).suffix
+            print("file name is %s" % filename)
+            print("file extension is %s" % fileExt)
+        if os.path.isdir(filename):
+            print("user input is a folder")
+            fileORfolder = "folder"
+            # get file extension
+            files = Path(self.lineEdit_2.text()).iterdir()
+            first_file = next((f for f in files if f.is_file()), None)
+            fileExt = first_file.suffix if first_file else "Folder is empty"
+            print("folder name is %s" % filename)
+            print("file extension is %s" % fileExt)
+            time.sleep(2)
+        if(fileExt != ".txt"):
+            print("making histogram")
+            cmd = "python3 makeHisto.py"
+            os.system(cmd)
+        if(fileExt == ".txt"):
+            print("making histogram")
+            cmd = "python3 makeHistoTXT.py"
+            os.system(cmd)
             
     def analyzeSignal(self):
         print("analyzing fitness signal")
