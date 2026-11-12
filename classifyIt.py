@@ -103,15 +103,47 @@ class Ui_Dialog(object):
         sys.exit(app.exec_())
     
     def heatmapIt(self):
+        # read popstar ctl file
+        infile = open("popstar.ctl", "r")
+        infile_lines = infile.readlines()
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            #print(header)
+            #print(value)
+            if(header == "fileExt"):
+                ext = value
+                print("my file extension(s) are",ext) 
+        ext = ""+ext+""
         print("making heatmap for CES signals")
         cmd = "python3 CESheatmap.py"
         os.system(cmd)
-        cmd = "python3 CESheatmap_video.py"
-        os.system(cmd)
-        cmd = "python3 CESheatmap_mfcc.py"
-        os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 CESheatmap_video.py"
+            os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 CESheatmap_mfcc.py"
+            os.system(cmd)
         
     def classifyIt(self):
+        # read popstar ctl file
+        infile = open("popstar.ctl", "r")
+        infile_lines = infile.readlines()
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            #print(header)
+            #print(value)
+            if(header == "fileExt"):
+                ext = value
+                print("my file extension(s) are",ext) 
+        ext = ""+ext+""
         print("running RF classifier")
         filename1 = self.lineEdit.text()
         filename2 = self.lineEdit_2.text()
@@ -129,12 +161,29 @@ class Ui_Dialog(object):
         f.close()
         cmd = "python3 classifyFeatures.py"
         os.system(cmd)
-        cmd = "python3 classifyFeatures_video.py"
-        os.system(cmd)
-        cmd = "python3 classifyFeatures_mfcc.py"
-        os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 classifyFeatures_video.py"
+            os.system(cmd)
+        if(ext != ".txt"):    
+            cmd = "python3 classifyFeatures_mfcc.py"
+            os.system(cmd)
     
     def clusterIt(self):
+        # read popstar ctl file
+        infile = open("popstar.ctl", "r")
+        infile_lines = infile.readlines()
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            #print(header)
+            #print(value)
+            if(header == "fileExt"):
+                ext = value
+                print("my file extension(s) are",ext) 
+        ext = ""+ext+""
         print("running FDA signature classification analysis")
         filename1 = self.lineEdit.text()
         filename2 = self.lineEdit_2.text()
@@ -152,10 +201,12 @@ class Ui_Dialog(object):
         f.close()
         cmd = "python3 clusterFeatures.py"
         os.system(cmd)
-        cmd = "python3 clusterFeatures_video.py"
-        os.system(cmd)
-        cmd = "python3 clusterFeatures_mfcc.py"
-        os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 clusterFeatures_video.py"
+            os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 clusterFeatures_mfcc.py"
+            os.system(cmd)
 
 if __name__ == "__main__":
     import sys
