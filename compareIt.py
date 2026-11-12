@@ -71,6 +71,21 @@ class Ui_Dialog(object):
         sys.exit(app.exec_())
     
     def compareDist(self):
+        # read popstar ctl file
+        infile = open("popstar.ctl", "r")
+        infile_lines = infile.readlines()
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            #print(header)
+            #print(value)
+            if(header == "fileExt"):
+                ext = value
+                print("my file extension(s) are",ext) 
+        ext = ""+ext+""
         print("compare step distributions")
         print("appending control file")
         filename1 = self.lineEdit.text()
@@ -81,12 +96,29 @@ class Ui_Dialog(object):
         f.close()
         cmd = "python3 compareDist.py"
         os.system(cmd)
-        cmd = "python3 compareDist_video.py"
-        os.system(cmd)
-        cmd = "python3 compareDist_mfcc.py"
-        os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 compareDist_video.py"
+            os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 compareDist_mfcc.py"
+            os.system(cmd)
         
     def compareSignal(self):
+        # read popstar ctl file
+        infile = open("popstar.ctl", "r")
+        infile_lines = infile.readlines()
+        for x in range(len(infile_lines)):
+            infile_line = infile_lines[x]
+            #print(infile_line)
+            infile_line_array = str.split(infile_line, ",")
+            header = infile_line_array[0]
+            value = infile_line_array[1]
+            #print(header)
+            #print(value)
+            if(header == "fileExt"):
+                ext = value
+                print("my file extension(s) are",ext) 
+        ext = ""+ext+""
         print("compare fitness signal features")
         print("appending control file")
         filename1 = self.lineEdit.text()
@@ -97,10 +129,12 @@ class Ui_Dialog(object):
         f.close()
         cmd = "python3 compareSignal.py"
         os.system(cmd)
-        cmd = "python3 compareSignal_video.py"
-        os.system(cmd)
-        cmd = "python3 compareSignal_mfcc.py"
-        os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 compareSignal_video.py"
+            os.system(cmd)
+        if(ext != ".txt"):
+            cmd = "python3 compareSignal_mfcc.py"
+            os.system(cmd)
 
 
 if __name__ == "__main__":

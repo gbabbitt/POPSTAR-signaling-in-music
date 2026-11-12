@@ -57,6 +57,7 @@ for x in range(len(infile_lines)):
     if(header == "folder2"):
         name2 = value
         print("my file/folder name is",name2)    
+    
 infile.close()
  ###### variable assignments ######
 inp1 = ""+name1+""
@@ -69,11 +70,17 @@ def collectDF():
     writePath = "popstar_results/distance_order1_compare_%s_%s.txt" % (inp1,inp2)
     txt_out = open(writePath, "w")
     txt_out.write("folder\tdistance\n")
-    lst = os.listdir("%s_analysis/intervals/" % (inp1)) # your directory path
+    try:
+        lst = os.listdir("%s_analysis/intervals/" % (inp1)) # your directory path
+    except:
+        lst = os.listdir("%s_analysis/texts/" % (inp1)) # your directory path
     number_files = len(lst)
     print("number of files")
     print(number_files)
-    dir_list = os.listdir("%s_analysis/intervals/" % (inp1))
+    try:
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp1))
+    except:
+        dir_list = os.listdir("%s_analysis/texts/" % (inp1))
     print(dir_list)
     for fname in dir_list:
         print(fname)
@@ -86,11 +93,17 @@ def collectDF():
             print("%s\t%s" % (inp1,distance))
             txt_out.write("%s\t%s\n" % (inp1,distance))
     ##################################        
-    lst = os.listdir("%s_analysis/intervals/" % (inp2)) # your directory path
+    try:
+        lst = os.listdir("%s_analysis/intervals/" % (inp2)) # your directory path
+    except:
+        lst = os.listdir("%s_analysis/texts/" % (inp2)) # your directory path
     number_files = len(lst)
     print("number of files")
     print(number_files)
-    dir_list = os.listdir("%s_analysis/intervals/" % (inp2))
+    try:
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp2))
+    except:
+        dir_list = os.listdir("%s_analysis/texts/" % (inp2))
     print(dir_list)
     for fname in dir_list:
         print(fname)

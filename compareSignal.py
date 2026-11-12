@@ -77,16 +77,22 @@ def collectDF():
     txt_out1.write("folder\tenergy\n")
     txt_out2.write("folder\tcontrol\n")
     txt_out3.write("folder\tsurprise\n")
-    lst = os.listdir("%s_analysis/intervals/" % (inp1)) # your directory path
+    try:
+        lst = os.listdir("%s_analysis/intervals/" % (inp1)) # your directory path
+    except:
+        lst = os.listdir("%s_analysis/texts/" % (inp1)) # your directory path
     number_files = len(lst)
     print("number of files")
     print(number_files)
-    dir_list = os.listdir("%s_analysis/intervals/" % (inp1))
+    try:
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp1))
+    except:
+        dir_list = os.listdir("%s_analysis/texts/" % (inp1))
     print(dir_list)
     for fname in dir_list:
         print(fname)
         dirname = fname
-        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp1,dirname)
+        readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp1,dirname)
         df = pd.read_csv(readPath, sep = "\t")
         #print(df)
         energy_list = []
@@ -114,16 +120,22 @@ def collectDF():
         txt_out2.write("%s\t%s\n" % (inp1,control_avg))
         txt_out3.write("%s\t%s\n" % (inp1,surprise_avg))
     ####################################
-    lst = os.listdir("%s_analysis/intervals/" % (inp2)) # your directory path
+    try:
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp2))
+    except:
+        dir_list = os.listdir("%s_analysis/texts/" % (inp2))
     number_files = len(lst)
     print("number of files")
     print(number_files)
-    dir_list = os.listdir("%s_analysis/intervals/" % (inp2))
+    try:
+        dir_list = os.listdir("%s_analysis/intervals/" % (inp2))
+    except:
+        dir_list = os.listdir("%s_analysis/texts/" % (inp2))
     print(dir_list)
     for fname in dir_list:
         print(fname)
         dirname = fname
-        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp2,dirname)
+        readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp2,dirname)
         df = pd.read_csv(readPath, sep = "\t")
         #print(df)    
         energy_list = []
