@@ -256,10 +256,7 @@ def collectDFeb():
         for fname in dir_list:
             print(fname)
             dirname = fname
-            try:
-                readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
-            except:
-                readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp,dirname)
+            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             energy_list = []

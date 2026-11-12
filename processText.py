@@ -29,12 +29,13 @@ from PIL import Image, ImageDraw, ImageFont
 ################################################################################
 
 print("\nIT APPEARS YOU ARE ANALYZING TEXT AND NOT AUDIOVISUAL FORMAT...")
-#tm = input("\nEnter the text chunk length to analyze (in tokens) (e.g. 600)\n")
-#stl = input("\nEnter the text chunk window step length (in tokens) (e.g. 300)\n")
-
+tm = input("\nEnter the text chunk length to analyze (in tokens) (e.g. 600)\n")
+stl = input("\nEnter the text chunk window step length (in tokens) (e.g. 300)\n")
+mdl = input("\nEnter LLM model (e.g. sentence-transformers/all-MiniLM-L6-v2)\n")
+'''
 tm = 500
 stl = 250
-
+'''
 
 inp0 = "full"
 inp00 = "y"
@@ -128,8 +129,7 @@ else:
  
 def cos_sim():   
     # Initialize a lightweight LLM model and tokenizer
-    #model_name = input("\nEnter LLM model (e.g. sentence-transformers/all-MiniLM-L6-v2)\n")
-    model_name = "sentence-transformers/all-MiniLM-L6-v2"
+    model_name = mdl
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name)
     '''
@@ -346,13 +346,13 @@ def derive():
         'surprise': surprise
     })
     print(ternary_raw)
-    writepath1 = "%s_analysis/ternary_txt_raw.txt" % (inp)
+    writepath1 = "%s_analysis/ternary_raw.txt" % (inp)
     ternary_raw.to_csv(writepath1, index=False)
     ternary_norm_prelim = (ternary_raw - ternary_raw.min()) / (ternary_raw.max() - ternary_raw.min())
-    writepath2 = "%s_analysis/ternary_txt_norm_prelim.txt" % (inp)
+    writepath2 = "%s_analysis/ternary_norm_prelim.txt" % (inp)
     ternary_norm_prelim.to_csv(writepath2, index=False)
     ternary_norm = ternary_norm_prelim.div(ternary_norm_prelim.sum(axis=1), axis=0)
-    writepath3 = "%s_analysis/ternary_txt_norm.txt" % (inp)
+    writepath3 = "%s_analysis/ternary_norm.txt" % (inp)
     ternary_norm.to_csv(writepath3, index=False)
 
 def derive_batch():
@@ -383,13 +383,13 @@ def derive_batch():
             'surprise': surprise
         })
         print(ternary_raw)
-        writepath1 = "%s_analysis/ternary_txt_raw_%s.txt" % (inp,foldername[:-4])
+        writepath1 = "%s_analysis/ternary_raw_%s.txt" % (inp,foldername[:-4])
         ternary_raw.to_csv(writepath1, index=False)
         ternary_norm_prelim = (ternary_raw - ternary_raw.min()) / (ternary_raw.max() - ternary_raw.min())
-        writepath2 = "%s_analysis/ternary_txt_norm_prelim_%s.txt" % (inp,foldername[:-4])
+        writepath2 = "%s_analysis/ternary_norm_prelim_%s.txt" % (inp,foldername[:-4])
         ternary_norm_prelim.to_csv(writepath2, index=False)
         ternary_norm = ternary_norm_prelim.div(ternary_norm_prelim.sum(axis=1), axis=0)
-        writepath3 = "%s_analysis/ternary_txt_norm_%s.txt" % (inp,foldername[:-4])
+        writepath3 = "%s_analysis/ternary_norm_%s.txt" % (inp,foldername[:-4])
         ternary_norm.to_csv(writepath3, index=False)
 
     

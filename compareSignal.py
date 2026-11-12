@@ -92,10 +92,7 @@ def collectDF():
     for fname in dir_list:
         print(fname)
         dirname = fname
-        try:
-            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp1,dirname)
-        except:
-            readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp1,dirname)
+        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp1,dirname)
         df = pd.read_csv(readPath, sep = "\t")
         #print(df)
         energy_list = []
@@ -138,10 +135,7 @@ def collectDF():
     for fname in dir_list:
         print(fname)
         dirname = fname
-        try:
-            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp2,dirname)
-        except:
-            readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp2,dirname)
+        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp2,dirname)
         df = pd.read_csv(readPath, sep = "\t")
         #print(df)    
         energy_list = []

@@ -317,7 +317,7 @@ def copyMovie_batch():
 
 def distances():
     print("calc distances")
-    readPath = "%s_analysis/ternary_txt_norm.txt" % (inp)
+    readPath = "%s_analysis/ternary_norm.txt" % (inp)
     writePath = "%s_analysis/distances.txt" % (inp)
     writePath2 = "%s_analysis/distances_order1.txt" % (inp)
     writePath3 = "%s_analysis/distances_order0.txt" % (inp)
@@ -372,7 +372,7 @@ def distances_batch():
     for fname in dir_list:
         print(fname)
         dirname = fname
-        readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp,dirname)
+        readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
         writePath = "%s_analysis/distances_%s.txt" % (inp,dirname)
         writePath2 = "%s_analysis/distances_order1_%s.txt" % (inp,dirname)
         writePath3 = "%s_analysis/distances_order0_%s.txt" % (inp,dirname)

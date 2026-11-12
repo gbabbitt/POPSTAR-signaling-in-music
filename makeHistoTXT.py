@@ -691,7 +691,7 @@ def main_audio():
         plt.show()
         ############## permutation test ################
         print("running permutations test on %s" % (inp))
-        readPath = "%s_analysis/ternary_txt_norm.txt" % (inp)
+        readPath = "%s_analysis/ternary_norm.txt" % (inp)
         df_obs = pd.read_csv(readPath, delimiter=',',header=0)
         cnt_above = 0
         cnt_below = 0
@@ -807,7 +807,7 @@ def main_audio():
             #plt.show()
             ############## permutation test ################
             print("running permutations test on %s %s" % (inp,dirname))
-            readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp,dirname)
+            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
             df_obs = pd.read_csv(readPath, delimiter=',',header=0)
             cnt_above = 0
             cnt_below = 0
@@ -866,7 +866,7 @@ def main_audio():
             txt_out2.close
             sns.histplot(df, x="distance", hue="order", kde=True)
             p_value = round(p_value,4)
-            plt.title("stability in audio CES = %s for %s\n" % (percent_nr,dirname))
+            plt.title("stability in textual CES = %s for %s\n" % (percent_nr,dirname))
             plt.savefig("%s_analysis/permutation_test/%s/histogram_CES_stability_%s.png" % (inp,dirname,dirname))
             plt.savefig("popstar_results/histogram-CES_stability_%s_%s.png" % (inp,dirname))
             cnt = cnt +1

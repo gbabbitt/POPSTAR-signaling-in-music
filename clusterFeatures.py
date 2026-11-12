@@ -167,10 +167,7 @@ def findDIM():
             print(fname)
             fname_cnt = fname_cnt+1
             dirname = fname
-            try:
-                readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
-            except:
-                readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp,dirname)
+            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             
@@ -227,10 +224,7 @@ def collectDF():
             print(fname)
             fname_cnt = fname_cnt+1
             dirname = fname
-            try:
-                readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
-            except:
-                readPath = "%s_analysis/ternary_txt_raw%s.txt" % (inp,dirname)
+            readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             writePath2 = "popstar_results/FDA/%s/FDA_features_%s.txt" % (inp,dirname)
