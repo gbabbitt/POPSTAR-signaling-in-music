@@ -241,16 +241,25 @@ def collectDFeb():
     
     for j in range(len(folder_list)):
         inp = folder_list[j]
-        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        try:
+            lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        except:
+            lst = os.listdir("%s_analysis/texts/" % (inp)) # your directory path
         number_files = len(lst)
         print("number of files")
         print(number_files)
-        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        try:
+            dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        except:
+            dir_list = os.listdir("%s_analysis/intervals/" % (inp))        
         print(dir_list)
         for fname in dir_list:
             print(fname)
             dirname = fname
-            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
+            try:
+                readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
+            except:
+                readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             energy_list = []
@@ -337,11 +346,28 @@ def KruskalWallis():
 ####################  main program      #########################################
 #################################################################################
 def main():
-    collectDFrf()
+    # read popstar ctl file
+    infile = open("popstar.ctl", "r")
+    infile_lines = infile.readlines()
+    for x in range(len(infile_lines)):
+        infile_line = infile_lines[x]
+        #print(infile_line)
+        infile_line_array = str.split(infile_line, ",")
+        header = infile_line_array[0]
+        value = infile_line_array[1]
+        #print(header)
+        #print(value)
+        if(header == "fileExt"):
+            ext = value
+            print("my file extension(s) are",ext) 
+    ext = ""+ext+""
+    if(ext != ".txt"):
+        collectDFrf()
     collectDFeb()
     KruskalWallis()
     errorBarPlot()
-    RFclass()
+    if(ext != ".txt"):
+        RFclass()
     print("\nsignal classification is complete\n")   
     
         

@@ -148,11 +148,17 @@ def findDIM():
     Cvals = []
     for j in range(len(folder_list)):
         inp = folder_list[j]
-        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        try:
+            lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        except:
+            lst = os.listdir("%s_analysis/texts/" % (inp)) # your directory path    
         number_files = len(lst)
         print("number of files")
         print(number_files)
-        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        try:
+            dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        except:
+            dir_list = os.listdir("%s_analysis/texts/" % (inp))       
         print(dir_list)
         if not os.path.exists('popstar_results/FDA/%s' % inp):
             os.mkdir('popstar_results/FDA/%s' % inp)
@@ -161,7 +167,10 @@ def findDIM():
             print(fname)
             fname_cnt = fname_cnt+1
             dirname = fname
-            readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
+            try:
+                readPath = "%s_analysis/ternary_norm_%s.txt" % (inp,dirname)
+            except:
+                readPath = "%s_analysis/ternary_txt_norm_%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             
@@ -199,11 +208,17 @@ def collectDF():
     Svals = []
     for j in range(len(folder_list)):
         inp = folder_list[j]
-        lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        try:
+            lst = os.listdir("%s_analysis/intervals/" % (inp)) # your directory path
+        except:
+            lst = os.listdir("%s_analysis/itexts/" % (inp)) # your directory path   
         number_files = len(lst)
         print("number of files")
         print(number_files)
-        dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        try:
+            dir_list = os.listdir("%s_analysis/intervals/" % (inp))
+        except:
+            dir_list = os.listdir("%s_analysis/texts/" % (inp))        
         print(dir_list)
         if not os.path.exists('popstar_results/FDA/%s' % inp):
             os.mkdir('popstar_results/FDA/%s' % inp)
@@ -212,7 +227,10 @@ def collectDF():
             print(fname)
             fname_cnt = fname_cnt+1
             dirname = fname
-            readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
+            try:
+                readPath = "%s_analysis/ternary_%s.txt" % (inp,dirname)
+            except:
+                readPath = "%s_analysis/ternary_txt_raw%s.txt" % (inp,dirname)
             df = pd.read_csv(readPath, sep = "\t")
             #print(df)
             writePath2 = "popstar_results/FDA/%s/FDA_features_%s.txt" % (inp,dirname)
