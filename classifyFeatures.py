@@ -251,7 +251,7 @@ def collectDFeb():
         try:
             dir_list = os.listdir("%s_analysis/intervals/" % (inp))
         except:
-            dir_list = os.listdir("%s_analysis/intervals/" % (inp))        
+            dir_list = os.listdir("%s_analysis/texts/" % (inp))        
         print(dir_list)
         for fname in dir_list:
             print(fname)
@@ -358,11 +358,12 @@ def main():
             ext = value
             print("my file extension(s) are",ext) 
     ext = ""+ext+""
-    if(ext != ".txt"):
-        collectDFrf()
+    ##############
     collectDFeb()
     KruskalWallis()
     errorBarPlot()
+    if(ext != ".txt"):
+        collectDFrf()
     if(ext != ".txt"):
         RFclass()
     print("\nsignal classification is complete\n")   
