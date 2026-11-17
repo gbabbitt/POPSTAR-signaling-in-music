@@ -42,7 +42,10 @@ if(fof=="folder"):
     print("movies generated can be found in your main folder")
     exit()
 # calculate number of faces for single file
-lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
+try:
+    lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
+except:
+    lst = os.listdir("%s_analysis/texts/" % (inp)) # your directory path
 frame_num = int(len(lst)/4)  # note folder has 4 types of files
 print("number of movie frames is %s" % frame_num)
 # calculate number of faces for folder
