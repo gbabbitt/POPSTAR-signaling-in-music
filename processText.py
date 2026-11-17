@@ -348,7 +348,13 @@ def derive():
     print(ternary_raw)
     writepath1 = "%s_analysis/ternary_raw.txt" % (inp)
     ternary_raw.to_csv(writepath1, index=False)
-    ternary_norm_prelim = (ternary_raw - ternary_raw.min()) / (ternary_raw.max() - ternary_raw.min())
+    sf = 0.1 #scaling factor
+    if(selfOpt == "yes"):
+        ternary_norm_prelim = (ternary_raw - ternary_raw.min()) / (ternary_raw.max() - ternary_raw.min())
+    if(selfOpt == "no"):
+        mean_shakespeare = 0.0034
+        sd_shakespeare = 0.007
+        ternary_norm_prelim = ((ternary_raw - mean_shakespeare) / (sd_shakespeare)*sf+1)/2
     writepath2 = "%s_analysis/ternary_norm_prelim.txt" % (inp)
     ternary_norm_prelim.to_csv(writepath2, index=False)
     ternary_norm = ternary_norm_prelim.div(ternary_norm_prelim.sum(axis=1), axis=0)
@@ -385,7 +391,13 @@ def derive_batch():
         print(ternary_raw)
         writepath1 = "%s_analysis/ternary_raw_%s.txt" % (inp,foldername[:-4])
         ternary_raw.to_csv(writepath1, index=False)
-        ternary_norm_prelim = (ternary_raw - ternary_raw.min()) / (ternary_raw.max() - ternary_raw.min())
+        sf = 0.1 # scaling factor
+        if(selfOpt == "yes"):
+            ternary_norm_prelim = (ternary_raw - ternary_raw.min()) / (ternary_raw.max() - ternary_raw.min())
+        if(selfOpt == "no"):
+            mean_shakespeare = 0.0034
+            sd_shakespeare = 0.007
+            ternary_norm_prelim = ((ternary_raw - mean_shakespeare) / (sd_shakespeare)*sf+1)/2
         writepath2 = "%s_analysis/ternary_norm_prelim_%s.txt" % (inp,foldername[:-4])
         ternary_norm_prelim.to_csv(writepath2, index=False)
         ternary_norm = ternary_norm_prelim.div(ternary_norm_prelim.sum(axis=1), axis=0)
