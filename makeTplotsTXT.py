@@ -67,7 +67,7 @@ musiOpt = ""+musiOpt+""
 if(fof=="file"):
     # calculate number of faces for single file
     lst = os.listdir("%s_analysis/texts/" % inp) # your directory path
-    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    face_num = int(len(lst))
     print("number of text .png is %s" % face_num)
     
 
@@ -140,7 +140,7 @@ def main():
     valX = 0.5
     valY = 0.5
     valZ = 0.5  
-    for i in range(face_num-1):
+    for i in range(face_num-4):
         if(i == 0):
             valX = 0.5
             valY = 0.5
@@ -164,7 +164,7 @@ def main():
         tdata.update({tdata_name: tdata_norm})
         #tdata.append(tdata_add)
         #print(tdata)
-        if(i>face_num-1):
+        if(i>face_num-4):
             continue
         if not os.path.exists('%s_analysis/tplots1' % inp):
             os.mkdir('%s_analysis/tplots1' % inp)
@@ -246,7 +246,7 @@ def main_batch_tplots1(item):
         print(foldername)
     # calculate number of faces for single file
     lst = os.listdir("%s_analysis/texts/%s" % (inp,foldername)) # your directory path
-    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    face_num = int(len(lst))  # note folder has 4 types of files
     print("number of tplots is %s" % face_num)  
     ###########################
     # make each ternary plot 1
@@ -262,7 +262,7 @@ def main_batch_tplots1(item):
     valX = 0.5
     valY = 0.5
     valZ = 0.5  
-    for i in range(face_num-1):
+    for i in range(face_num-4):
         if(i == 0):
             valX = 0.5
             valY = 0.5
@@ -286,7 +286,7 @@ def main_batch_tplots1(item):
         tdata.update({tdata_name: tdata_norm})
         #tdata.append(tdata_add)
         #print(tdata)
-        if(i>face_num-1):
+        if(i>face_num-4):
             continue
         if not os.path.exists('%s_analysis/tplots1' % inp):
             os.mkdir('%s_analysis/tplots1' % inp)
@@ -309,7 +309,7 @@ def main_batch_tplots2(item):
             print(foldername)
         # calculate number of faces for single file
         lst = os.listdir("%s_analysis/texts/%s" % (inp,foldername)) # your directory path
-        face_num = int(len(lst)/4)  # note folder has 4 types of files
+        face_num = int(len(lst))  # note folder has 4 types of files
         print("number of tplots is %s" % face_num)  
         ###########################
         # make each ternary plot 2
@@ -325,7 +325,7 @@ def main_batch_tplots2(item):
         valX = 0.5
         valY = 0.5
         valZ = 0.5  
-        for i in range(face_num-2):
+        for i in range(face_num-4):
             if(i == 0):
                 valX = 0.5
                 valY = 0.5
@@ -349,7 +349,7 @@ def main_batch_tplots2(item):
             tdata.update({tdata_name: tdata_norm})
             #tdata.append(tdata_add)
             #print(tdata)
-            if(i>face_num-1):
+            if(i>face_num-4):
                 continue
             if not os.path.exists('%s_analysis/tplots2' % inp):
                 os.mkdir('%s_analysis/tplots2' % inp)
