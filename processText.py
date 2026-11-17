@@ -32,10 +32,10 @@ print("\nIT APPEARS YOU ARE ANALYZING TEXT AND NOT AUDIOVISUAL FORMAT...")
 tm = input("\nEnter the text chunk length to analyze (in tokens) (e.g. 600)\n")
 stl = input("\nEnter the text chunk window step length (in tokens) (e.g. 300)\n")
 mdl = input("\nEnter LLM model (e.g. sentence-transformers/all-MiniLM-L6-v2)\n")
-'''
-tm = 500
-stl = 250
-'''
+outfile = open("popstar_txt.ctl", "w")
+outfile.write("txt_chk,%s\n" % tm)
+outfile.write("txt_stp,%s\n" % stl)
+outfile.close()
 
 inp0 = "full"
 inp00 = "y"
