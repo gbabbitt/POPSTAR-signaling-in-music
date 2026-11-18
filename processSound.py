@@ -427,6 +427,8 @@ def create_sonogram_batch_list():
     global file_paths
     file_paths = []
     for foldername in os.listdir(folder_path1):
+        if not os.path.exists('%s_analysis/signals/%s' % (inp,foldername)):
+            os.mkdir('%s_analysis/signals/%s' % (inp,foldername)) 
         folder_path2 = os.path.join(folder_path1, "%s" % (foldername))
         print(folder_path2)
         # Process the file
