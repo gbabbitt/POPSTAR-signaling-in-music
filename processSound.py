@@ -104,7 +104,9 @@ if os.path.exists('%s_analysis' % inp):
 if not os.path.exists('%s_analysis' % inp):
         os.mkdir('%s_analysis' % inp)
 if not os.path.exists('%s_analysis/intervals' % inp):
-        os.mkdir('%s_analysis/intervals' % inp)        
+        os.mkdir('%s_analysis/intervals' % inp)
+if not os.path.exists('%s_analysis/signals' % inp):
+        os.mkdir('%s_analysis/signals' % inp) 
 ################################################################################
 #########################   sonogram generator  ################################
 ################################################################################
@@ -352,6 +354,7 @@ def create_sonogram(item):
             print("generating sonograms for %s" % (fname))
             outfile = "%s_analysis/intervals/%s.png" % (inp,fname)
             outfile2 = "%s_analysis/intervals/%s_signal.jpg" % (inp,fname)
+            outfile3 = "%s_analysis/signals/signal_%s.jpg" % (inp,fname)
             samplingFrequency, signalData = wavfile.read(infile)
             #print(signalData)
             #print(signalData[:,1])
@@ -374,6 +377,7 @@ def create_sonogram(item):
             plt.ylabel("SIGNAL")
             plt.xticks([]) 
             plt.savefig(outfile2)
+            plt.savefig(outfile3)
             plt.close()
     
             #print(samplingFrequency)
@@ -454,8 +458,7 @@ def create_sonogram_batch(item):
                 print("generating sonograms for %s %s" % (folder,fname))
                 outfile = "%s_analysis/intervals/%s/%s.png" % (inp,folder,fname)
                 outfile2 = "%s_analysis/intervals/%s/%s_signal.jpg" % (inp,folder,fname)
-                
-                
+                outfile3 = "%s_analysis/signals/%s/signal_%s.jpg" % (inp,folder,fname)
                 #infile = file_path
                 #input2 = "%s.png" % filename
                 #input6 = "%s_signal.jpg" % filename
@@ -482,6 +485,7 @@ def create_sonogram_batch(item):
                 plt.ylabel("SIGNAL")
                 plt.xticks([]) 
                 plt.savefig(outfile2)
+                plt.savefig(outfile3)
                 plt.close()
         
                 # generate spectrogram

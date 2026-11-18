@@ -66,8 +66,10 @@ musiOpt = ""+musiOpt+""
 
 if(fof=="file"):
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
-    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    #lst = os.listdir("%s_analysis/intervals/" % inp) # your directory path
+    #face_num = int(len(lst)/4)  # note folder has 4 types of files
+    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    face_num = int(len(lst))  
     print("number of Chernoff faces is %s" % face_num)
     
 
@@ -508,8 +510,10 @@ def main_batch_faces(item):
         foldername = "%s" % (folder_path_array[2])
         print(foldername)
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
-    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
+    #face_num = int(len(lst)/4)  # note folder has 4 types of files
+    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    face_num = int(len(lst)) 
     print("number of Chernoff faces is %s" % face_num)  
     
     # Generate random data for faces and tplots
@@ -564,8 +568,10 @@ def main_batch_tplots1(item):
         foldername = "%s" % (folder_path_array[2])
         print(foldername)
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
-    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
+    #face_num = int(len(lst)/4)  # note folder has 4 types of files
+    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    face_num = int(len(lst)) 
     print("number of tplots is %s" % face_num)  
     ###########################
     # make each ternary plot 1
@@ -627,8 +633,10 @@ def main_batch_tplots2(item):
         foldername = "%s" % (folder_path_array[2])
         print(foldername)
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
-    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
+    #face_num = int(len(lst)/4)  # note folder has 4 types of files
+    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    face_num = int(len(lst)) 
     print("number of tplots is %s" % face_num)  
     ###########################
     # make each ternary plot 2
@@ -700,8 +708,10 @@ def main_batch_tplots2_mfcc(item):
         foldername = "%s" % (folder_path_array[2])
         print(foldername)
     # calculate number of faces for single file
-    lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
-    face_num = int(len(lst)/4)  # note folder has 4 types of files
+    #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
+    #face_num = int(len(lst)/4)  # note folder has 4 types of files
+    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    face_num = int(len(lst)) 
     print("number of tplots is %s" % face_num)  
     ###########################
     # make each ternary plot 2
