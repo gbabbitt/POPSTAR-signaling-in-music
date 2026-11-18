@@ -512,7 +512,7 @@ def main_batch_faces(item):
     # calculate number of faces for single file
     #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
     #face_num = int(len(lst)/4)  # note folder has 4 types of files
-    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    lst = os.listdir("%s_analysis/signals/%s" % (inp,foldername)) # your directory path
     face_num = int(len(lst)) 
     print("number of Chernoff faces is %s" % face_num)  
     
@@ -570,7 +570,7 @@ def main_batch_tplots1(item):
     # calculate number of faces for single file
     #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
     #face_num = int(len(lst)/4)  # note folder has 4 types of files
-    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    lst = os.listdir("%s_analysis/signals/%s" % (inp,foldername))
     face_num = int(len(lst)) 
     print("number of tplots is %s" % face_num)  
     ###########################
@@ -635,7 +635,7 @@ def main_batch_tplots2(item):
     # calculate number of faces for single file
     #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
     #face_num = int(len(lst)/4)  # note folder has 4 types of files
-    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    lst = os.listdir("%s_analysis/signals/%s" % (inp,foldername))
     face_num = int(len(lst)) 
     print("number of tplots is %s" % face_num)  
     ###########################
@@ -710,7 +710,7 @@ def main_batch_tplots2_mfcc(item):
     # calculate number of faces for single file
     #lst = os.listdir("%s_analysis/intervals/%s" % (inp,foldername)) # your directory path
     #face_num = int(len(lst)/4)  # note folder has 4 types of files
-    lst = os.listdir("%s_analysis/signals/" % inp) # your directory path
+    lst = os.listdir("%s_analysis/signals/%s" % (inp,foldername))
     face_num = int(len(lst)) 
     print("number of tplots is %s" % face_num)  
     ###########################

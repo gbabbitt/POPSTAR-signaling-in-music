@@ -457,10 +457,11 @@ def create_sonogram_batch(item):
                 infile_segment = infile_array[3]
                 fname = infile_segment
                 folder = infile_array[2]
+                fname_append = fname[:-4]
                 print("generating sonograms for %s %s" % (folder,fname))
                 outfile = "%s_analysis/intervals/%s/%s.png" % (inp,folder,fname)
                 outfile2 = "%s_analysis/intervals/%s/%s_signal.jpg" % (inp,folder,fname)
-                outfile3 = "%s_analysis/signals/%s/signal_%s.jpg" % (inp,folder,fname)
+                outfile3 = "%s_analysis/signals/%s/signal_%s.jpg" % (inp,folder,fname_append)
                 #infile = file_path
                 #input2 = "%s.png" % filename
                 #input6 = "%s_signal.jpg" % filename

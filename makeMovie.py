@@ -1129,7 +1129,8 @@ def main():
         if(ext == ".mp4"):
             distances_video_batch()
         if(ext == ".mp3" or ext == ".wav"):
-            distances_mfcc_batch()    
+            distances_mfcc_batch()
+        
 ###############################################################
 if __name__ == '__main__':
     main()
