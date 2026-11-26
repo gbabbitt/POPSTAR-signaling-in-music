@@ -17,6 +17,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse, Arc
 import ternary
+from ternary.helpers import simplex_iterator
+from sklearn.neighbors import KernelDensity
 import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
@@ -70,9 +72,6 @@ if(fof=="file"):
     face_num = int(len(lst))
     print("number of text .png is %s" % face_num)
     
-
-
-
 def ternary_plot1(tdata, i, valX, valY, valZ):
     #print("making ternary plots")
     # Create a figure and axes with ternary scale
@@ -106,6 +105,68 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     tax.left_axis_label("intellectual impact", fontsize=fsE, color='green') # A
     tax.right_axis_label("physical impact", fontsize=fsP, color='red') # B
     tax.bottom_axis_label("emotional impact", fontsize=fsI, color='blue') # C
+    tax.set_title("Textual CES Signal - distance from text center", fontsize=14, y=-0.15)
+    # Remove default Matplotlib axes
+    tax.get_axes().axis('off')
+
+    # Add legend
+    tax.legend()
+
+    # Draw gridlines
+    tax.gridlines(multiple=0.1, color="grey")
+    #tax.ticks(axis='lbr', linewidth=1)
+    return tax
+
+def ternary_plot1_heat(tdata, i, valX, valY, valZ):
+    #print("making ternary plots")
+    # Create a figure and axes with ternary scale
+    scale = 60
+    fig, tax = ternary.figure(scale=scale)
+        
+    # Plot the data points
+    #print(i)
+    #print(tdata)
+    #tdata_np = tdata["0"][:, :2]
+    #tdata_np = tdata.to_numpy()
+            
+        
+    # 2. Project 3D simplex points (a, b, c) into 2D Cartesian space (x, y)
+    # project_sequence returns (xs, ys) tuples for a sequence of points
+    #print(tdata)
+    arr = np.column_stack(list(tdata.values())).astype(float)
+    #print(arr)
+    xs, ys = ternary.helpers.project_sequence(arr)
+    traj_2d = np.column_stack([xs, ys])
+
+    # 3. Fit scikit-learn Gaussian KDE
+    kde = KernelDensity(bandwidth=0.06, kernel="gaussian")
+    kde.fit(traj_2d)
+
+    # 4. Evaluate KDE over a triangular grid for python-ternary's heatmap
+        
+    grid_keys = []
+    grid_pts_norm = []
+
+    for i, j, k in simplex_iterator(scale):
+        grid_keys.append((i, j))
+        grid_pts_norm.append((i/scale , j/scale , k/scale ))
+
+    grid_xs, grid_ys = ternary.helpers.project_sequence(grid_pts_norm)
+    grid_2d = np.column_stack([grid_xs, grid_ys])
+
+    densities = np.exp(kde.score_samples(grid_2d))
+    heatmap_data = dict(zip(grid_keys, densities))
+    
+    tax.heatmap(heatmap_data,scale=scale,style="hexagonal",cmap="viridis",colorbar=False)
+    #tax.plot_colored_trajectory(tdata.values(), linewidth=1, color='black', label="song trajectory")
+    
+    # Set labels and title
+    tax.right_corner_label("ENERGY", fontsize=10, color='black')
+    tax.top_corner_label("CONTROL", fontsize=10, color='black')
+    tax.left_corner_label("SURPRISE", fontsize=10, color='black')
+    tax.left_axis_label("intellectual impact", fontsize=8, color='green') # A
+    tax.right_axis_label("physical impact", fontsize=8, color='red') # B
+    tax.bottom_axis_label("emotional impact", fontsize=8, color='blue') # C
     tax.set_title("Textual CES Signal - distance from text center", fontsize=14, y=-0.15)
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
@@ -172,6 +233,8 @@ def main():
             os.mkdir('%s_analysis/tplots2' % inp)
         print("generating ternary plot 1 and 2 %s" % str(i+1))
         tax = ternary_plot1(tdata, i, valX, valY, valZ)
+        if(i>face_num-4-10):
+            tax = ternary_plot1_heat(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s_analysis/tplots1/tplot_%s.png' % (inp, i), dpi=144)
         tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
@@ -292,6 +355,8 @@ def main_batch_tplots1(item):
             os.mkdir('%s_analysis/tplots1' % inp)
         print("generating ternary plot 1 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot1(tdata, i, valX, valY, valZ)
+        if(i>face_num-4-10):
+            tax = ternary_plot1_heat(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
         tax.close()
@@ -355,6 +420,8 @@ def main_batch_tplots2(item):
                 os.mkdir('%s_analysis/tplots2' % inp)
             print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
             tax = ternary_plot1(tdata, i, valX, valY, valZ)
+            if(i>face_num-4-10):
+                tax = ternary_plot1_heat(tdata, i, valX, valY, valZ)
             # save image
             tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
             tax.close()   
