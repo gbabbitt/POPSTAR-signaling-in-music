@@ -11,12 +11,15 @@ signalType = "real"
 
 import getopt, sys # Allows for command line arguments
 import os
+import shutil
 import random as rnd
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse, Arc
 import ternary
+from ternary.helpers import simplex_iterator
+from sklearn.neighbors import KernelDensity
 import multiprocessing
 # find number of cores
 num_cores = multiprocessing.cpu_count()
@@ -63,6 +66,9 @@ selfOpt = ""+selfOpt+""
 musiOpt = ""+musiOpt+""
 
 #lyr = "no"
+
+if not os.path.exists('popstar_results'):
+        os.mkdir('popstar_results')
 
 if(fof=="file"):
     # calculate number of faces for single file
@@ -186,8 +192,70 @@ def ternary_plot1(tdata, i, valX, valY, valZ):
     tax.gridlines(multiple=0.1, color="grey")
     #tax.ticks(axis='lbr', linewidth=1)
     return tax
-    
 
+
+def ternary_plot1_heat(tdata, i, valX, valY, valZ):
+    #print("making ternary plots")
+    # Create a figure and axes with ternary scale
+    scale = 50
+    fig, tax = ternary.figure(scale=scale)
+        
+    # Plot the data points
+    #print(i)
+    #print(tdata)
+    #tdata_np = tdata["0"][:, :2]
+    #tdata_np = tdata.to_numpy()
+            
+        
+    # 2. Project 3D simplex points (a, b, c) into 2D Cartesian space (x, y)
+    # project_sequence returns (xs, ys) tuples for a sequence of points
+    #print(tdata)
+    arr = np.column_stack(list(tdata.values())).astype(float)
+    #print(arr)
+    xs, ys = ternary.helpers.project_sequence(arr)
+    traj_2d = np.column_stack([xs, ys])
+
+    # 3. Fit scikit-learn Gaussian KDE
+    kde = KernelDensity(bandwidth=0.06, kernel="gaussian")
+    kde.fit(traj_2d)
+
+    # 4. Evaluate KDE over a triangular grid for python-ternary's heatmap
+        
+    grid_keys = []
+    grid_pts_norm = []
+
+    for i, j, k in simplex_iterator(scale):
+        grid_keys.append((i, j))
+        grid_pts_norm.append((i/scale , j/scale , k/scale ))
+
+    grid_xs, grid_ys = ternary.helpers.project_sequence(grid_pts_norm)
+    grid_2d = np.column_stack([grid_xs, grid_ys])
+
+    densities = np.exp(kde.score_samples(grid_2d))
+    heatmap_data = dict(zip(grid_keys, densities))
+    
+    tax.heatmap(heatmap_data,scale=scale,style="hexagonal",cmap="magma",colorbar=False)
+    #tax.plot_colored_trajectory(tdata.values(), linewidth=1, color='black', label="song trajectory")
+    
+    # Set labels and title
+    tax.right_corner_label("ENERGY", fontsize=10, color='black')
+    tax.top_corner_label("CONTROL", fontsize=10, color='black')
+    tax.left_corner_label("SURPRISE", fontsize=10, color='black')
+    tax.left_axis_label("intellectual impact", fontsize=8, color='green') # A
+    tax.right_axis_label("physical impact", fontsize=8, color='red') # B
+    tax.bottom_axis_label("emotional impact", fontsize=8, color='blue') # C
+    tax.set_title("Audio CES Signal - distance from song center", fontsize=14, y=-0.15)
+    # Remove default Matplotlib axes
+    tax.get_axes().axis('off')
+
+    # Add legend
+    tax.legend()
+
+    # Draw gridlines
+    tax.gridlines(multiple=0.1, color="grey")
+    #tax.ticks(axis='lbr', linewidth=1)
+    return tax
+    
 
 def ternary_plot2(tdata, i, TEvalue, valX, valY, valZ):
     #print("making ternary plots")
@@ -226,13 +294,13 @@ def ternary_plot2(tdata, i, TEvalue, valX, valY, valZ):
     if(selfOpt == "no" and ext == ".mp4"):
        tax.set_title("Video CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
     if(selfOpt == "yes" and ext == ".mp3"):
-       tax.set_title("MFCC CES Signal - distance from video center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+       tax.set_title("MFCC CES Signal - distance from audio center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
     if(selfOpt == "no" and ext == ".mp3"):
-       tax.set_title("MFCC CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+       tax.set_title("MFCC CES Signal - distance from avg human speech (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
     if(selfOpt == "yes" and ext == ".wav"):
-       tax.set_title("MFCC CES Signal - distance from video center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+       tax.set_title("MFCC CES Signal - distance from audio center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
     if(selfOpt == "no" and ext == ".wav"):
-       tax.set_title("MFCC CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+       tax.set_title("MFCC CES Signal - distance from avg human speech (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
     
     # Remove default Matplotlib axes
     tax.get_axes().axis('off')
@@ -244,6 +312,82 @@ def ternary_plot2(tdata, i, TEvalue, valX, valY, valZ):
     tax.gridlines(multiple=0.1, color="grey")
     #tax.ticks(axis='lbr', linewidth=1)
     return tax
+
+
+def ternary_plot2_heat(tdata, i, TEvalue, valX, valY, valZ):
+    #print("making ternary plots")
+    # Create a figure and axes with ternary scale
+    scale=50
+    fig, tax = ternary.figure(scale=scale)
+        
+    # Plot the data points
+    #print(i)
+    #print(tdata)
+    
+    # 2. Project 3D simplex points (a, b, c) into 2D Cartesian space (x, y)
+    # project_sequence returns (xs, ys) tuples for a sequence of points
+    #print(tdata)
+    arr = np.column_stack(list(tdata.values())).astype(float)
+    #print(arr)
+    xs, ys = ternary.helpers.project_sequence(arr)
+    traj_2d = np.column_stack([xs, ys])
+
+    # 3. Fit scikit-learn Gaussian KDE
+    kde = KernelDensity(bandwidth=0.06, kernel="gaussian")
+    kde.fit(traj_2d)
+
+    # 4. Evaluate KDE over a triangular grid for python-ternary's heatmap
+        
+    grid_keys = []
+    grid_pts_norm = []
+
+    for i, j, k in simplex_iterator(scale):
+        grid_keys.append((i, j))
+        grid_pts_norm.append((i/scale , j/scale , k/scale ))
+
+    grid_xs, grid_ys = ternary.helpers.project_sequence(grid_pts_norm)
+    grid_2d = np.column_stack([grid_xs, grid_ys])
+
+    densities = np.exp(kde.score_samples(grid_2d))
+    heatmap_data = dict(zip(grid_keys, densities))
+    
+    tax.heatmap(heatmap_data,scale=scale,style="hexagonal",cmap="magma",colorbar=False)
+    #tax.plot_colored_trajectory(tdata.values(), linewidth=1, color='black', label="song trajectory")
+    
+    # Set labels and title
+    tax.right_corner_label("ENERGY", fontsize=10, color='black')
+    tax.top_corner_label("CONTROL", fontsize=10, color='black')
+    tax.left_corner_label("SURPRISE", fontsize=10, color='black')
+    tax.left_axis_label("intellectual impact", fontsize=8, color='green') # A
+    tax.right_axis_label("physical impact", fontsize=8, color='red') # B
+    tax.bottom_axis_label("emotional impact", fontsize=8, color='blue') # C
+    if(selfOpt == "yes" and ext == ".mp4"):
+       tax.set_title("Video CES Signal - distance from video center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "no" and ext == ".mp4"):
+       tax.set_title("Video CES Signal - distance from ambient scene (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "yes" and ext == ".mp3"):
+       tax.set_title("MFCC CES Signal - distance from audio center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "no" and ext == ".mp3"):
+       tax.set_title("MFCC CES Signal - distance from avg human speech (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "yes" and ext == ".wav"):
+       tax.set_title("MFCC CES Signal - distance from audio center (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    if(selfOpt == "no" and ext == ".wav"):
+       tax.set_title("MFCC CES Signal - distance from avg human speech (TE = %s)" % TEvalue, fontsize=14, y=-0.15)
+    
+    # Remove default Matplotlib axes
+    tax.get_axes().axis('off')
+
+    # Add legend
+    tax.legend()
+
+    # Draw gridlines
+    tax.gridlines(multiple=0.1, color="grey")
+    #tax.ticks(axis='lbr', linewidth=1)
+    return tax
+    
+    
+
+
     
     
 ################################################################################################
@@ -332,8 +476,12 @@ def main():
             os.mkdir('%s_analysis/tplots1' % inp)
         print("generating ternary plot 1 %s" % str(i+1))
         tax = ternary_plot1(tdata, i, valX, valY, valZ)
+        if(i>face_num-10):
+            tax = ternary_plot1_heat(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s_analysis/tplots1/tplot_%s.png' % (inp, i), dpi=144)
+        if(i==face_num-9):
+                shutil.copy2("%s_analysis/tplots1/tplot_%s.png" % (inp,i), "popstar_results/tplot_audio_heatmap_%s.png" % inp)
         tax.close()
     
     ###########################    
@@ -381,14 +529,18 @@ def main():
             tdata.update({tdata_name: tdata_norm})
             #tdata.append(tdata_add)
             #print(tdata)
-            if(i>face_num-1):
+            if(i>face_num-2):
                 continue
             if not os.path.exists('%s_analysis/tplots2' % inp):
                 os.mkdir('%s_analysis/tplots2' % inp)
             print("generating ternary plot 2 %s" % str(i+1))
             tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
+            if(i>face_num-10):
+                tax = ternary_plot2_heat(tdata, i, TEvalue, valX, valY, valZ)
             # save image
             tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
+            if(i==face_num-9):
+                shutil.copy2("%s_analysis/tplots2/tplot_%s.png" % (inp,i), "popstar_results/tplot_video_heatmap_%s.png" % inp)
             tax.close()
 
     if(ext == ".mp3" or ext == ".wav"):   
@@ -433,14 +585,18 @@ def main():
             tdata.update({tdata_name: tdata_norm})
             #tdata.append(tdata_add)
             #print(tdata)
-            if(i>face_num-1):
+            if(i>face_num-2):
                 continue
             if not os.path.exists('%s_analysis/tplots2' % inp):
                 os.mkdir('%s_analysis/tplots2' % inp)
             print("generating ternary plot 2 %s" % str(i+1))
             tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
+            if(i>face_num-10):
+                tax = ternary_plot2_heat(tdata, i, TEvalue, valX, valY, valZ)
             # save image
             tax.savefig('%s_analysis/tplots2/tplot_%s.png' % (inp, i), dpi=144)
+            if(i==face_num-9):
+                shutil.copy2("%s_analysis/tplots2/tplot_%s.png" % (inp,i), "popstar_results/tplot_mfcc_heatmap_%s.png" % inp)
             tax.close()
 
 
@@ -617,8 +773,12 @@ def main_batch_tplots1(item):
             os.mkdir('%s_analysis/tplots1' % inp)
         print("generating ternary plot 1 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot1(tdata, i, valX, valY, valZ)
+        if(i>face_num-10):
+            tax = ternary_plot1_heat(tdata, i, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
+        if(i==face_num-9):
+                shutil.copy2("%s_analysis/tplots1/%s/tplot_%s.png" % (inp,foldername,i), "popstar_results/tplot_audio_heatmap_%s_%s.png" % (inp,foldername))
         tax.close()
     
 def main_batch_tplots2(item):
@@ -692,8 +852,12 @@ def main_batch_tplots2(item):
             os.mkdir('%s_analysis/tplots2' % inp)
         print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
+        if(i>face_num-10):
+            tax = ternary_plot2_heat(tdata, i, TEvalue, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
+        if(i==face_num-9):
+                shutil.copy2("%s_analysis/tplots2/%s/tplot_%s.png" % (inp,foldername,i), "popstar_results/tplot_video_heatmap_%s_%s.png" % (inp,foldername))
         tax.close()   
 
 def main_batch_tplots2_mfcc(item):
@@ -768,8 +932,12 @@ def main_batch_tplots2_mfcc(item):
             os.mkdir('%s_analysis/tplots2' % inp)
         print("generating ternary plot 2 %s for %s" % (str(i+1),foldername))
         tax = ternary_plot2(tdata, i, TEvalue, valX, valY, valZ)
+        if(i>face_num-10):
+            tax = ternary_plot2_heat(tdata, i, TEvalue, valX, valY, valZ)
         # save image
         tax.savefig('%s/tplot_%s.png' % (folder_path, i), dpi=144)
+        if(i==face_num-9):
+                shutil.copy2("%s_analysis/tplots2/%s/tplot_%s.png" % (inp,foldername,i), "popstar_results/tplot_mfcc_heatmap_%s_%s.png" % (inp,foldername))
         tax.close()   
 
 
